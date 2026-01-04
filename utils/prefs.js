@@ -19,6 +19,10 @@ export const PREFS = {
   CONTEXT_MENU_COMMAND_NO_SELECTION:
     "extension.browse-bot.findbar-ai.context-menu-command-no-selection",
   BACKGROUND_STYLE: "extension.browse-bot.findbar-ai.background-style",
+  CUSTOM_SYSTEM_PROMPT: "extension.browse-bot.custom-system-prompt",
+
+  SHORTCUT_FINDBAR: "extension.browse-bot.findbar-ai.shortcut-findbar",
+  SHORTCUT_URLBAR: "extension.browse-bot.urlbar-ai.shortcut-urlbar",
 
   // URL Bar
   URLBAR_AI_ENABLED: "extension.browse-bot.urlbar-ai-enabled",
@@ -314,6 +318,27 @@ export const PREFS = {
   set llmMaxOutputTokens(value) {
     this.setPref(this.LLM_MAX_OUTPUT_TOKENS, value);
   },
+
+  get shortcutFindbar() {
+    return this.getPref(this.SHORTCUT_FINDBAR);
+  },
+  set shortcutFindbar(value) {
+    this.setPref(this.SHORTCUT_FINDBAR, value);
+  },
+
+  get shortcutUrlbar() {
+    return this.getPref(this.SHORTCUT_URLBAR);
+  },
+  set shortcutUrlbar(value) {
+    this.setPref(this.SHORTCUT_URLBAR, value);
+  },
+
+  get customSystemPrompt() {
+    return this.getPref(this.CUSTOM_SYSTEM_PROMPT);
+  },
+  set customSystemPrompt(value) {
+    this.setPref(this.CUSTOM_SYSTEM_PROMPT, value);
+  },
 };
 
 export const debugLog = (...args) => {
@@ -348,9 +373,9 @@ PREFS.defaultValues = {
   [PREFS.MISTRAL_API_KEY]: "",
   [PREFS.MISTRAL_MODEL]: "mistral-medium-latest",
   [PREFS.GEMINI_API_KEY]: "",
-  [PREFS.GEMINI_MODEL]: "gemini-2.0-flash",
+  [PREFS.GEMINI_MODEL]: "gemini-2.5-flash",
   [PREFS.OPENAI_API_KEY]: "",
-  [PREFS.OPENAI_MODEL]: "gpt-4o",
+  [PREFS.OPENAI_MODEL]: "gpt-5.2",
   [PREFS.CLAUDE_API_KEY]: "",
   [PREFS.CLAUDE_MODEL]: "claude-4-opus",
   [PREFS.GROK_API_KEY]: "",
@@ -370,7 +395,10 @@ PREFS.defaultValues = {
   [PREFS.CONFORMATION]: true,
   [PREFS.BACKGROUND_STYLE]: "solid",
 
-  // Advanced LLM Defaults
+  [PREFS.SHORTCUT_FINDBAR]: "ctrl+shift+f",
+  [PREFS.SHORTCUT_URLBAR]: "ctrl+space",
+
+  [PREFS.CUSTOM_SYSTEM_PROMPT]: "",
   [PREFS.LLM_TEMPERATURE]: 0.7,
   [PREFS.LLM_TOP_P]: 1.0,
   [PREFS.LLM_TOP_K]: 40,

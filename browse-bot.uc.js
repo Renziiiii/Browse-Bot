@@ -2,8 +2,8 @@
 // @name            Browse Bot
 // @description     Transforms the standard Zen Browser findbar into a modern, floating, AI-powered chat interface. Inspired by Arc Browser.
 // @author          Bibek Bhusal
-// @version         2.0.0
-// @lastUpdated     2025-10-27
+// @version         2.5.0
+// @lastUpdated     2026-01-04
 // @ignorecache
 // @homepage        https://github.com/Vertex-Mods/Browse-Bot
 // ==/UserScript==
@@ -13,7 +13,7 @@
 // Any changes made here will be overwritten.
 // To make changes, please edit the source files in the repository:
 // https://github.com/BibekBhusal0/zen-custom-js
-import { n as number, t as tool, o as object, s as string, a as array, c as createCerebras, b as createPerplexity, d as createOpenAI, e as createOllama, f as createMistral, x as xai, g as createGoogleGenerativeAI, h as createAnthropic, i as stepCountIs, j as generateText, k as streamText, l as generateObject } from './vercel-ai-sdk.uc.js';
+import { n as number, t as tool, o as object, s as string, a as array, c as createCerebras, b as createPerplexity, d as createOpenAI, e as createOllama, f as createMistral, x as xai, g as createGoogleGenerativeAI, h as createAnthropic, i as stepCountIs, j as generateText, k as streamText, l as output_exports } from './vercel-ai-sdk.uc.js';
 
 const PREFS = {
   // Findbar
@@ -36,6 +36,10 @@ const PREFS = {
   CONTEXT_MENU_COMMAND_NO_SELECTION:
     "extension.browse-bot.findbar-ai.context-menu-command-no-selection",
   BACKGROUND_STYLE: "extension.browse-bot.findbar-ai.background-style",
+  CUSTOM_SYSTEM_PROMPT: "extension.browse-bot.custom-system-prompt",
+
+  SHORTCUT_FINDBAR: "extension.browse-bot.findbar-ai.shortcut-findbar",
+  SHORTCUT_URLBAR: "extension.browse-bot.urlbar-ai.shortcut-urlbar",
 
   // URL Bar
   URLBAR_AI_ENABLED: "extension.browse-bot.urlbar-ai-enabled",
@@ -331,6 +335,27 @@ const PREFS = {
   set llmMaxOutputTokens(value) {
     this.setPref(this.LLM_MAX_OUTPUT_TOKENS, value);
   },
+
+  get shortcutFindbar() {
+    return this.getPref(this.SHORTCUT_FINDBAR);
+  },
+  set shortcutFindbar(value) {
+    this.setPref(this.SHORTCUT_FINDBAR, value);
+  },
+
+  get shortcutUrlbar() {
+    return this.getPref(this.SHORTCUT_URLBAR);
+  },
+  set shortcutUrlbar(value) {
+    this.setPref(this.SHORTCUT_URLBAR, value);
+  },
+
+  get customSystemPrompt() {
+    return this.getPref(this.CUSTOM_SYSTEM_PROMPT);
+  },
+  set customSystemPrompt(value) {
+    this.setPref(this.CUSTOM_SYSTEM_PROMPT, value);
+  },
 };
 
 const debugLog = (...args) => {
@@ -365,9 +390,9 @@ PREFS.defaultValues = {
   [PREFS.MISTRAL_API_KEY]: "",
   [PREFS.MISTRAL_MODEL]: "mistral-medium-latest",
   [PREFS.GEMINI_API_KEY]: "",
-  [PREFS.GEMINI_MODEL]: "gemini-2.0-flash",
+  [PREFS.GEMINI_MODEL]: "gemini-2.5-flash",
   [PREFS.OPENAI_API_KEY]: "",
-  [PREFS.OPENAI_MODEL]: "gpt-4o",
+  [PREFS.OPENAI_MODEL]: "gpt-5.2",
   [PREFS.CLAUDE_API_KEY]: "",
   [PREFS.CLAUDE_MODEL]: "claude-4-opus",
   [PREFS.GROK_API_KEY]: "",
@@ -387,7 +412,10 @@ PREFS.defaultValues = {
   [PREFS.CONFORMATION]: true,
   [PREFS.BACKGROUND_STYLE]: "solid",
 
-  // Advanced LLM Defaults
+  [PREFS.SHORTCUT_FINDBAR]: "ctrl+shift+f",
+  [PREFS.SHORTCUT_URLBAR]: "ctrl+space",
+
+  [PREFS.CUSTOM_SYSTEM_PROMPT]: "",
   [PREFS.LLM_TEMPERATURE]: 0.7,
   [PREFS.LLM_TOP_P]: 1.0,
   [PREFS.LLM_TOP_K]: 40,
@@ -399,7 +427,7 @@ PREFS.defaultValues = {
   // [PREFS.SHOW_TOOL_CALL]: false,
 };
 
-function frameScript() {
+async function frameScript() {
   const getUrlAndTitle = () => {
     return {
       url: content.location.href,
@@ -462,59 +490,56 @@ function frameScript() {
     }
 
     function waitForSelectorWithObserver(selector, timeout = 5000) {
-      return new Promise(async (resolve, reject) => {
-        try {
-          await ensureBodyAvailable();
-          const el = doc.querySelector(selector);
-          if (el) return resolve(el);
-
-          const observer = new win.MutationObserver(() => {
+      return new Promise((resolve, reject) => {
+        ensureBodyAvailable()
+          .then(() => {
             const el = doc.querySelector(selector);
-            if (el) {
+            if (el) return resolve(el);
+
+            const observer = new win.MutationObserver(() => {
+              const el = doc.querySelector(selector);
+              if (el) {
+                observer.disconnect();
+                resolve(el);
+              }
+            });
+
+            observer.observe(doc.body, {
+              childList: true,
+              subtree: true,
+            });
+
+            win.setTimeout(() => {
               observer.disconnect();
-              resolve(el);
-            }
+              reject(new Error(`Timeout waiting for ${selector}`));
+            }, timeout);
+          })
+          .catch((e) => {
+            reject(new Error(`waitForSelectorWithObserver failed: ${e.message}`));
           });
-
-          observer.observe(doc.body, {
-            childList: true,
-            subtree: true,
-          });
-
-          win.setTimeout(() => {
-            observer.disconnect();
-            reject(new Error(`Timeout waiting for ${selector}`));
-          }, timeout);
-        } catch (e) {
-          reject(new Error(`waitForSelectorWithObserver failed: ${e.message}`));
-        }
       });
     }
 
-    try {
-      if (!doc.querySelector("ytd-transcript-renderer")) {
-        const button = doc.querySelector('button[aria-label="Show transcript"]');
-        if (!button)
-          throw new Error('"Show transcript" button not found — transcript may not be available.');
-        button.click();
-        await waitForSelectorWithObserver("ytd-transcript-renderer", 5000);
-      }
-
-      await waitForSelectorWithObserver("ytd-transcript-segment-renderer .segment-text", 5000);
-
-      const segments = Array.from(
-        doc.querySelectorAll("ytd-transcript-segment-renderer .segment-text")
-      );
-      if (!segments.length) throw new Error("Transcript segments found, but all are empty.");
-
-      const transcript = segments
-        .map((el) => el.textContent.trim())
-        .filter(Boolean)
-        .join("\n");
-      return transcript;
-    } catch (err) {
-      throw err;
+    if (!doc.querySelector("ytd-transcript-renderer")) {
+      const button = doc.querySelector('button[aria-label="Show transcript"]');
+      if (!button)
+        throw new Error('"Show transcript" button not found — transcript may not be available.');
+      button.click();
+      await waitForSelectorWithObserver("ytd-transcript-renderer", 5000);
     }
+
+    await waitForSelectorWithObserver("ytd-transcript-segment-renderer .segment-text", 5000);
+
+    const segments = Array.from(
+      doc.querySelectorAll("ytd-transcript-segment-renderer .segment-text")
+    );
+    if (!segments.length) throw new Error("Transcript segments found, but all are empty.");
+
+    const transcript = segments
+      .map((el) => el.textContent.trim())
+      .filter(Boolean)
+      .join("\n");
+    return transcript;
   }
 
   const getYoutubeDescription = async () => {
@@ -669,79 +694,66 @@ const messageManagerAPI = {
   },
 
   async getHTMLContent() {
-    try {
-      return await this.send("GetPageHTMLContent");
-    } catch (error) {
+    return this.send("GetPageHTMLContent").catch((error) => {
       debugError("Failed to get page HTML content:", error);
       return {};
-    }
+    });
   },
 
   async getSelectedText() {
-    try {
-      const result = await this.send("GetSelectedText");
-      if (!result || !result.hasSelection) {
+    return this.send("GetSelectedText")
+      .then((result) => {
+        if (!result || !result.hasSelection) {
+          return this.getUrlAndTitle();
+        }
+        return result;
+      })
+      .catch((error) => {
+        debugError("Failed to get selected text:", error);
         return this.getUrlAndTitle();
-      }
-      return result;
-    } catch (error) {
-      debugError("Failed to get selected text:", error);
-      return this.getUrlAndTitle();
-    }
+      });
   },
 
   async getPageTextContent(trimWhiteSpace = true) {
-    try {
-      return await this.send("GetPageTextContent", { trimWhiteSpace });
-    } catch (error) {
+    return this.send("GetPageTextContent", { trimWhiteSpace }).catch((error) => {
       debugError("Failed to get page text content:", error);
       return this.getUrlAndTitle();
-    }
+    });
   },
 
   async clickElement(selector) {
-    try {
-      return await this.send("ClickElement", { selector });
-    } catch (error) {
+    return this.send("ClickElement", { selector }).catch((error) => {
       debugError(`Failed to click element with selector "${selector}":`, error);
       return { error: `Failed to click element with selector "${selector}".` };
-    }
+    });
   },
 
   async fillForm(selector, value) {
-    try {
-      return await this.send("FillForm", { selector, value });
-    } catch (error) {
+    return this.send("FillForm", { selector, value }).catch((error) => {
       debugError(`Failed to fill form with selector "${selector}":`, error);
       return { error: `Failed to fill form with selector "${selector}".` };
-    }
+    });
   },
 
   async getYoutubeTranscript() {
-    try {
-      return await this.send("GetYoutubeTranscript");
-    } catch (error) {
+    return this.send("GetYoutubeTranscript").catch((error) => {
       debugError("Failed to get youtube transcript:", error);
       return { error: `Failed to get youtube transcript: ${error.message}` };
-    }
+    });
   },
 
   async getYoutubeDescription() {
-    try {
-      return await this.send("GetYoutubeDescription");
-    } catch (error) {
+    return this.send("GetYoutubeDescription").catch((error) => {
       debugError("Failed to get youtube description:", error);
       return { error: `Failed to get youtube description: ${error.message}` };
-    }
+    });
   },
 
   async getYoutubeComments(count) {
-    try {
-      return await this.send("GetYoutubeComments", { count });
-    } catch (error) {
+    return this.send("GetYoutubeComments", { count }).catch((error) => {
       debugError("Failed to get youtube comments:", error);
       return { error: `Failed to get youtube comments: ${error.message}` };
-    }
+    });
   },
 };
 
@@ -769,12 +781,80 @@ const escapeXmlAttribute = (str) => {
 const SettingsModal = {
   _modalElement: null,
   _currentPrefValues: {},
+  _currentShortcutTarget: null,
+  _boundHandleShortcutKeyDown: null,
 
   _getSafeIdForProvider(providerName) {
     return providerName.replace(/\./g, "-");
   },
 
+  _initShortcutHandler() {
+    this._boundHandleShortcutKeyDown = this._handleShortcutKeyDown.bind(this);
+  },
+
+  _handleShortcutKeyDown(event) {
+    if (!this._currentShortcutTarget) return;
+
+    event.preventDefault();
+    event.stopPropagation();
+
+    const targetInput = this._currentShortcutTarget;
+    const prefKey = targetInput.dataset.pref;
+
+    if (event.key === "Escape") {
+      targetInput.value = PREFS.getPref(prefKey);
+      targetInput.classList.remove("recording");
+      targetInput.placeholder = "Click to set";
+      this._currentShortcutTarget = null;
+      window.removeEventListener("keydown", this._boundHandleShortcutKeyDown, true);
+      return;
+    }
+
+    if (event.key === "Backspace" || event.key === "Delete") {
+      targetInput.value = "";
+      this._currentPrefValues[prefKey] = "";
+      targetInput.classList.remove("recording");
+      targetInput.placeholder = "Click to set";
+      this._currentShortcutTarget = null;
+      window.removeEventListener("keydown", this._boundHandleShortcutKeyDown, true);
+      return;
+    }
+
+    if (["Control", "Alt", "Shift", "Meta"].includes(event.key)) {
+      return;
+    }
+
+    let shortcutString = "";
+    if (event.ctrlKey || event.metaKey) shortcutString += "Ctrl+";
+    if (event.altKey) shortcutString += "Alt+";
+    if (event.shiftKey) shortcutString += "Shift+";
+    shortcutString += event.key.toUpperCase();
+
+    targetInput.value = shortcutString;
+    this._currentPrefValues[prefKey] = shortcutString;
+    debugLog(`Shortcut for ${prefKey} set to: ${shortcutString}`);
+
+    targetInput.classList.remove("recording");
+    targetInput.placeholder = "Click to set";
+    this._currentShortcutTarget = null;
+    window.removeEventListener("keydown", this._boundHandleShortcutKeyDown, true);
+  },
+
+  _generateShortcutInputHtml(prefConstant, label) {
+    const currentValue = PREFS.getPref(prefConstant);
+    const prefId = `pref-${prefConstant.toLowerCase().replace(/_/g, "-")}`;
+    return `
+      <div class="setting-item">
+        <label for="${prefId}">${label}</label>
+        <input type="text" id="${prefId}" data-pref="${prefConstant}" value="${escapeXmlAttribute(
+          currentValue
+        )}" readonly placeholder="Click to set" class="shortcut-input" />
+      </div>
+    `;
+  },
+
   createModalElement() {
+    this._initShortcutHandler();
     const settingsHtml = this._generateSettingsHtml();
     const container = parseElement(settingsHtml);
     this._modalElement = container;
@@ -903,7 +983,7 @@ const SettingsModal = {
           } else if (control.type === "number") {
             try {
               this._currentPrefValues[prefKey] = Number(e.target.value);
-            } catch (error) {
+            } catch {
               this._currentPrefValues[prefKey] = 0;
             }
           } else {
@@ -928,17 +1008,39 @@ const SettingsModal = {
       });
     });
 
+    // Attach event listeners for shortcut inputs
+    this._modalElement.querySelectorAll(".shortcut-input").forEach((input) => {
+      input.addEventListener("focus", (e) => {
+        this._currentShortcutTarget = e.target;
+        e.target.classList.add("recording");
+        e.target.placeholder = "Press keys...";
+        window.addEventListener("keydown", this._boundHandleShortcutKeyDown, true);
+      });
+
+      input.addEventListener("blur", () => {
+        if (this._currentShortcutTarget) {
+          this._currentShortcutTarget.classList.remove("recording");
+          this._currentShortcutTarget.placeholder = "Click to set";
+          this._currentShortcutTarget = null;
+          window.removeEventListener("keydown", this._boundHandleShortcutKeyDown, true);
+        }
+      });
+
+      input.addEventListener("keydown", (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+      });
+    });
+
     // Initial update for provider-specific settings display
     this._updateProviderSpecificSettings(this._modalElement, PREFS.llmProvider);
 
-    // Preset Change Listener - REMOVED
-
     // Reset Button Listeners
-    this._modalElement.querySelectorAll(".reset-section-btn").forEach(btn => {
+    this._modalElement.querySelectorAll(".reset-section-btn").forEach((btn) => {
       btn.addEventListener("click", (e) => {
         e.stopPropagation(); // Prevent accordion toggle
         const prefsToReset = btn.dataset.resetPrefs.split(",");
-        prefsToReset.forEach(prefKey => {
+        prefsToReset.forEach((prefKey) => {
           if (!prefKey) return; // skip empty
           const defVal = PREFS.defaultValues[prefKey];
 
@@ -958,10 +1060,7 @@ const SettingsModal = {
 
             // Special logic for provider reset
             if (prefKey === PREFS.LLM_PROVIDER) {
-              this._updateProviderSpecificSettings(
-                this._modalElement,
-                defVal
-              );
+              this._updateProviderSpecificSettings(this._modalElement, defVal);
             }
           }
         });
@@ -1096,7 +1195,7 @@ const SettingsModal = {
   ) {
     const settingsHtml = settingsArray
       .map((s) => {
-        if (s.type === 'number') {
+        if (s.type === "number") {
           return this._generateNumberSettingHtml(s.label, s.pref, s.min, s.max, s.step, s.tooltip);
         }
         return this._generateCheckboxSettingHtml(s.label, s.pref);
@@ -1104,7 +1203,9 @@ const SettingsModal = {
       .join("");
 
     // If no explicit resetPrefs passed, try to infer from settingsArray
-    const prefsToReset = (resetPrefs.length > 0 ? resetPrefs : settingsArray.map(s => s.pref)).join(",");
+    const prefsToReset = (
+      resetPrefs.length > 0 ? resetPrefs : settingsArray.map((s) => s.pref)
+    ).join(",");
 
     return `
     <section class="settings-section settings-accordion" data-expanded="${expanded}" >
@@ -1167,9 +1268,13 @@ const SettingsModal = {
       </div>
     `;
 
-    const findbarResetPrefs = [...findbarSettings.map(s => s.pref), PREFS.POSITION, PREFS.BACKGROUND_STYLE];
+    const findbarResetPrefs = [
+      ...findbarSettings.map((s) => s.pref),
+      PREFS.POSITION,
+      PREFS.BACKGROUND_STYLE,
+    ];
     const findbarSectionHtml = this._createCheckboxSectionHtml(
-      "Findbar AI (ctrl + shift + F)",
+      "Findbar AI",
       findbarSettings,
       true,
       "",
@@ -1184,15 +1289,39 @@ const SettingsModal = {
       { label: "Hide Suggestions", pref: PREFS.URLBAR_AI_HIDE_SUGGESTIONS },
     ];
     const urlbarSectionHtml = this._createCheckboxSectionHtml(
-      "URLBar AI (ctrl + space)",
+      "URLBar AI",
       urlbarSettings,
       false,
       "",
       "",
-      urlbarSettings.map(s => s.pref)
+      urlbarSettings.map((s) => s.pref)
     );
 
-    // Section 3: AI Behavior
+    // Section 3: Keyboard Shortcuts
+    const shortcutFindbarHtml = this._generateShortcutInputHtml(
+      PREFS.SHORTCUT_FINDBAR,
+      "Open Findbar AI"
+    );
+    const shortcutUrlbarHtml = this._generateShortcutInputHtml(
+      PREFS.SHORTCUT_URLBAR,
+      "Toggle URLBar AI"
+    );
+    const shortcutsSectionHtml = `
+      <section class="settings-section settings-accordion" data-expanded="true">
+        <h4 class="accordion-header">
+          Keyboard Shortcuts
+          <div class="reset-section-btn" data-reset-prefs="${PREFS.SHORTCUT_FINDBAR},${PREFS.SHORTCUT_URLBAR}" title="Reset Section" role="button">
+            <img src="chrome://global/skin/icons/reload.svg" />
+          </div>
+        </h4>
+        <div class="accordion-content">
+          ${shortcutFindbarHtml}
+          ${shortcutUrlbarHtml}
+        </div>
+      </section>
+    `;
+
+    // Section 4: AI Behavior
     const aiBehaviorSettings = [
       { label: "Enable Citations", pref: PREFS.CITATIONS_ENABLED },
       { label: "Stream Response", pref: PREFS.STREAM_ENABLED },
@@ -1205,23 +1334,33 @@ const SettingsModal = {
       </div>
     `;
     const maxToolCallsHtml = `
-  <div class="setting-item">
-    <label for="pref-max-tool-calls">Max Tool Calls (Maximum number of messages to send AI back to back)</label>
-    <input type="number" id="pref-max-tool-calls" data-pref="${PREFS.MAX_TOOL_CALLS}" />
-  </div>
-`;
+   <div class="setting-item">
+     <label for="pref-max-tool-calls">Max Tool Calls (Maximum number of messages to send AI back to back)</label>
+     <input type="number" id="pref-max-tool-calls" data-pref="${PREFS.MAX_TOOL_CALLS}" />
+   </div>
+ `;
+    const customSystemPromptHtml = `
+   <div class="setting-item">
+     <label for="pref-custom-system-prompt">Custom System Prompt</label>
+     <textarea id="pref-custom-system-prompt" data-pref="${PREFS.CUSTOM_SYSTEM_PROMPT}" rows="3" placeholder="Pretend like ...."></textarea>
+   </div>
+ `;
 
-    const aiBehaviorResetPrefs = [...aiBehaviorSettings.map(s => s.pref), PREFS.MAX_TOOL_CALLS];
+    const aiBehaviorResetPrefs = [
+      ...aiBehaviorSettings.map((s) => s.pref),
+      PREFS.MAX_TOOL_CALLS,
+      PREFS.CUSTOM_SYSTEM_PROMPT,
+    ];
     const aiBehaviorSectionHtml = this._createCheckboxSectionHtml(
       "AI Behavior",
       aiBehaviorSettings,
       true,
       aiBehaviorWarningHtml,
-      maxToolCallsHtml,
+      maxToolCallsHtml + customSystemPromptHtml,
       aiBehaviorResetPrefs
     );
 
-    // Section 4: Context Menu
+    // Section 5: Context Menu
     const contextMenuSettings = [
       { label: "Enable Context Menu (right click menu)", pref: PREFS.CONTEXT_MENU_ENABLED },
       {
@@ -1232,14 +1371,18 @@ const SettingsModal = {
     const contextMenuCommandsHtml = `
       <div class="setting-item">
         <label for="pref-context-menu-command-no-selection">Command when no text is selected</label>
-        <input type="text" id="pref-context-menu-command-no-selection" data-pref="${PREFS.CONTEXT_MENU_COMMAND_NO_SELECTION}" />
+        <textarea id="pref-context-menu-command-no-selection" data-pref="${PREFS.CONTEXT_MENU_COMMAND_NO_SELECTION}" rows="3"></textarea>
       </div>
       <div class="setting-item">
         <label for="pref-context-menu-command-with-selection">Command when text is selected. Use {selection} for the selected text.</label>
         <textarea id="pref-context-menu-command-with-selection" data-pref="${PREFS.CONTEXT_MENU_COMMAND_WITH_SELECTION}" rows="3"></textarea>
       </div>
     `;
-    const contextMenuResetPrefs = [...contextMenuSettings.map(s => s.pref), PREFS.CONTEXT_MENU_COMMAND_NO_SELECTION, PREFS.CONTEXT_MENU_COMMAND_WITH_SELECTION];
+    const contextMenuResetPrefs = [
+      ...contextMenuSettings.map((s) => s.pref),
+      PREFS.CONTEXT_MENU_COMMAND_NO_SELECTION,
+      PREFS.CONTEXT_MENU_COMMAND_WITH_SELECTION,
+    ];
     const contextMenuSectionHtml = this._createCheckboxSectionHtml(
       "Context Menu",
       contextMenuSettings,
@@ -1249,7 +1392,7 @@ const SettingsModal = {
       contextMenuResetPrefs
     );
 
-    // Section 5: LLM Providers
+    // Section 6: LLM Providers
     let llmProviderSettingsHtml = "";
     for (const [name, provider] of Object.entries(browseBotFindbarLLM.AVAILABLE_PROVIDERS)) {
       const modelPrefKey = provider.modelPref;
@@ -1300,7 +1443,9 @@ const SettingsModal = {
     const llmProvidersResetPrefs = [
       PREFS.LLM_PROVIDER,
       PREFS.OLLAMA_BASE_URL,
-      ...Object.values(browseBotFindbarLLM.AVAILABLE_PROVIDERS).flatMap(p => [p.modelPref, PREFS[`${p.name.toUpperCase()}_API_KEY`]]).filter(Boolean)
+      ...Object.values(browseBotFindbarLLM.AVAILABLE_PROVIDERS)
+        .flatMap((p) => [p.modelPref, PREFS[`${p.name.toUpperCase()}_API_KEY`]])
+        .filter(Boolean),
     ];
 
     const llmProvidersSectionHtml = `
@@ -1318,48 +1463,67 @@ const SettingsModal = {
         ${llmProviderSettingsHtml}
       </section>`;
 
-    // Section 8: Advanced LLM
+    // Section 7: Advanced LLM
     const advancedLLMSettings = [
       {
         label: "Temperature",
         pref: PREFS.LLM_TEMPERATURE,
-        type: "number", step: 0.1, min: 0, max: 2,
-        tooltip: "Controls randomness. Lower values are more deterministic."
+        type: "number",
+        step: 0.1,
+        min: 0,
+        max: 2,
+        tooltip: "Controls randomness. Lower values are more deterministic.",
       },
       {
-        label: "Top P  -----",// :HACK: adding space so that tooltip stay under container
+        label: "Top P  -----", // :HACK: adding space so that tooltip stay under container
         pref: PREFS.LLM_TOP_P,
-        type: "number", step: 0.1, min: 0, max: 1,
-        tooltip: "Nucleus sampling. Limits token selection to top cumulative probability."
+        type: "number",
+        step: 0.1,
+        min: 0,
+        max: 1,
+        tooltip: "Nucleus sampling. Limits token selection to top cumulative probability.",
       },
       {
         label: "Top K  ----- ", // :HACK: adding space so that tooltip stay under container
         pref: PREFS.LLM_TOP_K,
-        type: "number", step: 1, min: 0, max: 200,
-        tooltip: "Limits sampling to the top K tokens. Removes low probability responses."
+        type: "number",
+        step: 1,
+        min: 0,
+        max: 200,
+        tooltip: "Limits sampling to the top K tokens. Removes low probability responses.",
       },
       {
         label: "Presence Penalty",
         pref: PREFS.LLM_PRESENCE_PENALTY,
-        type: "number", step: 0.1, min: -2, max: 2,
-        tooltip: "Penalizes repeated tokens. Reduces repetition of information already in the context."
+        type: "number",
+        step: 0.1,
+        min: -2,
+        max: 2,
+        tooltip:
+          "Penalizes repeated tokens. Reduces repetition of information already in the context.",
       },
       {
         label: "Frequency Penalty",
         pref: PREFS.LLM_FREQUENCY_PENALTY,
-        type: "number", step: 0.1, min: -2, max: 2,
-        tooltip: "Penalizes frequent tokens. Discourages repetition of the same words/phrases."
+        type: "number",
+        step: 0.1,
+        min: -2,
+        max: 2,
+        tooltip: "Penalizes frequent tokens. Discourages repetition of the same words/phrases.",
       },
       {
         label: "Max Output Tokens",
         pref: PREFS.LLM_MAX_OUTPUT_TOKENS,
-        type: "number", step: 1, min: 1, max: 32000,
-        tooltip: "Maximum number of tokens to generate."
+        type: "number",
+        step: 1,
+        min: 1,
+        max: 32000,
+        tooltip: "Maximum number of tokens to generate.",
       },
     ];
 
     // Preset removed as per user request
-    const advancedLLMResetPrefs = advancedLLMSettings.map(s => s.pref);
+    const advancedLLMResetPrefs = advancedLLMSettings.map((s) => s.pref);
 
     const advancedLLMSectionHtml = this._createCheckboxSectionHtml(
       "Advanced LLM Settings",
@@ -1370,7 +1534,7 @@ const SettingsModal = {
       advancedLLMResetPrefs
     );
 
-    // Section 6: Browser Findbar
+    // Section 8: Browser Findbar
     const browserFindbarSettings = [
       { label: "Find as you Type", pref: "accessibility.typeaheadfind" },
       {
@@ -1386,10 +1550,10 @@ const SettingsModal = {
       false,
       "",
       "",
-      browserFindbarSettings.map(s => s.pref)
+      browserFindbarSettings.map((s) => s.pref)
     );
 
-    // Section 7: Development
+    // Section 9: Development
     const devSettings = [{ label: "Debug Mode (logs in console)", pref: PREFS.DEBUG_MODE }];
     const devSectionHtml = this._createCheckboxSectionHtml("Development", devSettings, false);
 
@@ -1406,6 +1570,7 @@ const SettingsModal = {
           <div class="ai-settings-content">
             ${findbarSectionHtml}
             ${urlbarSectionHtml}
+            ${shortcutsSectionHtml}
             ${aiBehaviorSectionHtml}
             ${contextMenuSectionHtml}
             ${llmProvidersSectionHtml}
@@ -2840,6 +3005,33 @@ ${toolExamples.join("\n\n")}
   }
 };
 
+/**
+ * Creates a unique signature for a keyboard shortcut.
+ * @param {KeyboardEvent} event - The keyboard event.
+ * @returns {string} A unique signature string.
+ */
+function eventToShortcutSignature(event) {
+  const modifiers = [];
+  if (event.ctrlKey || event.metaKey) modifiers.push("ctrl");
+  if (event.altKey) modifiers.push("alt");
+  if (event.shiftKey) modifiers.push("shift");
+  modifiers.push(event.key.toLowerCase());
+  return modifiers.join("+");
+}
+
+/**
+ * Creates a unique signature for a shortcut string.
+ * @param {string} shortcutStr - The shortcut string (e.g., "Ctrl+K").
+ * @returns {string} A unique signature string.
+ */
+function shortcutStringToSignature(shortcutStr) {
+  if (!shortcutStr) return "";
+  return shortcutStr
+    .toLowerCase()
+    .replace(/control/g, "ctrl")
+    .replace(/option/g, "alt");
+}
+
 const icons = {
   loading: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="var(--browse-bot-muted)" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" width="100%" height="100%"><path d="M21 12a9 9 0 1 1-6.219-8.56"/></svg>`,
   success: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="var(--browse-bot-success)" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" width="100%" height="100%"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>`,
@@ -3697,7 +3889,7 @@ const browseBotFindbar = {
         e.preventDefault();
         try {
           openTrustedLinkIn(e.target.href, "tab");
-        } catch (e) {}
+        } catch {}
       }
     });
 
@@ -4162,7 +4354,10 @@ const browseBotFindbar = {
   },
 
   addKeymaps: function (e) {
-    if (e.key && e.key.toLowerCase() === "f" && e.ctrlKey && e.shiftKey && !e.altKey) {
+    const currentShortcut = shortcutStringToSignature(PREFS.shortcutFindbar);
+    const eventSignature = eventToShortcutSignature(e);
+
+    if (eventSignature === currentShortcut) {
       e.preventDefault();
       e.stopPropagation();
       this.expanded = true;
@@ -4291,7 +4486,7 @@ function googleFaviconAPI(domainOrUrl, size = 32) {
   let domain;
   try {
     domain = new URL(domainOrUrl).hostname;
-  } catch (e) {
+  } catch {
     domain = domainOrUrl;
   }
   return `https://s2.googleusercontent.com/s2/favicons?domain_url=https://${domain}&sz=${size}`;
@@ -4774,7 +4969,7 @@ class LLM {
       model: this.currentProvider.getModel(),
       system: await this.getSystemPrompt(),
       messages: this.history,
-      schema: citationSchema,
+      output: output_exports.object({ schema: citationSchema }),
       temperature: PREFS.llmTemperature,
       topP: PREFS.llmTopP,
       topK: PREFS.llmTopK,
@@ -4784,13 +4979,13 @@ class LLM {
       ...rest,
     };
 
-    const { object } = await generateObject(config);
+    const { output } = await generateText(config);
 
     // Only update history if it wasn't overridden in the options
     if (!rest.messages) {
-      this.history.push({ role: "assistant", content: JSON.stringify(object) });
+      this.history.push({ role: "assistant", content: JSON.stringify(output) });
     }
-    return object;
+    return output;
   }
 
   getHistory() {
@@ -4837,7 +5032,13 @@ class BrowseBotLLM extends LLM {
   }
 
   async getSystemPrompt() {
-    let systemPrompt = `You are a helpful AI assistant integrated into Zen Browser, a minimal and modern fork of Firefox. Your primary purpose is to answer user questions based on the content of the current webpage.
+    let systemPrompt = "";
+
+    if (PREFS.customSystemPrompt) {
+      systemPrompt = PREFS.customSystemPrompt + "\n\n";
+    }
+
+    systemPrompt += `You are a helpful AI assistant integrated into Zen Browser, a minimal and modern fork of Firefox. Your primary purpose is to answer user questions based on the content of the current webpage.
 
 ## Your Instructions:
 - Be concise, accurate, and helpful.`;
@@ -4925,87 +5126,28 @@ Here are some examples demonstrating the correct JSON output format.
       ]
     }
     \`\`\`
-
-**Example 3: The WRONG way (What NOT to do)**
-This is incorrect because it uses one citation \`[1]\` for three different facts. This is lazy and unhelpful.
--   **Your JSON Response (Incorrect):**
-    \`\`\`json
-    {
-      "answer": "This project is a toolkit for loading custom JavaScript into the browser [1]. Its main features include a modern UI [1] and an API for managing hotkeys and notifications [1].",
-      "citations": [
-        {
-          "id": 1,
-          "source_quote": "...a toolkit for loading custom JavaScript... It has features like a modern UI... provides an API for hotkeys and notifications..."
-        }
-      ]
-    }
-    \`\`\`
-
-**Example 4: The WRONG way (What NOT to do)**
-This is incorrect because it uses one citation same id for all facts.
-\`\`\`json
-{
-  "answer": "Novel is a Notion-style WYSIWYG editor with AI-powered autocompletion [1]. It is built with Tiptap and Vercel AI SDK [1]. You can install it using npm [1]. Features include a slash menu, bubble menu, AI autocomplete, and image uploads [1].",
-  "citations": [
-    {
-      "id": 1,
-      "source_quote": "Novel is a Notion-style WYSIWYG editor with AI-powered autocompletion."
-    },
-    {
-      "id": 1,
-      "source_quote": "Built with Tiptap + Vercel AI SDK."
-    },
-    {
-      "id": 1,
-      "source_quote": "Installation npm i novel"
-    },
-    {
-      "id": 1,
-      "source_quote": "Features Slash menu & bubble menu AI autocomplete (type ++ to activate, or select from slash menu) Image uploads (drag & drop / copy & paste, or select from slash menu)"
-    }
-  ]
-}
-\`\`\`
-
-**Example 5: The correct format of previous example**
-This example is correct, note that it contain unique \`id\`, and each in text citation match to each citation \`id\`.
-\`\`\`json
-{
-  "answer": "Novel is a Notion-style WYSIWYG editor with AI-powered autocompletion [1]. It is built with Tiptap and Vercel AI SDK [2]. You can install it using npm [3]. Features include a slash menu, bubble menu, AI autocomplete, and image uploads [4].",
-  "citations": [
-    {
-      "id": 1,
-      "source_quote": "Novel is a Notion-style WYSIWYG editor with AI-powered autocompletion."
-    },
-    {
-      "id": 2,
-      "source_quote": "Built with Tiptap + Vercel AI SDK."
-    },
-    {
-      "id": 3,
-      "source_quote": "Installation npm i novel"
-    },
-    {
-      "id": 4,
-      "source_quote": "Features Slash menu & bubble menu AI autocomplete (type ++ to activate, or select from slash menu) Image uploads (drag & drop / copy & paste, or select from slash menu)"
-    }
-  ]
-}
-\`\`\`
 `;
     }
 
     if (!this.agenticMode) {
       systemPrompt += `
 - Strictly base all your answers on the webpage content provided below.
-- If the user's question cannot be answered from the content, state that the information is not available on the page.
-
-Here is the initial info about the current page:
-`;
-      const pageContext = await messageManagerAPI.getPageTextContent(!this.citationsEnabled);
-      systemPrompt += JSON.stringify(pageContext);
+- If the user's question cannot be answered from the content, state that the information is not available on the page.`;
     }
     return systemPrompt;
+  }
+
+  async _addUserPromptWithContext(prompt) {
+    let contextString = "";
+    if (this.agenticMode) {
+      const pageContext = messageManagerAPI.getUrlAndTitle();
+      contextString = `Page URL: ${pageContext.url}\nPage Title: ${pageContext.title}`;
+    } else {
+      const pageContext = await messageManagerAPI.getPageTextContent(!this.citationsEnabled);
+      contextString = `Page URL: ${pageContext.url}\nPage Title: ${pageContext.title}\nPage Content: """\n${pageContext.textContent}\n"""`;
+    }
+
+    return `Use the following page context to answer the user's question.\n${contextString}\n\nUser Question: ${prompt}`;
   }
 
   parseModelResponseText(responseText) {
@@ -5051,19 +5193,31 @@ Here is the initial info about the current page:
       return object;
     }
 
+    const userPromptWithContext = await this._addUserPromptWithContext(prompt);
+    this.history.push({ role: "user", content: prompt });
+    const llmHistory = [...this.history];
+    llmHistory[llmHistory.length - 1] = { role: "user", content: userPromptWithContext };
+
     if (!this.agenticMode) {
       if (this.streamEnabled) {
         const self = this;
-        const streamResult = await super.streamText({ prompt, abortSignal });
-        (async () => {
-          await streamResult.text;
-          if (browseBotFindbar?.findbar) {
-            browseBotFindbar.findbar.history = self.getHistory();
-          }
-        })();
+        const streamResult = await super.streamText({
+          abortSignal,
+          messages: llmHistory,
+          onFinish: (result) => {
+            self.history.push(...result.response.messages);
+            if (browseBotFindbar?.findbar) {
+              browseBotFindbar.findbar.history = self.getHistory();
+            }
+          },
+        });
         return streamResult;
       } else {
-        const result = await super.generateText({ prompt, abortSignal });
+        const result = await super.generateText({
+          abortSignal,
+          messages: llmHistory,
+        });
+        this.history.push(...result.response.messages);
         if (browseBotFindbar?.findbar) {
           browseBotFindbar.findbar.history = this.getHistory();
         }
@@ -5097,17 +5251,18 @@ Here is the initial info about the current page:
     const tools = getTools(findbarToolGroups, { shouldToolBeCalled, afterToolCall });
 
     const commonConfig = {
-      prompt,
       tools,
       stopWhen: stepCountIs(this.maxToolCalls),
       abortSignal,
+      messages: llmHistory,
     };
 
     if (this.streamEnabled) {
       const self = this;
       return super.streamText({
         ...commonConfig,
-        onFinish: () => {
+        onFinish: (result) => {
+          self.history.push(...result.response.messages);
           if (browseBotFindbar?.findbar) {
             browseBotFindbar.findbar.history = self.getHistory();
           }
@@ -5115,6 +5270,7 @@ Here is the initial info about the current page:
       });
     } else {
       const result = await super.generateText(commonConfig);
+      this.history.push(...result.response.messages);
       if (browseBotFindbar?.findbar) {
         browseBotFindbar.findbar.history = this.getHistory();
       }
@@ -5135,7 +5291,13 @@ const urlBarGroups = ["search", "navigation", "tabs", "workspaces", "uiFeedback"
 
 class UrlBarLLM extends LLM {
   async getSystemPrompt() {
-    let systemPrompt = `You are an AI integrated with Zen Browser URL bar, designed to assist users in browsing the web effectively and organizing their workspace in a better way.
+    let systemPrompt = "";
+
+    if (PREFS.customSystemPrompt) {
+      systemPrompt = PREFS.customSystemPrompt + "\n\n";
+    }
+
+    systemPrompt += `You are an AI integrated with Zen Browser URL bar, designed to assist users in browsing the web effectively and organizing their workspace in a better way.
 
 Your primary responsibilities include:
 1. Making tool calls in each response based on user input.
@@ -5326,7 +5488,9 @@ const urlbarAI = {
       textbox.style.removeProperty("transition");
       textbox.style.removeProperty("overflow");
       textbox.style.removeProperty("height");
-    } catch {}
+    } catch {
+      // ignore
+    }
   },
 
   toggleAIMode(forceState, forceClose = false) {
@@ -5354,8 +5518,11 @@ const urlbarAI = {
   },
 
   handleGlobalKeyDown(e) {
-    if (e.ctrlKey && e.code === "Space" && !e.altKey && !e.shiftKey) {
-      debugLog("urlbarAI: Ctrl+Space detected globally");
+    const currentShortcut = shortcutStringToSignature(PREFS.shortcutUrlbar);
+    const eventSignature = eventToShortcutSignature(e);
+
+    if (eventSignature === currentShortcut) {
+      debugLog("urlbarAI: Custom shortcut detected");
       e.preventDefault();
       e.stopPropagation();
       gURLBar.focus();
@@ -5431,10 +5598,8 @@ const urlbarAI = {
         gURLBar.inputField.setAttribute("placeholder", this._originalPlaceholder);
         this.toggleAIMode(false, true);
 
-// clear data after 4 seconds
-    setTimeout(() => 
-urlBarLLM.clearData()
-, 4000);
+        // clear data after 4 seconds
+        setTimeout(() => urlBarLLM.clearData(), 4000);
       });
     } else {
       this.toggleAIMode(false, true);

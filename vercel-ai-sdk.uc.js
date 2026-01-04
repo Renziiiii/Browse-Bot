@@ -1,8 +1,8 @@
 // src/errors/ai-sdk-error.ts
-var marker$4 = "vercel.ai.error";
-var symbol$4 = Symbol.for(marker$4);
-var _a$5, _b$2;
-var AISDKError$1 = class _AISDKError extends (_b$2 = Error, _a$5 = symbol$4, _b$2) {
+var marker$3 = "vercel.ai.error";
+var symbol$3 = Symbol.for(marker$3);
+var _a$4, _b$2;
+var AISDKError = class _AISDKError extends (_b$2 = Error, _a$4 = symbol$3, _b$2) {
   /**
    * Creates an AI SDK Error.
    *
@@ -17,7 +17,7 @@ var AISDKError$1 = class _AISDKError extends (_b$2 = Error, _a$5 = symbol$4, _b$
     cause
   }) {
     super(message);
-    this[_a$5] = true;
+    this[_a$4] = true;
     this.name = name14;
     this.cause = cause;
   }
@@ -27,7 +27,7 @@ var AISDKError$1 = class _AISDKError extends (_b$2 = Error, _a$5 = symbol$4, _b$
    * @returns {boolean} True if the error is an AI SDK Error, false otherwise.
    */
   static isInstance(error) {
-    return _AISDKError.hasMarker(error, marker$4);
+    return _AISDKError.hasMarker(error, marker$3);
   }
   static hasMarker(error, marker15) {
     const markerSymbol = Symbol.for(marker15);
@@ -36,11 +36,11 @@ var AISDKError$1 = class _AISDKError extends (_b$2 = Error, _a$5 = symbol$4, _b$
 };
 
 // src/errors/api-call-error.ts
-var name$4 = "AI_APICallError";
-var marker2$2 = `vercel.ai.error.${name$4}`;
-var symbol2$2 = Symbol.for(marker2$2);
-var _a2$2, _b2$1;
-var APICallError$1 = class APICallError extends (_b2$1 = AISDKError$1, _a2$2 = symbol2$2, _b2$1) {
+var name$3 = "AI_APICallError";
+var marker2$1 = `vercel.ai.error.${name$3}`;
+var symbol2$1 = Symbol.for(marker2$1);
+var _a2$1, _b2$1;
+var APICallError = class extends (_b2$1 = AISDKError, _a2$1 = symbol2$1, _b2$1) {
   constructor({
     message,
     url,
@@ -56,8 +56,8 @@ var APICallError$1 = class APICallError extends (_b2$1 = AISDKError$1, _a2$2 = s
     // server error
     data
   }) {
-    super({ name: name$4, message, cause });
-    this[_a2$2] = true;
+    super({ name: name$3, message, cause });
+    this[_a2$1] = true;
     this.url = url;
     this.requestBodyValues = requestBodyValues;
     this.statusCode = statusCode;
@@ -67,28 +67,28 @@ var APICallError$1 = class APICallError extends (_b2$1 = AISDKError$1, _a2$2 = s
     this.data = data;
   }
   static isInstance(error) {
-    return AISDKError$1.hasMarker(error, marker2$2);
+    return AISDKError.hasMarker(error, marker2$1);
   }
 };
 
 // src/errors/empty-response-body-error.ts
-var name2$2 = "AI_EmptyResponseBodyError";
-var marker3$3 = `vercel.ai.error.${name2$2}`;
-var symbol3$3 = Symbol.for(marker3$3);
-var _a3$3, _b3$1;
-var EmptyResponseBodyError$1 = class EmptyResponseBodyError extends (_b3$1 = AISDKError$1, _a3$3 = symbol3$3, _b3$1) {
+var name2$1 = "AI_EmptyResponseBodyError";
+var marker3$2 = `vercel.ai.error.${name2$1}`;
+var symbol3$2 = Symbol.for(marker3$2);
+var _a3$2, _b3$1;
+var EmptyResponseBodyError = class extends (_b3$1 = AISDKError, _a3$2 = symbol3$2, _b3$1) {
   // used in isInstance
   constructor({ message = "Empty response body" } = {}) {
-    super({ name: name2$2, message });
-    this[_a3$3] = true;
+    super({ name: name2$1, message });
+    this[_a3$2] = true;
   }
   static isInstance(error) {
-    return AISDKError$1.hasMarker(error, marker3$3);
+    return AISDKError.hasMarker(error, marker3$2);
   }
 };
 
 // src/errors/get-error-message.ts
-function getErrorMessage$2(error) {
+function getErrorMessage$1(error) {
   if (error == null) {
     return "unknown error";
   }
@@ -102,82 +102,82 @@ function getErrorMessage$2(error) {
 }
 
 // src/errors/invalid-argument-error.ts
-var name3$3 = "AI_InvalidArgumentError";
-var marker4$3 = `vercel.ai.error.${name3$3}`;
-var symbol4$3 = Symbol.for(marker4$3);
-var _a4$3, _b4$1;
-var InvalidArgumentError$2 = class InvalidArgumentError extends (_b4$1 = AISDKError$1, _a4$3 = symbol4$3, _b4$1) {
+var name3$2 = "AI_InvalidArgumentError";
+var marker4$2 = `vercel.ai.error.${name3$2}`;
+var symbol4$2 = Symbol.for(marker4$2);
+var _a4$2, _b4$1;
+var InvalidArgumentError$1 = class InvalidArgumentError extends (_b4$1 = AISDKError, _a4$2 = symbol4$2, _b4$1) {
   constructor({
     message,
     cause,
     argument
   }) {
-    super({ name: name3$3, message, cause });
-    this[_a4$3] = true;
+    super({ name: name3$2, message, cause });
+    this[_a4$2] = true;
     this.argument = argument;
   }
   static isInstance(error) {
-    return AISDKError$1.hasMarker(error, marker4$3);
+    return AISDKError.hasMarker(error, marker4$2);
   }
 };
 
 // src/errors/invalid-prompt-error.ts
-var name4$3 = "AI_InvalidPromptError";
-var marker5$3 = `vercel.ai.error.${name4$3}`;
-var symbol5$3 = Symbol.for(marker5$3);
-var _a5$3, _b5$1;
-var InvalidPromptError$1 = class InvalidPromptError extends (_b5$1 = AISDKError$1, _a5$3 = symbol5$3, _b5$1) {
+var name4$2 = "AI_InvalidPromptError";
+var marker5$2 = `vercel.ai.error.${name4$2}`;
+var symbol5$2 = Symbol.for(marker5$2);
+var _a5$2, _b5$1;
+var InvalidPromptError = class extends (_b5$1 = AISDKError, _a5$2 = symbol5$2, _b5$1) {
   constructor({
     prompt,
     message,
     cause
   }) {
-    super({ name: name4$3, message: `Invalid prompt: ${message}`, cause });
-    this[_a5$3] = true;
+    super({ name: name4$2, message: `Invalid prompt: ${message}`, cause });
+    this[_a5$2] = true;
     this.prompt = prompt;
   }
   static isInstance(error) {
-    return AISDKError$1.hasMarker(error, marker5$3);
+    return AISDKError.hasMarker(error, marker5$2);
   }
 };
 
 // src/errors/invalid-response-data-error.ts
-var name5$3 = "AI_InvalidResponseDataError";
-var marker6$2 = `vercel.ai.error.${name5$3}`;
-var symbol6$2 = Symbol.for(marker6$2);
-var _a6$2, _b6$1;
-var InvalidResponseDataError$1 = class InvalidResponseDataError extends (_b6$1 = AISDKError$1, _a6$2 = symbol6$2, _b6$1) {
+var name5$2 = "AI_InvalidResponseDataError";
+var marker6$1 = `vercel.ai.error.${name5$2}`;
+var symbol6$1 = Symbol.for(marker6$1);
+var _a6$1, _b6$1;
+var InvalidResponseDataError = class extends (_b6$1 = AISDKError, _a6$1 = symbol6$1, _b6$1) {
   constructor({
     data,
     message = `Invalid response data: ${JSON.stringify(data)}.`
   }) {
-    super({ name: name5$3, message });
-    this[_a6$2] = true;
+    super({ name: name5$2, message });
+    this[_a6$1] = true;
     this.data = data;
   }
   static isInstance(error) {
-    return AISDKError$1.hasMarker(error, marker6$2);
+    return AISDKError.hasMarker(error, marker6$1);
   }
 };
 
 // src/errors/json-parse-error.ts
-var name6$2 = "AI_JSONParseError";
-var marker7$3 = `vercel.ai.error.${name6$2}`;
-var symbol7$3 = Symbol.for(marker7$3);
-var _a7$3, _b7$1;
-var JSONParseError$1 = class JSONParseError extends (_b7$1 = AISDKError$1, _a7$3 = symbol7$3, _b7$1) {
+var name6$1 = "AI_JSONParseError";
+var marker7$2 = `vercel.ai.error.${name6$1}`;
+var symbol7$2 = Symbol.for(marker7$2);
+var _a7$2, _b7$1;
+var JSONParseError = class extends (_b7$1 = AISDKError, _a7$2 = symbol7$2, _b7$1) {
   constructor({ text, cause }) {
     super({
-      name: name6$2,
+      name: name6$1,
       message: `JSON parsing failed: Text: ${text}.
-Error message: ${getErrorMessage$2(cause)}`,
+Error message: ${getErrorMessage$1(cause)}`,
       cause
     });
-    this[_a7$3] = true;
+    this[_a7$2] = true;
     this.text = text;
   }
   static isInstance(error) {
-    return AISDKError$1.hasMarker(error, marker7$3);
+    return AISDKError.hasMarker(error, marker7$2);
   }
 };
 
@@ -186,79 +186,79 @@ var name7$1 = "AI_LoadAPIKeyError";
 var marker8$1 = `vercel.ai.error.${name7$1}`;
 var symbol8$1 = Symbol.for(marker8$1);
 var _a8$1, _b8;
-var LoadAPIKeyError = class extends (_b8 = AISDKError$1, _a8$1 = symbol8$1, _b8) {
+var LoadAPIKeyError = class extends (_b8 = AISDKError, _a8$1 = symbol8$1, _b8) {
   // used in isInstance
   constructor({ message }) {
     super({ name: name7$1, message });
     this[_a8$1] = true;
   }
   static isInstance(error) {
-    return AISDKError$1.hasMarker(error, marker8$1);
+    return AISDKError.hasMarker(error, marker8$1);
   }
 };
 
 // src/errors/no-such-model-error.ts
-var name10$2 = "AI_NoSuchModelError";
-var marker11$1 = `vercel.ai.error.${name10$2}`;
-var symbol11$1 = Symbol.for(marker11$1);
-var _a11$1, _b11;
-var NoSuchModelError$1 = class NoSuchModelError extends (_b11 = AISDKError$1, _a11$1 = symbol11$1, _b11) {
+var name10$1 = "AI_NoSuchModelError";
+var marker11 = `vercel.ai.error.${name10$1}`;
+var symbol11 = Symbol.for(marker11);
+var _a11, _b11;
+var NoSuchModelError = class extends (_b11 = AISDKError, _a11 = symbol11, _b11) {
   constructor({
-    errorName = name10$2,
+    errorName = name10$1,
     modelId,
     modelType,
     message = `No such ${modelType}: ${modelId}`
   }) {
     super({ name: errorName, message });
-    this[_a11$1] = true;
+    this[_a11] = true;
     this.modelId = modelId;
     this.modelType = modelType;
   }
   static isInstance(error) {
-    return AISDKError$1.hasMarker(error, marker11$1);
+    return AISDKError.hasMarker(error, marker11);
   }
 };
 
 // src/errors/too-many-embedding-values-for-call-error.ts
-var name11$1 = "AI_TooManyEmbeddingValuesForCallError";
-var marker12$2 = `vercel.ai.error.${name11$1}`;
-var symbol12$2 = Symbol.for(marker12$2);
-var _a12$2, _b12;
-var TooManyEmbeddingValuesForCallError$1 = class TooManyEmbeddingValuesForCallError extends (_b12 = AISDKError$1, _a12$2 = symbol12$2, _b12) {
+var name11 = "AI_TooManyEmbeddingValuesForCallError";
+var marker12$1 = `vercel.ai.error.${name11}`;
+var symbol12$1 = Symbol.for(marker12$1);
+var _a12$1, _b12;
+var TooManyEmbeddingValuesForCallError = class extends (_b12 = AISDKError, _a12$1 = symbol12$1, _b12) {
   constructor(options) {
     super({
-      name: name11$1,
+      name: name11,
       message: `Too many values for a single embedding call. The ${options.provider} model "${options.modelId}" can only embed up to ${options.maxEmbeddingsPerCall} values per call, but ${options.values.length} values were provided.`
     });
-    this[_a12$2] = true;
+    this[_a12$1] = true;
     this.provider = options.provider;
     this.modelId = options.modelId;
     this.maxEmbeddingsPerCall = options.maxEmbeddingsPerCall;
     this.values = options.values;
   }
   static isInstance(error) {
-    return AISDKError$1.hasMarker(error, marker12$2);
+    return AISDKError.hasMarker(error, marker12$1);
   }
 };
 
 // src/errors/type-validation-error.ts
-var name12$2 = "AI_TypeValidationError";
-var marker13$1 = `vercel.ai.error.${name12$2}`;
-var symbol13$1 = Symbol.for(marker13$1);
-var _a13$1, _b13;
-var TypeValidationError$1 = class _TypeValidationError extends (_b13 = AISDKError$1, _a13$1 = symbol13$1, _b13) {
+var name12$1 = "AI_TypeValidationError";
+var marker13 = `vercel.ai.error.${name12$1}`;
+var symbol13 = Symbol.for(marker13);
+var _a13, _b13;
+var TypeValidationError = class _TypeValidationError extends (_b13 = AISDKError, _a13 = symbol13, _b13) {
   constructor({ value, cause }) {
     super({
-      name: name12$2,
+      name: name12$1,
       message: `Type validation failed: Value: ${JSON.stringify(value)}.
-Error message: ${getErrorMessage$2(cause)}`,
+Error message: ${getErrorMessage$1(cause)}`,
       cause
     });
-    this[_a13$1] = true;
+    this[_a13] = true;
     this.value = value;
   }
   static isInstance(error) {
-    return AISDKError$1.hasMarker(error, marker13$1);
+    return AISDKError.hasMarker(error, marker13);
   }
   /**
    * Wraps an error into a TypeValidationError.
@@ -279,47 +279,23 @@ Error message: ${getErrorMessage$2(cause)}`,
 };
 
 // src/errors/unsupported-functionality-error.ts
-var name13$1 = "AI_UnsupportedFunctionalityError";
-var marker14$2 = `vercel.ai.error.${name13$1}`;
-var symbol14$2 = Symbol.for(marker14$2);
-var _a14$2, _b14;
-var UnsupportedFunctionalityError$1 = class UnsupportedFunctionalityError extends (_b14 = AISDKError$1, _a14$2 = symbol14$2, _b14) {
+var name13 = "AI_UnsupportedFunctionalityError";
+var marker14$1 = `vercel.ai.error.${name13}`;
+var symbol14$1 = Symbol.for(marker14$1);
+var _a14$1, _b14;
+var UnsupportedFunctionalityError = class extends (_b14 = AISDKError, _a14$1 = symbol14$1, _b14) {
   constructor({
     functionality,
     message = `'${functionality}' functionality not supported.`
   }) {
-    super({ name: name13$1, message });
-    this[_a14$2] = true;
+    super({ name: name13, message });
+    this[_a14$1] = true;
     this.functionality = functionality;
   }
   static isInstance(error) {
-    return AISDKError$1.hasMarker(error, marker14$2);
+    return AISDKError.hasMarker(error, marker14$1);
   }
 };
-
-// src/json-value/is-json.ts
-function isJSONValue(value) {
-  if (value === null || typeof value === "string" || typeof value === "number" || typeof value === "boolean") {
-    return true;
-  }
-  if (Array.isArray(value)) {
-    return value.every(isJSONValue);
-  }
-  if (typeof value === "object") {
-    return Object.entries(value).every(
-      ([key, val]) => typeof key === "string" && (val === void 0 || isJSONValue(val))
-    );
-  }
-  return false;
-}
-function isJSONArray(value) {
-  return Array.isArray(value) && value.every(isJSONValue);
-}
-function isJSONObject(value) {
-  return value != null && typeof value === "object" && Object.entries(value).every(
-    ([key, val]) => typeof key === "string" && (val === void 0 || isJSONValue(val))
-  );
-}
 
 /** A special constant with type `never` */
 function $constructor(name, initializer, params) {
@@ -575,6 +551,11 @@ const NUMBER_FORMAT_RANGES = {
 };
 function pick(schema, mask) {
     const currDef = schema._zod.def;
+    const checks = currDef.checks;
+    const hasChecks = checks && checks.length > 0;
+    if (hasChecks) {
+        throw new Error(".pick() cannot be used on object schemas containing refinements");
+    }
     const def = mergeDefs(schema._zod.def, {
         get shape() {
             const newShape = {};
@@ -595,6 +576,11 @@ function pick(schema, mask) {
 }
 function omit(schema, mask) {
     const currDef = schema._zod.def;
+    const checks = currDef.checks;
+    const hasChecks = checks && checks.length > 0;
+    if (hasChecks) {
+        throw new Error(".omit() cannot be used on object schemas containing refinements");
+    }
     const def = mergeDefs(schema._zod.def, {
         get shape() {
             const newShape = { ...schema._zod.def.shape };
@@ -620,7 +606,14 @@ function extend(schema, shape) {
     const checks = schema._zod.def.checks;
     const hasChecks = checks && checks.length > 0;
     if (hasChecks) {
-        throw new Error("Object schemas containing refinements cannot be extended. Use `.safeExtend()` instead.");
+        // Only throw if new shape overlaps with existing shape
+        // Use getOwnPropertyDescriptor to check key existence without accessing values
+        const existingShape = schema._zod.def.shape;
+        for (const key in shape) {
+            if (Object.getOwnPropertyDescriptor(existingShape, key) !== undefined) {
+                throw new Error("Cannot overwrite keys on object schemas containing refinements. Use `.safeExtend()` instead.");
+            }
+        }
     }
     const def = mergeDefs(schema._zod.def, {
         get shape() {
@@ -628,7 +621,6 @@ function extend(schema, shape) {
             assignProp(this, "shape", _shape); // self-caching
             return _shape;
         },
-        checks: [],
     });
     return clone(schema, def);
 }
@@ -636,15 +628,13 @@ function safeExtend(schema, shape) {
     if (!isPlainObject(shape)) {
         throw new Error("Invalid input to safeExtend: expected a plain object");
     }
-    const def = {
-        ...schema._zod.def,
+    const def = mergeDefs(schema._zod.def, {
         get shape() {
             const _shape = { ...schema._zod.def.shape, ...shape };
             assignProp(this, "shape", _shape); // self-caching
             return _shape;
         },
-        checks: schema._zod.def.checks,
-    };
+    });
     return clone(schema, def);
 }
 function merge(a, b) {
@@ -662,6 +652,12 @@ function merge(a, b) {
     return clone(a, def);
 }
 function partial(Class, schema, mask) {
+    const currDef = schema._zod.def;
+    const checks = currDef.checks;
+    const hasChecks = checks && checks.length > 0;
+    if (hasChecks) {
+        throw new Error(".partial() cannot be used on object schemas containing refinements");
+    }
     const def = mergeDefs(schema._zod.def, {
         get shape() {
             const oldShape = schema._zod.def.shape;
@@ -731,7 +727,6 @@ function required(Class, schema, mask) {
             assignProp(this, "shape", shape); // self-caching
             return shape;
         },
-        checks: [],
     });
     return clone(schema, def);
 }
@@ -867,7 +862,7 @@ function formatError(error, mapper = (issue) => issue.message) {
     return fieldErrors;
 }
 
-const _parse$2 = (_Err) => (schema, value, _ctx, _params) => {
+const _parse$1 = (_Err) => (schema, value, _ctx, _params) => {
     const ctx = _ctx ? Object.assign(_ctx, { async: false }) : { async: false };
     const result = schema._zod.run({ value, issues: [] }, ctx);
     if (result instanceof Promise) {
@@ -921,10 +916,10 @@ const _safeParseAsync = (_Err) => async (schema, value, _ctx) => {
 const safeParseAsync$1 = /* @__PURE__*/ _safeParseAsync($ZodRealError);
 const _encode = (_Err) => (schema, value, _ctx) => {
     const ctx = _ctx ? Object.assign(_ctx, { direction: "backward" }) : { direction: "backward" };
-    return _parse$2(_Err)(schema, value, ctx);
+    return _parse$1(_Err)(schema, value, ctx);
 };
 const _decode = (_Err) => (schema, value, _ctx) => {
-    return _parse$2(_Err)(schema, value, _ctx);
+    return _parse$1(_Err)(schema, value, _ctx);
 };
 const _encodeAsync = (_Err) => async (schema, value, _ctx) => {
     const ctx = _ctx ? Object.assign(_ctx, { direction: "backward" }) : { direction: "backward" };
@@ -981,7 +976,8 @@ const cidrv6 = /^(([0-9a-fA-F]{1,4}:){7}[0-9a-fA-F]{1,4}|::|([0-9a-fA-F]{1,4})?:
 const base64 = /^$|^(?:[0-9a-zA-Z+/]{4})*(?:(?:[0-9a-zA-Z+/]{2}==)|(?:[0-9a-zA-Z+/]{3}=))?$/;
 const base64url = /^[A-Za-z0-9_-]*$/;
 // https://blog.stevenlevithan.com/archives/validate-phone-number#r4-3 (regex sans spaces)
-const e164 = /^\+(?:[0-9]){6,14}[0-9]$/;
+// E.164: leading digit must be 1-9; total digits (excluding '+') between 7-15
+const e164 = /^\+[1-9]\d{6,14}$/;
 // const dateSource = `((\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-((0[13578]|1[02])-(0[1-9]|[12]\\d|3[01])|(0[469]|11)-(0[1-9]|[12]\\d|30)|(02)-(0[1-9]|1\\d|2[0-8])))`;
 const dateSource = `(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))`;
 const date$1 = /*@__PURE__*/ new RegExp(`^${dateSource}$`);
@@ -1016,7 +1012,7 @@ const string$1 = (params) => {
     return new RegExp(`^${regex}$`);
 };
 const integer = /^-?\d+$/;
-const number$2 = /^-?\d+(?:\.\d+)?/;
+const number$2 = /^-?\d+(?:\.\d+)?$/;
 const boolean$1 = /^(?:true|false)$/i;
 const _null$2 = /^null$/i;
 // regex for string with no uppercase letters
@@ -1056,7 +1052,7 @@ const $ZodCheckLessThan = /*@__PURE__*/ $constructor("$ZodCheckLessThan", (inst,
         payload.issues.push({
             origin,
             code: "too_big",
-            maximum: def.value,
+            maximum: typeof def.value === "object" ? def.value.getTime() : def.value,
             input: payload.value,
             inclusive: def.inclusive,
             inst,
@@ -1084,7 +1080,7 @@ const $ZodCheckGreaterThan = /*@__PURE__*/ $constructor("$ZodCheckGreaterThan", 
         payload.issues.push({
             origin,
             code: "too_small",
-            minimum: def.value,
+            minimum: typeof def.value === "object" ? def.value.getTime() : def.value,
             input: payload.value,
             inclusive: def.inclusive,
             inst,
@@ -1172,6 +1168,7 @@ const $ZodCheckNumberFormat = /*@__PURE__*/ $constructor("$ZodCheckNumberFormat"
                         note: "Integers must be within the safe integer range.",
                         inst,
                         origin,
+                        inclusive: true,
                         continue: !def.abort,
                     });
                 }
@@ -1184,6 +1181,7 @@ const $ZodCheckNumberFormat = /*@__PURE__*/ $constructor("$ZodCheckNumberFormat"
                         note: "Integers must be within the safe integer range.",
                         inst,
                         origin,
+                        inclusive: true,
                         continue: !def.abort,
                     });
                 }
@@ -1207,7 +1205,9 @@ const $ZodCheckNumberFormat = /*@__PURE__*/ $constructor("$ZodCheckNumberFormat"
                 input,
                 code: "too_big",
                 maximum,
+                inclusive: true,
                 inst,
+                continue: !def.abort,
             });
         }
     };
@@ -1470,8 +1470,8 @@ class Doc {
 
 const version = {
     major: 4,
-    minor: 2,
-    patch: 1,
+    minor: 3,
+    patch: 4,
 };
 
 const $ZodType = /*@__PURE__*/ $constructor("$ZodType", (inst, def) => {
@@ -1581,7 +1581,8 @@ const $ZodType = /*@__PURE__*/ $constructor("$ZodType", (inst, def) => {
             return runChecks(result, checks, ctx);
         };
     }
-    inst["~standard"] = {
+    // Lazy initialize ~standard to avoid creating objects for every schema
+    defineLazy(inst, "~standard", () => ({
         validate: (value) => {
             try {
                 const r = safeParse$1(inst, value);
@@ -1593,7 +1594,7 @@ const $ZodType = /*@__PURE__*/ $constructor("$ZodType", (inst, def) => {
         },
         vendor: "zod",
         version: 1,
-    };
+    }));
 });
 const $ZodString = /*@__PURE__*/ $constructor("$ZodString", (inst, def) => {
     $ZodType.init(inst, def);
@@ -2039,8 +2040,12 @@ const $ZodArray = /*@__PURE__*/ $constructor("$ZodArray", (inst, def) => {
         return payload; //handleArrayResultsAsync(parseResults, final);
     };
 });
-function handlePropertyResult(result, final, key, input) {
+function handlePropertyResult(result, final, key, input, isOptionalOut) {
     if (result.issues.length) {
+        // For optional-out schemas, ignore errors on absent keys
+        if (isOptionalOut && !(key in input)) {
+            return;
+        }
         final.issues.push(...prefixIssues(key, result.issues));
     }
     if (result.value === undefined) {
@@ -2074,6 +2079,7 @@ function handleCatchall(proms, input, payload, ctx, def, inst) {
     const keySet = def.keySet;
     const _catchall = def.catchall._zod;
     const t = _catchall.def.type;
+    const isOptionalOut = _catchall.optout === "optional";
     for (const key in input) {
         if (keySet.has(key))
             continue;
@@ -2083,10 +2089,10 @@ function handleCatchall(proms, input, payload, ctx, def, inst) {
         }
         const r = _catchall.run({ value: input[key], issues: [] }, ctx);
         if (r instanceof Promise) {
-            proms.push(r.then((r) => handlePropertyResult(r, payload, key, input)));
+            proms.push(r.then((r) => handlePropertyResult(r, payload, key, input, isOptionalOut)));
         }
         else {
-            handlePropertyResult(r, payload, key, input);
+            handlePropertyResult(r, payload, key, input, isOptionalOut);
         }
     }
     if (unrecognized.length) {
@@ -2154,12 +2160,13 @@ const $ZodObject = /*@__PURE__*/ $constructor("$ZodObject", (inst, def) => {
         const shape = value.shape;
         for (const key of value.keys) {
             const el = shape[key];
+            const isOptionalOut = el._zod.optout === "optional";
             const r = el._zod.run({ value: input[key], issues: [] }, ctx);
             if (r instanceof Promise) {
-                proms.push(r.then((r) => handlePropertyResult(r, payload, key, input)));
+                proms.push(r.then((r) => handlePropertyResult(r, payload, key, input, isOptionalOut)));
             }
             else {
-                handlePropertyResult(r, payload, key, input);
+                handlePropertyResult(r, payload, key, input, isOptionalOut);
             }
         }
         if (!catchall) {
@@ -2191,15 +2198,20 @@ const $ZodObjectJIT = /*@__PURE__*/ $constructor("$ZodObjectJIT", (inst, def) =>
         for (const key of normalized.keys) {
             const id = ids[key];
             const k = esc(key);
+            const schema = shape[key];
+            const isOptionalOut = schema?._zod?.optout === "optional";
             doc.write(`const ${id} = ${parseStr(key)};`);
-            doc.write(`
+            if (isOptionalOut) {
+                // For optional-out schemas, ignore errors on absent keys
+                doc.write(`
         if (${id}.issues.length) {
-          payload.issues = payload.issues.concat(${id}.issues.map(iss => ({
-            ...iss,
-            path: iss.path ? [${k}, ...iss.path] : [${k}]
-          })));
+          if (${k} in input) {
+            payload.issues = payload.issues.concat(${id}.issues.map(iss => ({
+              ...iss,
+              path: iss.path ? [${k}, ...iss.path] : [${k}]
+            })));
+          }
         }
-        
         
         if (${id}.value === undefined) {
           if (${k} in input) {
@@ -2210,6 +2222,26 @@ const $ZodObjectJIT = /*@__PURE__*/ $constructor("$ZodObjectJIT", (inst, def) =>
         }
         
       `);
+            }
+            else {
+                doc.write(`
+        if (${id}.issues.length) {
+          payload.issues = payload.issues.concat(${id}.issues.map(iss => ({
+            ...iss,
+            path: iss.path ? [${k}, ...iss.path] : [${k}]
+          })));
+        }
+        
+        if (${id}.value === undefined) {
+          if (${k} in input) {
+            newResult[${k}] = undefined;
+          }
+        } else {
+          newResult[${k}] = ${id}.value;
+        }
+        
+      `);
+            }
         }
         doc.write(`payload.value = newResult;`);
         doc.write(`return payload;`);
@@ -2445,11 +2477,38 @@ function mergeValues(a, b) {
     return { valid: false, mergeErrorPath: [] };
 }
 function handleIntersectionResults(result, left, right) {
-    if (left.issues.length) {
-        result.issues.push(...left.issues);
+    // Track which side(s) report each key as unrecognized
+    const unrecKeys = new Map();
+    let unrecIssue;
+    for (const iss of left.issues) {
+        if (iss.code === "unrecognized_keys") {
+            unrecIssue ?? (unrecIssue = iss);
+            for (const k of iss.keys) {
+                if (!unrecKeys.has(k))
+                    unrecKeys.set(k, {});
+                unrecKeys.get(k).l = true;
+            }
+        }
+        else {
+            result.issues.push(iss);
+        }
     }
-    if (right.issues.length) {
-        result.issues.push(...right.issues);
+    for (const iss of right.issues) {
+        if (iss.code === "unrecognized_keys") {
+            for (const k of iss.keys) {
+                if (!unrecKeys.has(k))
+                    unrecKeys.set(k, {});
+                unrecKeys.get(k).r = true;
+            }
+        }
+        else {
+            result.issues.push(iss);
+        }
+    }
+    // Report only keys unrecognized by BOTH sides
+    const bothKeys = [...unrecKeys].filter(([, f]) => f.l && f.r).map(([k]) => k);
+    if (bothKeys.length && unrecIssue) {
+        result.issues.push({ ...unrecIssue, keys: bothKeys });
     }
     if (aborted(result))
         return result;
@@ -2483,7 +2542,9 @@ const $ZodTuple = /*@__PURE__*/ $constructor("$ZodTuple", (inst, def) => {
             const tooSmall = input.length < optStart - 1;
             if (tooBig || tooSmall) {
                 payload.issues.push({
-                    ...(tooBig ? { code: "too_big", maximum: items.length } : { code: "too_small", minimum: items.length }),
+                    ...(tooBig
+                        ? { code: "too_big", maximum: items.length, inclusive: true }
+                        : { code: "too_small", minimum: items.length }),
                     input,
                     inst,
                     origin: "array",
@@ -2594,9 +2655,23 @@ const $ZodRecord = /*@__PURE__*/ $constructor("$ZodRecord", (inst, def) => {
             for (const key of Reflect.ownKeys(input)) {
                 if (key === "__proto__")
                     continue;
-                const keyResult = def.keyType._zod.run({ value: key, issues: [] }, ctx);
+                let keyResult = def.keyType._zod.run({ value: key, issues: [] }, ctx);
                 if (keyResult instanceof Promise) {
                     throw new Error("Async schemas not supported in object keys currently");
+                }
+                // Numeric string fallback: if key failed with "expected number", retry with Number(key)
+                const checkNumericKey = typeof key === "string" &&
+                    number$2.test(key) &&
+                    keyResult.issues.length &&
+                    keyResult.issues.some((iss) => iss.code === "invalid_type" && iss.expected === "number");
+                if (checkNumericKey) {
+                    const retryResult = def.keyType._zod.run({ value: Number(key), issues: [] }, ctx);
+                    if (retryResult instanceof Promise) {
+                        throw new Error("Async schemas not supported in object keys currently");
+                    }
+                    if (retryResult.issues.length === 0) {
+                        keyResult = retryResult;
+                    }
                 }
                 if (keyResult.issues.length) {
                     if (def.mode === "loose") {
@@ -2734,6 +2809,17 @@ const $ZodOptional = /*@__PURE__*/ $constructor("$ZodOptional", (inst, def) => {
         if (payload.value === undefined) {
             return payload;
         }
+        return def.innerType._zod.run(payload, ctx);
+    };
+});
+const $ZodExactOptional = /*@__PURE__*/ $constructor("$ZodExactOptional", (inst, def) => {
+    // Call parent init - inherits optin/optout = "optional"
+    $ZodOptional.init(inst, def);
+    // Override values/pattern to NOT add undefined
+    defineLazy(inst._zod, "values", () => def.innerType._zod.values);
+    defineLazy(inst._zod, "pattern", () => def.innerType._zod.pattern);
+    // Override parse to just delegate (no undefined handling)
+    inst._zod.parse = (payload, ctx) => {
         return def.innerType._zod.run(payload, ctx);
     };
 });
@@ -2968,7 +3054,7 @@ function handleRefineResult(result, payload, input, inst) {
     }
 }
 
-var _a$4;
+var _a$3;
 class $ZodRegistry {
     constructor() {
         this._map = new WeakMap();
@@ -2978,9 +3064,6 @@ class $ZodRegistry {
         const meta = _meta[0];
         this._map.set(schema, meta);
         if (meta && typeof meta === "object" && "id" in meta) {
-            if (this._idmap.has(meta.id)) {
-                throw new Error(`ID ${meta.id} already exists in the registry`);
-            }
             this._idmap.set(meta.id, schema);
         }
         return this;
@@ -3018,15 +3101,17 @@ class $ZodRegistry {
 function registry() {
     return new $ZodRegistry();
 }
-(_a$4 = globalThis).__zod_globalRegistry ?? (_a$4.__zod_globalRegistry = registry());
+(_a$3 = globalThis).__zod_globalRegistry ?? (_a$3.__zod_globalRegistry = registry());
 const globalRegistry = globalThis.__zod_globalRegistry;
 
+// @__NO_SIDE_EFFECTS__
 function _string(Class, params) {
     return new Class({
         type: "string",
         ...normalizeParams(params),
     });
 }
+// @__NO_SIDE_EFFECTS__
 function _email(Class, params) {
     return new Class({
         type: "string",
@@ -3036,6 +3121,7 @@ function _email(Class, params) {
         ...normalizeParams(params),
     });
 }
+// @__NO_SIDE_EFFECTS__
 function _guid(Class, params) {
     return new Class({
         type: "string",
@@ -3045,6 +3131,7 @@ function _guid(Class, params) {
         ...normalizeParams(params),
     });
 }
+// @__NO_SIDE_EFFECTS__
 function _uuid(Class, params) {
     return new Class({
         type: "string",
@@ -3054,6 +3141,7 @@ function _uuid(Class, params) {
         ...normalizeParams(params),
     });
 }
+// @__NO_SIDE_EFFECTS__
 function _uuidv4(Class, params) {
     return new Class({
         type: "string",
@@ -3064,6 +3152,7 @@ function _uuidv4(Class, params) {
         ...normalizeParams(params),
     });
 }
+// @__NO_SIDE_EFFECTS__
 function _uuidv6(Class, params) {
     return new Class({
         type: "string",
@@ -3074,6 +3163,7 @@ function _uuidv6(Class, params) {
         ...normalizeParams(params),
     });
 }
+// @__NO_SIDE_EFFECTS__
 function _uuidv7(Class, params) {
     return new Class({
         type: "string",
@@ -3084,6 +3174,7 @@ function _uuidv7(Class, params) {
         ...normalizeParams(params),
     });
 }
+// @__NO_SIDE_EFFECTS__
 function _url(Class, params) {
     return new Class({
         type: "string",
@@ -3093,6 +3184,7 @@ function _url(Class, params) {
         ...normalizeParams(params),
     });
 }
+// @__NO_SIDE_EFFECTS__
 function _emoji(Class, params) {
     return new Class({
         type: "string",
@@ -3102,6 +3194,7 @@ function _emoji(Class, params) {
         ...normalizeParams(params),
     });
 }
+// @__NO_SIDE_EFFECTS__
 function _nanoid(Class, params) {
     return new Class({
         type: "string",
@@ -3111,6 +3204,7 @@ function _nanoid(Class, params) {
         ...normalizeParams(params),
     });
 }
+// @__NO_SIDE_EFFECTS__
 function _cuid(Class, params) {
     return new Class({
         type: "string",
@@ -3120,6 +3214,7 @@ function _cuid(Class, params) {
         ...normalizeParams(params),
     });
 }
+// @__NO_SIDE_EFFECTS__
 function _cuid2(Class, params) {
     return new Class({
         type: "string",
@@ -3129,6 +3224,7 @@ function _cuid2(Class, params) {
         ...normalizeParams(params),
     });
 }
+// @__NO_SIDE_EFFECTS__
 function _ulid(Class, params) {
     return new Class({
         type: "string",
@@ -3138,6 +3234,7 @@ function _ulid(Class, params) {
         ...normalizeParams(params),
     });
 }
+// @__NO_SIDE_EFFECTS__
 function _xid(Class, params) {
     return new Class({
         type: "string",
@@ -3147,6 +3244,7 @@ function _xid(Class, params) {
         ...normalizeParams(params),
     });
 }
+// @__NO_SIDE_EFFECTS__
 function _ksuid(Class, params) {
     return new Class({
         type: "string",
@@ -3156,6 +3254,7 @@ function _ksuid(Class, params) {
         ...normalizeParams(params),
     });
 }
+// @__NO_SIDE_EFFECTS__
 function _ipv4(Class, params) {
     return new Class({
         type: "string",
@@ -3165,6 +3264,7 @@ function _ipv4(Class, params) {
         ...normalizeParams(params),
     });
 }
+// @__NO_SIDE_EFFECTS__
 function _ipv6(Class, params) {
     return new Class({
         type: "string",
@@ -3174,6 +3274,7 @@ function _ipv6(Class, params) {
         ...normalizeParams(params),
     });
 }
+// @__NO_SIDE_EFFECTS__
 function _cidrv4(Class, params) {
     return new Class({
         type: "string",
@@ -3183,6 +3284,7 @@ function _cidrv4(Class, params) {
         ...normalizeParams(params),
     });
 }
+// @__NO_SIDE_EFFECTS__
 function _cidrv6(Class, params) {
     return new Class({
         type: "string",
@@ -3192,6 +3294,7 @@ function _cidrv6(Class, params) {
         ...normalizeParams(params),
     });
 }
+// @__NO_SIDE_EFFECTS__
 function _base64(Class, params) {
     return new Class({
         type: "string",
@@ -3201,6 +3304,7 @@ function _base64(Class, params) {
         ...normalizeParams(params),
     });
 }
+// @__NO_SIDE_EFFECTS__
 function _base64url(Class, params) {
     return new Class({
         type: "string",
@@ -3210,6 +3314,7 @@ function _base64url(Class, params) {
         ...normalizeParams(params),
     });
 }
+// @__NO_SIDE_EFFECTS__
 function _e164(Class, params) {
     return new Class({
         type: "string",
@@ -3219,6 +3324,7 @@ function _e164(Class, params) {
         ...normalizeParams(params),
     });
 }
+// @__NO_SIDE_EFFECTS__
 function _jwt(Class, params) {
     return new Class({
         type: "string",
@@ -3228,6 +3334,7 @@ function _jwt(Class, params) {
         ...normalizeParams(params),
     });
 }
+// @__NO_SIDE_EFFECTS__
 function _isoDateTime(Class, params) {
     return new Class({
         type: "string",
@@ -3239,6 +3346,7 @@ function _isoDateTime(Class, params) {
         ...normalizeParams(params),
     });
 }
+// @__NO_SIDE_EFFECTS__
 function _isoDate(Class, params) {
     return new Class({
         type: "string",
@@ -3247,6 +3355,7 @@ function _isoDate(Class, params) {
         ...normalizeParams(params),
     });
 }
+// @__NO_SIDE_EFFECTS__
 function _isoTime(Class, params) {
     return new Class({
         type: "string",
@@ -3256,6 +3365,7 @@ function _isoTime(Class, params) {
         ...normalizeParams(params),
     });
 }
+// @__NO_SIDE_EFFECTS__
 function _isoDuration(Class, params) {
     return new Class({
         type: "string",
@@ -3264,6 +3374,7 @@ function _isoDuration(Class, params) {
         ...normalizeParams(params),
     });
 }
+// @__NO_SIDE_EFFECTS__
 function _number(Class, params) {
     return new Class({
         type: "number",
@@ -3271,6 +3382,7 @@ function _number(Class, params) {
         ...normalizeParams(params),
     });
 }
+// @__NO_SIDE_EFFECTS__
 function _coercedNumber(Class, params) {
     return new Class({
         type: "number",
@@ -3279,6 +3391,7 @@ function _coercedNumber(Class, params) {
         ...normalizeParams(params),
     });
 }
+// @__NO_SIDE_EFFECTS__
 function _int(Class, params) {
     return new Class({
         type: "number",
@@ -3288,34 +3401,40 @@ function _int(Class, params) {
         ...normalizeParams(params),
     });
 }
+// @__NO_SIDE_EFFECTS__
 function _boolean(Class, params) {
     return new Class({
         type: "boolean",
         ...normalizeParams(params),
     });
 }
+// @__NO_SIDE_EFFECTS__
 function _null$1(Class, params) {
     return new Class({
         type: "null",
         ...normalizeParams(params),
     });
 }
+// @__NO_SIDE_EFFECTS__
 function _any(Class) {
     return new Class({
         type: "any",
     });
 }
+// @__NO_SIDE_EFFECTS__
 function _unknown(Class) {
     return new Class({
         type: "unknown",
     });
 }
+// @__NO_SIDE_EFFECTS__
 function _never(Class, params) {
     return new Class({
         type: "never",
         ...normalizeParams(params),
     });
 }
+// @__NO_SIDE_EFFECTS__
 function _lt(value, params) {
     return new $ZodCheckLessThan({
         check: "less_than",
@@ -3324,6 +3443,7 @@ function _lt(value, params) {
         inclusive: false,
     });
 }
+// @__NO_SIDE_EFFECTS__
 function _lte(value, params) {
     return new $ZodCheckLessThan({
         check: "less_than",
@@ -3332,6 +3452,7 @@ function _lte(value, params) {
         inclusive: true,
     });
 }
+// @__NO_SIDE_EFFECTS__
 function _gt(value, params) {
     return new $ZodCheckGreaterThan({
         check: "greater_than",
@@ -3340,6 +3461,7 @@ function _gt(value, params) {
         inclusive: false,
     });
 }
+// @__NO_SIDE_EFFECTS__
 function _gte(value, params) {
     return new $ZodCheckGreaterThan({
         check: "greater_than",
@@ -3348,6 +3470,7 @@ function _gte(value, params) {
         inclusive: true,
     });
 }
+// @__NO_SIDE_EFFECTS__
 function _multipleOf(value, params) {
     return new $ZodCheckMultipleOf({
         check: "multiple_of",
@@ -3355,6 +3478,7 @@ function _multipleOf(value, params) {
         value,
     });
 }
+// @__NO_SIDE_EFFECTS__
 function _maxLength(maximum, params) {
     const ch = new $ZodCheckMaxLength({
         check: "max_length",
@@ -3363,6 +3487,7 @@ function _maxLength(maximum, params) {
     });
     return ch;
 }
+// @__NO_SIDE_EFFECTS__
 function _minLength(minimum, params) {
     return new $ZodCheckMinLength({
         check: "min_length",
@@ -3370,6 +3495,7 @@ function _minLength(minimum, params) {
         minimum,
     });
 }
+// @__NO_SIDE_EFFECTS__
 function _length(length, params) {
     return new $ZodCheckLengthEquals({
         check: "length_equals",
@@ -3377,6 +3503,7 @@ function _length(length, params) {
         length,
     });
 }
+// @__NO_SIDE_EFFECTS__
 function _regex(pattern, params) {
     return new $ZodCheckRegex({
         check: "string_format",
@@ -3385,6 +3512,7 @@ function _regex(pattern, params) {
         pattern,
     });
 }
+// @__NO_SIDE_EFFECTS__
 function _lowercase(params) {
     return new $ZodCheckLowerCase({
         check: "string_format",
@@ -3392,6 +3520,7 @@ function _lowercase(params) {
         ...normalizeParams(params),
     });
 }
+// @__NO_SIDE_EFFECTS__
 function _uppercase(params) {
     return new $ZodCheckUpperCase({
         check: "string_format",
@@ -3399,6 +3528,7 @@ function _uppercase(params) {
         ...normalizeParams(params),
     });
 }
+// @__NO_SIDE_EFFECTS__
 function _includes(includes, params) {
     return new $ZodCheckIncludes({
         check: "string_format",
@@ -3407,6 +3537,7 @@ function _includes(includes, params) {
         includes,
     });
 }
+// @__NO_SIDE_EFFECTS__
 function _startsWith(prefix, params) {
     return new $ZodCheckStartsWith({
         check: "string_format",
@@ -3415,6 +3546,7 @@ function _startsWith(prefix, params) {
         prefix,
     });
 }
+// @__NO_SIDE_EFFECTS__
 function _endsWith(suffix, params) {
     return new $ZodCheckEndsWith({
         check: "string_format",
@@ -3423,6 +3555,7 @@ function _endsWith(suffix, params) {
         suffix,
     });
 }
+// @__NO_SIDE_EFFECTS__
 function _overwrite(tx) {
     return new $ZodCheckOverwrite({
         check: "overwrite",
@@ -3430,25 +3563,31 @@ function _overwrite(tx) {
     });
 }
 // normalize
+// @__NO_SIDE_EFFECTS__
 function _normalize(form) {
     return _overwrite((input) => input.normalize(form));
 }
 // trim
+// @__NO_SIDE_EFFECTS__
 function _trim() {
     return _overwrite((input) => input.trim());
 }
 // toLowerCase
+// @__NO_SIDE_EFFECTS__
 function _toLowerCase() {
     return _overwrite((input) => input.toLowerCase());
 }
 // toUpperCase
+// @__NO_SIDE_EFFECTS__
 function _toUpperCase() {
     return _overwrite((input) => input.toUpperCase());
 }
 // slugify
+// @__NO_SIDE_EFFECTS__
 function _slugify() {
     return _overwrite((input) => slugify(input));
 }
+// @__NO_SIDE_EFFECTS__
 function _array(Class, element, params) {
     return new Class({
         type: "array",
@@ -3459,6 +3598,7 @@ function _array(Class, element, params) {
         ...normalizeParams(params),
     });
 }
+// @__NO_SIDE_EFFECTS__
 function _custom(Class, fn, _params) {
     const norm = normalizeParams(_params);
     norm.abort ?? (norm.abort = true); // default to abort:false
@@ -3471,6 +3611,7 @@ function _custom(Class, fn, _params) {
     return schema;
 }
 // same as _custom but defaults to abort:false
+// @__NO_SIDE_EFFECTS__
 function _refine(Class, fn, _params) {
     const schema = new Class({
         type: "custom",
@@ -3480,6 +3621,7 @@ function _refine(Class, fn, _params) {
     });
     return schema;
 }
+// @__NO_SIDE_EFFECTS__
 function _superRefine(fn) {
     const ch = _check((payload) => {
         payload.addIssue = (issue$1) => {
@@ -3502,6 +3644,7 @@ function _superRefine(fn) {
     });
     return ch;
 }
+// @__NO_SIDE_EFFECTS__
 function _check(fn, params) {
     const ch = new $ZodCheck({
         check: "custom",
@@ -3568,14 +3711,7 @@ function process$1(schema, ctx, _params = { path: [], schemaPath: [] }) {
             schemaPath: [..._params.schemaPath, schema],
             path: _params.path,
         };
-        const parent = schema._zod.parent;
-        if (parent) {
-            // schema was cloned from another schema
-            result.ref = parent;
-            process$1(parent, ctx, params);
-            ctx.seen.get(parent).isParent = true;
-        }
-        else if (schema._zod.processJSONSchema) {
+        if (schema._zod.processJSONSchema) {
             schema._zod.processJSONSchema(ctx, result.schema, params);
         }
         else {
@@ -3585,6 +3721,14 @@ function process$1(schema, ctx, _params = { path: [], schemaPath: [] }) {
                 throw new Error(`[toJSONSchema]: Non-representable type encountered: ${def.type}`);
             }
             processor(schema, ctx, _json, params);
+        }
+        const parent = schema._zod.parent;
+        if (parent) {
+            // Also set ref if processor didn't (for inheritance)
+            if (!result.ref)
+                result.ref = parent;
+            process$1(parent, ctx, params);
+            ctx.seen.get(parent).isParent = true;
         }
     }
     // metadata
@@ -3611,6 +3755,18 @@ function extractDefs(ctx, schema
     const root = ctx.seen.get(schema);
     if (!root)
         throw new Error("Unprocessed schema. This is a bug in Zod.");
+    // Track ids to detect duplicates across different schemas
+    const idToSchema = new Map();
+    for (const entry of ctx.seen.entries()) {
+        const id = ctx.metadataRegistry.get(entry[0])?.id;
+        if (id) {
+            const existing = idToSchema.get(id);
+            if (existing && existing !== entry[0]) {
+                throw new Error(`Duplicate schema id "${id}" detected during JSON Schema conversion. Two different schemas cannot share the same id when converted together.`);
+            }
+            idToSchema.set(id, entry[0]);
+        }
+    }
     // returns a ref to the schema
     // defId will be empty if the ref points to an external schema (or #)
     const makeURI = (entry) => {
@@ -3712,43 +3868,84 @@ function extractDefs(ctx, schema
     }
 }
 function finalize(ctx, schema) {
-    //
-    // iterate over seen map;
     const root = ctx.seen.get(schema);
     if (!root)
         throw new Error("Unprocessed schema. This is a bug in Zod.");
-    // flatten _refs
+    // flatten refs - inherit properties from parent schemas
     const flattenRef = (zodSchema) => {
         const seen = ctx.seen.get(zodSchema);
+        // already processed
+        if (seen.ref === null)
+            return;
         const schema = seen.def ?? seen.schema;
         const _cached = { ...schema };
-        // already seen
-        if (seen.ref === null) {
-            return;
-        }
-        // flatten ref if defined
         const ref = seen.ref;
-        seen.ref = null; // prevent recursion
+        seen.ref = null; // prevent infinite recursion
         if (ref) {
             flattenRef(ref);
+            const refSeen = ctx.seen.get(ref);
+            const refSchema = refSeen.schema;
             // merge referenced schema into current
-            const refSchema = ctx.seen.get(ref).schema;
             if (refSchema.$ref && (ctx.target === "draft-07" || ctx.target === "draft-04" || ctx.target === "openapi-3.0")) {
+                // older drafts can't combine $ref with other properties
                 schema.allOf = schema.allOf ?? [];
                 schema.allOf.push(refSchema);
             }
             else {
                 Object.assign(schema, refSchema);
-                Object.assign(schema, _cached); // prevent overwriting any fields in the original schema
+            }
+            // restore child's own properties (child wins)
+            Object.assign(schema, _cached);
+            const isParentRef = zodSchema._zod.parent === ref;
+            // For parent chain, child is a refinement - remove parent-only properties
+            if (isParentRef) {
+                for (const key in schema) {
+                    if (key === "$ref" || key === "allOf")
+                        continue;
+                    if (!(key in _cached)) {
+                        delete schema[key];
+                    }
+                }
+            }
+            // When ref was extracted to $defs, remove properties that match the definition
+            if (refSchema.$ref) {
+                for (const key in schema) {
+                    if (key === "$ref" || key === "allOf")
+                        continue;
+                    if (key in refSeen.def && JSON.stringify(schema[key]) === JSON.stringify(refSeen.def[key])) {
+                        delete schema[key];
+                    }
+                }
+            }
+        }
+        // If parent was extracted (has $ref), propagate $ref to this schema
+        // This handles cases like: readonly().meta({id}).describe()
+        // where processor sets ref to innerType but parent should be referenced
+        const parent = zodSchema._zod.parent;
+        if (parent && parent !== ref) {
+            // Ensure parent is processed first so its def has inherited properties
+            flattenRef(parent);
+            const parentSeen = ctx.seen.get(parent);
+            if (parentSeen?.schema.$ref) {
+                schema.$ref = parentSeen.schema.$ref;
+                // De-duplicate with parent's definition
+                if (parentSeen.def) {
+                    for (const key in schema) {
+                        if (key === "$ref" || key === "allOf")
+                            continue;
+                        if (key in parentSeen.def && JSON.stringify(schema[key]) === JSON.stringify(parentSeen.def[key])) {
+                            delete schema[key];
+                        }
+                    }
+                }
             }
         }
         // execute overrides
-        if (!seen.isParent)
-            ctx.override({
-                zodSchema: zodSchema,
-                jsonSchema: schema,
-                path: seen.path ?? [],
-            });
+        ctx.override({
+            zodSchema: zodSchema,
+            jsonSchema: schema,
+            path: seen.path ?? [],
+        });
     };
     for (const entry of [...ctx.seen.entries()].reverse()) {
         flattenRef(entry[0]);
@@ -3801,8 +3998,8 @@ function finalize(ctx, schema) {
             value: {
                 ...schema["~standard"],
                 jsonSchema: {
-                    input: createStandardJSONSchemaMethod(schema, "input"),
-                    output: createStandardJSONSchemaMethod(schema, "output"),
+                    input: createStandardJSONSchemaMethod(schema, "input", ctx.processors),
+                    output: createStandardJSONSchemaMethod(schema, "output", ctx.processors),
                 },
             },
             enumerable: false,
@@ -3881,9 +4078,9 @@ const createToJSONSchemaMethod = (schema, processors = {}) => (params) => {
     extractDefs(ctx, schema);
     return finalize(ctx, schema);
 };
-const createStandardJSONSchemaMethod = (schema, io) => (params) => {
+const createStandardJSONSchemaMethod = (schema, io, processors = {}) => (params) => {
     const { libraryOptions, target } = params ?? {};
-    const ctx = initializeContext({ ...(libraryOptions ?? {}), target, io, processors: {} });
+    const ctx = initializeContext({ ...(libraryOptions ?? {}), target, io, processors });
     process$1(schema, ctx);
     extractDefs(ctx, schema);
     return finalize(ctx, schema);
@@ -3911,6 +4108,11 @@ const stringProcessor = (schema, ctx, _json, _params) => {
         json.format = formatMap[format] ?? format;
         if (json.format === "")
             delete json.format; // empty format is not valid
+        // JSON Schema format: "time" requires a full time with offset or Z
+        // z.iso.time() does not include timezone information, so format: "time" should never be used
+        if (format === "time") {
+            delete json.format;
+        }
     }
     if (contentEncoding)
         json.contentEncoding = contentEncoding;
@@ -4108,10 +4310,8 @@ const fileProcessor = (schema, _ctx, json, _params) => {
             Object.assign(_json, file);
         }
         else {
-            _json.anyOf = mime.map((m) => {
-                const mFile = { ...file, contentMediaType: m };
-                return mFile;
-            });
+            Object.assign(_json, file); // shared props at root
+            _json.anyOf = mime.map((m) => ({ contentMediaType: m })); // only contentMediaType differs
         }
     }
     else {
@@ -4285,16 +4485,44 @@ const recordProcessor = (schema, ctx, _json, params) => {
     const json = _json;
     const def = schema._zod.def;
     json.type = "object";
-    if (ctx.target === "draft-07" || ctx.target === "draft-2020-12") {
-        json.propertyNames = process$1(def.keyType, ctx, {
+    // For looseRecord with regex patterns, use patternProperties
+    // This correctly represents "only validate keys matching the pattern" semantics
+    // and composes well with allOf (intersections)
+    const keyType = def.keyType;
+    const keyBag = keyType._zod.bag;
+    const patterns = keyBag?.patterns;
+    if (def.mode === "loose" && patterns && patterns.size > 0) {
+        // Use patternProperties for looseRecord with regex patterns
+        const valueSchema = process$1(def.valueType, ctx, {
             ...params,
-            path: [...params.path, "propertyNames"],
+            path: [...params.path, "patternProperties", "*"],
+        });
+        json.patternProperties = {};
+        for (const pattern of patterns) {
+            json.patternProperties[pattern.source] = valueSchema;
+        }
+    }
+    else {
+        // Default behavior: use propertyNames + additionalProperties
+        if (ctx.target === "draft-07" || ctx.target === "draft-2020-12") {
+            json.propertyNames = process$1(def.keyType, ctx, {
+                ...params,
+                path: [...params.path, "propertyNames"],
+            });
+        }
+        json.additionalProperties = process$1(def.valueType, ctx, {
+            ...params,
+            path: [...params.path, "additionalProperties"],
         });
     }
-    json.additionalProperties = process$1(def.valueType, ctx, {
-        ...params,
-        path: [...params.path, "additionalProperties"],
-    });
+    // Add required for keys with discrete values (enum, literal, etc.)
+    const keyValues = keyType._zod.values;
+    if (keyValues) {
+        const validKeyValues = [...keyValues].filter((v) => typeof v === "string" || typeof v === "number");
+        if (validKeyValues.length > 0) {
+            json.required = validKeyValues;
+        }
+    }
 };
 const nullableProcessor = (schema, ctx, json, params) => {
     const def = schema._zod.def;
@@ -4531,7 +4759,7 @@ const ZodRealError = $constructor("ZodError", initializer, {
 // /** @deprecated Use `z.core.$ZodErrorMapCtx` instead. */
 // export type ErrorMapCtx = core.$ZodErrorMapCtx;
 
-const parse = /* @__PURE__ */ _parse$2(ZodRealError);
+const parse = /* @__PURE__ */ _parse$1(ZodRealError);
 const parseAsync = /* @__PURE__ */ _parseAsync(ZodRealError);
 const safeParse = /* @__PURE__ */ _safeParse(ZodRealError);
 const safeParseAsync = /* @__PURE__ */ _safeParseAsync(ZodRealError);
@@ -4564,8 +4792,11 @@ const ZodType = /*@__PURE__*/ $constructor("ZodType", (inst, def) => {
                 ...(def.checks ?? []),
                 ...checks.map((ch) => typeof ch === "function" ? { _zod: { check: ch, def: { check: "custom" }, onattach: [] } } : ch),
             ],
-        }));
+        }), {
+            parent: true,
+        });
     };
+    inst.with = inst.check;
     inst.clone = (def, params) => clone(inst, def, params);
     inst.brand = () => inst;
     inst.register = ((reg, meta) => {
@@ -4593,6 +4824,7 @@ const ZodType = /*@__PURE__*/ $constructor("ZodType", (inst, def) => {
     inst.overwrite = (fn) => inst.check(_overwrite(fn));
     // wrappers
     inst.optional = () => optional(inst);
+    inst.exactOptional = () => exactOptional(inst);
     inst.nullable = () => nullable(inst);
     inst.nullish = () => optional(nullable(inst));
     inst.nonoptional = (params) => nonoptional(inst, params);
@@ -4629,6 +4861,7 @@ const ZodType = /*@__PURE__*/ $constructor("ZodType", (inst, def) => {
     // helpers
     inst.isOptional = () => inst.safeParse(undefined).success;
     inst.isNullable = () => inst.safeParse(null).success;
+    inst.apply = (fn) => fn(inst);
     return inst;
 });
 /** @internal */
@@ -5120,6 +5353,18 @@ function optional(innerType) {
         innerType: innerType,
     });
 }
+const ZodExactOptional = /*@__PURE__*/ $constructor("ZodExactOptional", (inst, def) => {
+    $ZodExactOptional.init(inst, def);
+    ZodType.init(inst, def);
+    inst._zod.processJSONSchema = (ctx, json, params) => optionalProcessor(inst, ctx, json, params);
+    inst.unwrap = () => inst._zod.def.innerType;
+});
+function exactOptional(innerType) {
+    return new ZodExactOptional({
+        type: "optional",
+        innerType: innerType,
+    });
+}
 const ZodNullable = /*@__PURE__*/ $constructor("ZodNullable", (inst, def) => {
     $ZodNullable.init(inst, def);
     ZodType.init(inst, def);
@@ -5244,9 +5489,7 @@ function refine(fn, _params = {}) {
 function superRefine(fn) {
     return _superRefine(fn);
 }
-function _instanceof(cls, params = {
-    error: `Input not instance of ${cls.name}`,
-}) {
+function _instanceof(cls, params = {}) {
     const inst = new ZodCustom({
         type: "custom",
         check: "custom",
@@ -5255,6 +5498,18 @@ function _instanceof(cls, params = {
         ...normalizeParams(params),
     });
     inst._zod.bag.Class = cls;
+    // Override check to emit invalid_type instead of custom
+    inst._zod.check = (payload) => {
+        if (!(payload.value instanceof cls)) {
+            payload.issues.push({
+                code: "invalid_type",
+                expected: cls.name,
+                input: payload.value,
+                inst,
+                path: [...(inst._zod.def.path ?? [])],
+            });
+        }
+    };
     return inst;
 }
 
@@ -5657,7 +5912,7 @@ class EventSourceParserStream extends TransformStream {
 }
 
 // src/combine-headers.ts
-function combineHeaders$1(...headers) {
+function combineHeaders(...headers) {
   return headers.reduce(
     (combinedHeaders, currentHeaders) => ({
       ...combinedHeaders,
@@ -5771,7 +6026,7 @@ var DelayedPromise = class {
 };
 
 // src/extract-response-headers.ts
-function extractResponseHeaders$1(response) {
+function extractResponseHeaders(response) {
   return Object.fromEntries([...response.headers]);
 }
 
@@ -5816,11 +6071,11 @@ function convertToFormData(input, options = {}) {
   }
   return formData;
 }
-var name$3 = "AI_DownloadError";
-var marker$3 = `vercel.ai.error.${name$3}`;
-var symbol$3 = Symbol.for(marker$3);
-var _a$3, _b$1;
-var DownloadError = class extends (_b$1 = AISDKError$1, _a$3 = symbol$3, _b$1) {
+var name$2 = "AI_DownloadError";
+var marker$2 = `vercel.ai.error.${name$2}`;
+var symbol$2 = Symbol.for(marker$2);
+var _a$2, _b$1;
+var DownloadError = class extends (_b$1 = AISDKError, _a$2 = symbol$2, _b$1) {
   constructor({
     url,
     statusCode,
@@ -5828,14 +6083,14 @@ var DownloadError = class extends (_b$1 = AISDKError$1, _a$3 = symbol$3, _b$1) {
     cause,
     message = cause == null ? `Failed to download ${url}: ${statusCode} ${statusText}` : `Failed to download ${url}: ${cause}`
   }) {
-    super({ name: name$3, message, cause });
-    this[_a$3] = true;
+    super({ name: name$2, message, cause });
+    this[_a$2] = true;
     this.url = url;
     this.statusCode = statusCode;
     this.statusText = statusText;
   }
   static isInstance(error) {
-    return AISDKError$1.hasMarker(error, marker$3);
+    return AISDKError.hasMarker(error, marker$2);
   }
 };
 
@@ -5858,7 +6113,7 @@ async function downloadBlob(url) {
     throw new DownloadError({ url, cause: error });
   }
 }
-var createIdGenerator$1 = ({
+var createIdGenerator = ({
   prefix,
   size = 16,
   alphabet = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz",
@@ -5876,17 +6131,17 @@ var createIdGenerator$1 = ({
     return generator;
   }
   if (alphabet.includes(separator)) {
-    throw new InvalidArgumentError$2({
+    throw new InvalidArgumentError$1({
       argument: "separator",
       message: `The separator "${separator}" must not be part of the alphabet "${alphabet}".`
     });
   }
   return () => `${prefix}${separator}${generator()}`;
 };
-var generateId$1 = createIdGenerator$1();
+var generateId = createIdGenerator();
 
 // src/get-error-message.ts
-function getErrorMessage$1(error) {
+function getErrorMessage(error) {
   if (error == null) {
     return "unknown error";
   }
@@ -5900,25 +6155,25 @@ function getErrorMessage$1(error) {
 }
 
 // src/is-abort-error.ts
-function isAbortError$1(error) {
+function isAbortError(error) {
   return (error instanceof Error || error instanceof DOMException) && (error.name === "AbortError" || error.name === "ResponseAborted" || // Next.js
   error.name === "TimeoutError");
 }
 
 // src/handle-fetch-error.ts
-var FETCH_FAILED_ERROR_MESSAGES$1 = ["fetch failed", "failed to fetch"];
-function handleFetchError$1({
+var FETCH_FAILED_ERROR_MESSAGES = ["fetch failed", "failed to fetch"];
+function handleFetchError({
   error,
   url,
   requestBodyValues
 }) {
-  if (isAbortError$1(error)) {
+  if (isAbortError(error)) {
     return error;
   }
-  if (error instanceof TypeError && FETCH_FAILED_ERROR_MESSAGES$1.includes(error.message.toLowerCase())) {
+  if (error instanceof TypeError && FETCH_FAILED_ERROR_MESSAGES.includes(error.message.toLowerCase())) {
     const cause = error.cause;
     if (cause != null) {
-      return new APICallError$1({
+      return new APICallError({
         message: `Cannot connect to API: ${cause.message}`,
         cause,
         url,
@@ -5932,7 +6187,7 @@ function handleFetchError$1({
 }
 
 // src/get-runtime-environment-user-agent.ts
-function getRuntimeEnvironmentUserAgent$1(globalThisAny = globalThis) {
+function getRuntimeEnvironmentUserAgent(globalThisAny = globalThis) {
   var _a2, _b2, _c;
   if (globalThisAny.window) {
     return `runtime/browser`;
@@ -5950,7 +6205,7 @@ function getRuntimeEnvironmentUserAgent$1(globalThisAny = globalThis) {
 }
 
 // src/normalize-headers.ts
-function normalizeHeaders$1(headers) {
+function normalizeHeaders(headers) {
   if (headers == null) {
     return {};
   }
@@ -5973,8 +6228,8 @@ function normalizeHeaders$1(headers) {
 }
 
 // src/with-user-agent-suffix.ts
-function withUserAgentSuffix$1(headers, ...userAgentSuffixParts) {
-  const normalizedHeaders = new Headers(normalizeHeaders$1(headers));
+function withUserAgentSuffix(headers, ...userAgentSuffixParts) {
+  const normalizedHeaders = new Headers(normalizeHeaders(headers));
   const currentUserAgentHeader = normalizedHeaders.get("user-agent") || "";
   normalizedHeaders.set(
     "user-agent",
@@ -5984,7 +6239,7 @@ function withUserAgentSuffix$1(headers, ...userAgentSuffixParts) {
 }
 
 // src/version.ts
-var VERSION$b = "4.0.1" ;
+var VERSION$a = "4.0.2" ;
 
 // src/get-from-api.ts
 var getOriginalFetch = () => globalThis.fetch;
@@ -5999,14 +6254,14 @@ var getFromApi = async ({
   try {
     const response = await fetch2(url, {
       method: "GET",
-      headers: withUserAgentSuffix$1(
+      headers: withUserAgentSuffix(
         headers,
-        `ai-sdk/provider-utils/${VERSION$b}`,
-        getRuntimeEnvironmentUserAgent$1()
+        `ai-sdk/provider-utils/${VERSION$a}`,
+        getRuntimeEnvironmentUserAgent()
       ),
       signal: abortSignal
     });
-    const responseHeaders = extractResponseHeaders$1(response);
+    const responseHeaders = extractResponseHeaders(response);
     if (!response.ok) {
       let errorInformation;
       try {
@@ -6016,10 +6271,10 @@ var getFromApi = async ({
           requestBodyValues: {}
         });
       } catch (error) {
-        if (isAbortError$1(error) || APICallError$1.isInstance(error)) {
+        if (isAbortError(error) || APICallError.isInstance(error)) {
           throw error;
         }
-        throw new APICallError$1({
+        throw new APICallError({
           message: "Failed to process error response",
           cause: error,
           statusCode: response.status,
@@ -6038,11 +6293,11 @@ var getFromApi = async ({
       });
     } catch (error) {
       if (error instanceof Error) {
-        if (isAbortError$1(error) || APICallError$1.isInstance(error)) {
+        if (isAbortError(error) || APICallError.isInstance(error)) {
           throw error;
         }
       }
-      throw new APICallError$1({
+      throw new APICallError({
         message: "Failed to process successful response",
         cause: error,
         statusCode: response.status,
@@ -6052,7 +6307,7 @@ var getFromApi = async ({
       });
     }
   } catch (error) {
-    throw handleFetchError$1({ error, url, requestBodyValues: {} });
+    throw handleFetchError({ error, url, requestBodyValues: {} });
   }
 };
 
@@ -6178,19 +6433,19 @@ function mediaTypeToExtension(mediaType) {
 }
 
 // src/secure-json-parse.ts
-var suspectProtoRx$1 = /"__proto__"\s*:/;
-var suspectConstructorRx$1 = /"constructor"\s*:/;
-function _parse$1(text) {
+var suspectProtoRx = /"__proto__"\s*:/;
+var suspectConstructorRx = /"constructor"\s*:/;
+function _parse(text) {
   const obj = JSON.parse(text);
   if (obj === null || typeof obj !== "object") {
     return obj;
   }
-  if (suspectProtoRx$1.test(text) === false && suspectConstructorRx$1.test(text) === false) {
+  if (suspectProtoRx.test(text) === false && suspectConstructorRx.test(text) === false) {
     return obj;
   }
-  return filter$1(obj);
+  return filter(obj);
 }
-function filter$1(obj) {
+function filter(obj) {
   let next = [obj];
   while (next.length) {
     const nodes = next;
@@ -6212,15 +6467,15 @@ function filter$1(obj) {
   }
   return obj;
 }
-function secureJsonParse$1(text) {
+function secureJsonParse(text) {
   const { stackTraceLimit } = Error;
   try {
     Error.stackTraceLimit = 0;
   } catch (e) {
-    return _parse$1(text);
+    return _parse(text);
   }
   try {
-    return _parse$1(text);
+    return _parse(text);
   } finally {
     Error.stackTraceLimit = stackTraceLimit;
   }
@@ -7458,7 +7713,7 @@ function standardSchema(standardSchema2) {
         const result = await standardSchema2["~standard"].validate(value);
         return "value" in result ? { success: true, value: result.value } : {
           success: false,
-          error: new TypeValidationError$1({
+          error: new TypeValidationError({
             value,
             cause: result.issues
           })
@@ -7515,17 +7770,17 @@ function zodSchema(zodSchema2, options) {
 }
 
 // src/validate-types.ts
-async function validateTypes$1({
+async function validateTypes({
   value,
   schema
 }) {
-  const result = await safeValidateTypes$1({ value, schema });
+  const result = await safeValidateTypes({ value, schema });
   if (!result.success) {
-    throw TypeValidationError$1.wrap({ value, cause: result.error });
+    throw TypeValidationError.wrap({ value, cause: result.error });
   }
   return result.value;
 }
-async function safeValidateTypes$1({
+async function safeValidateTypes({
   value,
   schema
 }) {
@@ -7540,57 +7795,57 @@ async function safeValidateTypes$1({
     }
     return {
       success: false,
-      error: TypeValidationError$1.wrap({ value, cause: result.error }),
+      error: TypeValidationError.wrap({ value, cause: result.error }),
       rawValue: value
     };
   } catch (error) {
     return {
       success: false,
-      error: TypeValidationError$1.wrap({ value, cause: error }),
+      error: TypeValidationError.wrap({ value, cause: error }),
       rawValue: value
     };
   }
 }
 
 // src/parse-json.ts
-async function parseJSON$1({
+async function parseJSON({
   text,
   schema
 }) {
   try {
-    const value = secureJsonParse$1(text);
+    const value = secureJsonParse(text);
     if (schema == null) {
       return value;
     }
-    return validateTypes$1({ value, schema });
+    return validateTypes({ value, schema });
   } catch (error) {
-    if (JSONParseError$1.isInstance(error) || TypeValidationError$1.isInstance(error)) {
+    if (JSONParseError.isInstance(error) || TypeValidationError.isInstance(error)) {
       throw error;
     }
-    throw new JSONParseError$1({ text, cause: error });
+    throw new JSONParseError({ text, cause: error });
   }
 }
-async function safeParseJSON$1({
+async function safeParseJSON({
   text,
   schema
 }) {
   try {
-    const value = secureJsonParse$1(text);
+    const value = secureJsonParse(text);
     if (schema == null) {
       return { success: true, value, rawValue: value };
     }
-    return await safeValidateTypes$1({ value, schema });
+    return await safeValidateTypes({ value, schema });
   } catch (error) {
     return {
       success: false,
-      error: JSONParseError$1.isInstance(error) ? error : new JSONParseError$1({ text, cause: error }),
+      error: JSONParseError.isInstance(error) ? error : new JSONParseError({ text, cause: error }),
       rawValue: void 0
     };
   }
 }
 function isParsableJson(input) {
   try {
-    secureJsonParse$1(input);
+    secureJsonParse(input);
     return true;
   } catch (e) {
     return false;
@@ -7606,12 +7861,12 @@ function parseJsonEventStream({
         if (data === "[DONE]") {
           return;
         }
-        controller.enqueue(await safeParseJSON$1({ text: data, schema }));
+        controller.enqueue(await safeParseJSON({ text: data, schema }));
       }
     })
   );
 }
-async function parseProviderOptions$1({
+async function parseProviderOptions({
   provider,
   providerOptions,
   schema
@@ -7619,12 +7874,12 @@ async function parseProviderOptions$1({
   if ((providerOptions == null ? void 0 : providerOptions[provider]) == null) {
     return void 0;
   }
-  const parsedProviderOptions = await safeValidateTypes$1({
+  const parsedProviderOptions = await safeValidateTypes({
     value: providerOptions[provider],
     schema
   });
   if (!parsedProviderOptions.success) {
-    throw new InvalidArgumentError$2({
+    throw new InvalidArgumentError$1({
       argument: "providerOptions",
       message: `invalid ${provider} provider options`,
       cause: parsedProviderOptions.error
@@ -7632,8 +7887,8 @@ async function parseProviderOptions$1({
   }
   return parsedProviderOptions.value;
 }
-var getOriginalFetch2$1 = () => globalThis.fetch;
-var postJsonToApi$1 = async ({
+var getOriginalFetch2 = () => globalThis.fetch;
+var postJsonToApi = async ({
   url,
   headers,
   body,
@@ -7641,7 +7896,7 @@ var postJsonToApi$1 = async ({
   successfulResponseHandler,
   abortSignal,
   fetch: fetch2
-}) => postToApi$1({
+}) => postToApi({
   url,
   headers: {
     "Content-Type": "application/json",
@@ -7664,7 +7919,7 @@ var postFormDataToApi = async ({
   successfulResponseHandler,
   abortSignal,
   fetch: fetch2
-}) => postToApi$1({
+}) => postToApi({
   url,
   headers,
   body: {
@@ -7676,27 +7931,27 @@ var postFormDataToApi = async ({
   abortSignal,
   fetch: fetch2
 });
-var postToApi$1 = async ({
+var postToApi = async ({
   url,
   headers = {},
   body,
   successfulResponseHandler,
   failedResponseHandler,
   abortSignal,
-  fetch: fetch2 = getOriginalFetch2$1()
+  fetch: fetch2 = getOriginalFetch2()
 }) => {
   try {
     const response = await fetch2(url, {
       method: "POST",
-      headers: withUserAgentSuffix$1(
+      headers: withUserAgentSuffix(
         headers,
-        `ai-sdk/provider-utils/${VERSION$b}`,
-        getRuntimeEnvironmentUserAgent$1()
+        `ai-sdk/provider-utils/${VERSION$a}`,
+        getRuntimeEnvironmentUserAgent()
       ),
       body: body.content,
       signal: abortSignal
     });
-    const responseHeaders = extractResponseHeaders$1(response);
+    const responseHeaders = extractResponseHeaders(response);
     if (!response.ok) {
       let errorInformation;
       try {
@@ -7706,10 +7961,10 @@ var postToApi$1 = async ({
           requestBodyValues: body.values
         });
       } catch (error) {
-        if (isAbortError$1(error) || APICallError$1.isInstance(error)) {
+        if (isAbortError(error) || APICallError.isInstance(error)) {
           throw error;
         }
-        throw new APICallError$1({
+        throw new APICallError({
           message: "Failed to process error response",
           cause: error,
           statusCode: response.status,
@@ -7728,11 +7983,11 @@ var postToApi$1 = async ({
       });
     } catch (error) {
       if (error instanceof Error) {
-        if (isAbortError$1(error) || APICallError$1.isInstance(error)) {
+        if (isAbortError(error) || APICallError.isInstance(error)) {
           throw error;
         }
       }
-      throw new APICallError$1({
+      throw new APICallError({
         message: "Failed to process successful response",
         cause: error,
         statusCode: response.status,
@@ -7742,7 +7997,7 @@ var postToApi$1 = async ({
       });
     }
   } catch (error) {
-    throw handleFetchError$1({ error, url, requestBodyValues: body.values });
+    throw handleFetchError({ error, url, requestBodyValues: body.values });
   }
 };
 
@@ -7816,17 +8071,17 @@ async function resolve(value) {
   }
   return Promise.resolve(value);
 }
-var createJsonErrorResponseHandler$1 = ({
+var createJsonErrorResponseHandler = ({
   errorSchema,
   errorToMessage,
   isRetryable
 }) => async ({ response, url, requestBodyValues }) => {
   const responseBody = await response.text();
-  const responseHeaders = extractResponseHeaders$1(response);
+  const responseHeaders = extractResponseHeaders(response);
   if (responseBody.trim() === "") {
     return {
       responseHeaders,
-      value: new APICallError$1({
+      value: new APICallError({
         message: response.statusText,
         url,
         requestBodyValues,
@@ -7838,13 +8093,13 @@ var createJsonErrorResponseHandler$1 = ({
     };
   }
   try {
-    const parsedError = await parseJSON$1({
+    const parsedError = await parseJSON({
       text: responseBody,
       schema: errorSchema
     });
     return {
       responseHeaders,
-      value: new APICallError$1({
+      value: new APICallError({
         message: errorToMessage(parsedError),
         url,
         requestBodyValues,
@@ -7858,7 +8113,7 @@ var createJsonErrorResponseHandler$1 = ({
   } catch (parseError) {
     return {
       responseHeaders,
-      value: new APICallError$1({
+      value: new APICallError({
         message: response.statusText,
         url,
         requestBodyValues,
@@ -7871,9 +8126,9 @@ var createJsonErrorResponseHandler$1 = ({
   }
 };
 var createEventSourceResponseHandler = (chunkSchema) => async ({ response }) => {
-  const responseHeaders = extractResponseHeaders$1(response);
+  const responseHeaders = extractResponseHeaders(response);
   if (response.body == null) {
-    throw new EmptyResponseBodyError$1({});
+    throw new EmptyResponseBodyError({});
   }
   return {
     responseHeaders,
@@ -7883,15 +8138,15 @@ var createEventSourceResponseHandler = (chunkSchema) => async ({ response }) => 
     })
   };
 };
-var createJsonResponseHandler$1 = (responseSchema) => async ({ response, url, requestBodyValues }) => {
+var createJsonResponseHandler = (responseSchema) => async ({ response, url, requestBodyValues }) => {
   const responseBody = await response.text();
-  const parsedResult = await safeParseJSON$1({
+  const parsedResult = await safeParseJSON({
     text: responseBody,
     schema: responseSchema
   });
-  const responseHeaders = extractResponseHeaders$1(response);
+  const responseHeaders = extractResponseHeaders(response);
   if (!parsedResult.success) {
-    throw new APICallError$1({
+    throw new APICallError({
       message: "Invalid JSON response",
       cause: parsedResult.error,
       statusCode: response.status,
@@ -7908,9 +8163,9 @@ var createJsonResponseHandler$1 = (responseSchema) => async ({ response, url, re
   };
 };
 var createBinaryResponseHandler = () => async ({ response, url, requestBodyValues }) => {
-  const responseHeaders = extractResponseHeaders$1(response);
+  const responseHeaders = extractResponseHeaders(response);
   if (!response.body) {
-    throw new APICallError$1({
+    throw new APICallError({
       message: "Response body is empty",
       url,
       requestBodyValues,
@@ -7926,7 +8181,7 @@ var createBinaryResponseHandler = () => async ({ response, url, requestBodyValue
       value: new Uint8Array(buffer)
     };
   } catch (error) {
-    throw new APICallError$1({
+    throw new APICallError({
       message: "Failed to read response as array buffer",
       url,
       requestBodyValues,
@@ -7939,7 +8194,7 @@ var createBinaryResponseHandler = () => async ({ response, url, requestBodyValue
 };
 
 // src/without-trailing-slash.ts
-function withoutTrailingSlash$1(url) {
+function withoutTrailingSlash(url) {
   return url == null ? void 0 : url.replace(/\/$/, "");
 }
 
@@ -8049,17 +8304,17 @@ var indexBrowserExports = requireIndexBrowser();
 // src/gateway-provider.ts
 
 // src/errors/gateway-error.ts
-var marker$2 = "vercel.ai.gateway.error";
-var symbol$2 = Symbol.for(marker$2);
-var _a$2, _b;
-var GatewayError = class _GatewayError extends (_b = Error, _a$2 = symbol$2, _b) {
+var marker$1 = "vercel.ai.gateway.error";
+var symbol$1 = Symbol.for(marker$1);
+var _a$1, _b;
+var GatewayError = class _GatewayError extends (_b = Error, _a$1 = symbol$1, _b) {
   constructor({
     message,
     statusCode = 500,
     cause
   }) {
     super(message);
-    this[_a$2] = true;
+    this[_a$1] = true;
     this.statusCode = statusCode;
     this.cause = cause;
   }
@@ -8072,29 +8327,29 @@ var GatewayError = class _GatewayError extends (_b = Error, _a$2 = symbol$2, _b)
     return _GatewayError.hasMarker(error);
   }
   static hasMarker(error) {
-    return typeof error === "object" && error !== null && symbol$2 in error && error[symbol$2] === true;
+    return typeof error === "object" && error !== null && symbol$1 in error && error[symbol$1] === true;
   }
 };
 
 // src/errors/gateway-authentication-error.ts
-var name$2 = "GatewayAuthenticationError";
-var marker2$1 = `vercel.ai.gateway.error.${name$2}`;
-var symbol2$1 = Symbol.for(marker2$1);
-var _a2$1, _b2;
-var GatewayAuthenticationError = class _GatewayAuthenticationError extends (_b2 = GatewayError, _a2$1 = symbol2$1, _b2) {
+var name$1 = "GatewayAuthenticationError";
+var marker2 = `vercel.ai.gateway.error.${name$1}`;
+var symbol2 = Symbol.for(marker2);
+var _a2, _b2;
+var GatewayAuthenticationError = class _GatewayAuthenticationError extends (_b2 = GatewayError, _a2 = symbol2, _b2) {
   constructor({
     message = "Authentication failed",
     statusCode = 401,
     cause
   } = {}) {
     super({ message, statusCode, cause });
-    this[_a2$1] = true;
+    this[_a2] = true;
     // used in isInstance
-    this.name = name$2;
+    this.name = name$1;
     this.type = "authentication_error";
   }
   static isInstance(error) {
-    return GatewayError.hasMarker(error) && symbol2$1 in error;
+    return GatewayError.hasMarker(error) && symbol2 in error;
   }
   /**
    * Creates a contextual error message when authentication fails
@@ -8138,51 +8393,51 @@ Run 'npx vercel link' to link your project, then 'vc env pull' to fetch the toke
 };
 
 // src/errors/gateway-invalid-request-error.ts
-var name2$1 = "GatewayInvalidRequestError";
-var marker3$2 = `vercel.ai.gateway.error.${name2$1}`;
-var symbol3$2 = Symbol.for(marker3$2);
-var _a3$2, _b3;
-var GatewayInvalidRequestError = class extends (_b3 = GatewayError, _a3$2 = symbol3$2, _b3) {
+var name2 = "GatewayInvalidRequestError";
+var marker3$1 = `vercel.ai.gateway.error.${name2}`;
+var symbol3$1 = Symbol.for(marker3$1);
+var _a3$1, _b3;
+var GatewayInvalidRequestError = class extends (_b3 = GatewayError, _a3$1 = symbol3$1, _b3) {
   constructor({
     message = "Invalid request",
     statusCode = 400,
     cause
   } = {}) {
     super({ message, statusCode, cause });
-    this[_a3$2] = true;
+    this[_a3$1] = true;
     // used in isInstance
-    this.name = name2$1;
+    this.name = name2;
     this.type = "invalid_request_error";
   }
   static isInstance(error) {
-    return GatewayError.hasMarker(error) && symbol3$2 in error;
+    return GatewayError.hasMarker(error) && symbol3$1 in error;
   }
 };
 
 // src/errors/gateway-rate-limit-error.ts
-var name3$2 = "GatewayRateLimitError";
-var marker4$2 = `vercel.ai.gateway.error.${name3$2}`;
-var symbol4$2 = Symbol.for(marker4$2);
-var _a4$2, _b4;
-var GatewayRateLimitError = class extends (_b4 = GatewayError, _a4$2 = symbol4$2, _b4) {
+var name3$1 = "GatewayRateLimitError";
+var marker4$1 = `vercel.ai.gateway.error.${name3$1}`;
+var symbol4$1 = Symbol.for(marker4$1);
+var _a4$1, _b4;
+var GatewayRateLimitError = class extends (_b4 = GatewayError, _a4$1 = symbol4$1, _b4) {
   constructor({
     message = "Rate limit exceeded",
     statusCode = 429,
     cause
   } = {}) {
     super({ message, statusCode, cause });
-    this[_a4$2] = true;
+    this[_a4$1] = true;
     // used in isInstance
-    this.name = name3$2;
+    this.name = name3$1;
     this.type = "rate_limit_exceeded";
   }
   static isInstance(error) {
-    return GatewayError.hasMarker(error) && symbol4$2 in error;
+    return GatewayError.hasMarker(error) && symbol4$1 in error;
   }
 };
-var name4$2 = "GatewayModelNotFoundError";
-var marker5$2 = `vercel.ai.gateway.error.${name4$2}`;
-var symbol5$2 = Symbol.for(marker5$2);
+var name4$1 = "GatewayModelNotFoundError";
+var marker5$1 = `vercel.ai.gateway.error.${name4$1}`;
+var symbol5$1 = Symbol.for(marker5$1);
 var modelNotFoundParamSchema = lazySchema(
   () => zodSchema(
     object$1({
@@ -8190,8 +8445,8 @@ var modelNotFoundParamSchema = lazySchema(
     })
   )
 );
-var _a5$2, _b5;
-var GatewayModelNotFoundError = class extends (_b5 = GatewayError, _a5$2 = symbol5$2, _b5) {
+var _a5$1, _b5;
+var GatewayModelNotFoundError = class extends (_b5 = GatewayError, _a5$1 = symbol5$1, _b5) {
   constructor({
     message = "Model not found",
     statusCode = 404,
@@ -8199,45 +8454,45 @@ var GatewayModelNotFoundError = class extends (_b5 = GatewayError, _a5$2 = symbo
     cause
   } = {}) {
     super({ message, statusCode, cause });
-    this[_a5$2] = true;
+    this[_a5$1] = true;
     // used in isInstance
-    this.name = name4$2;
+    this.name = name4$1;
     this.type = "model_not_found";
     this.modelId = modelId;
   }
   static isInstance(error) {
-    return GatewayError.hasMarker(error) && symbol5$2 in error;
+    return GatewayError.hasMarker(error) && symbol5$1 in error;
   }
 };
 
 // src/errors/gateway-internal-server-error.ts
-var name5$2 = "GatewayInternalServerError";
-var marker6$1 = `vercel.ai.gateway.error.${name5$2}`;
-var symbol6$1 = Symbol.for(marker6$1);
-var _a6$1, _b6;
-var GatewayInternalServerError = class extends (_b6 = GatewayError, _a6$1 = symbol6$1, _b6) {
+var name5$1 = "GatewayInternalServerError";
+var marker6 = `vercel.ai.gateway.error.${name5$1}`;
+var symbol6 = Symbol.for(marker6);
+var _a6, _b6;
+var GatewayInternalServerError = class extends (_b6 = GatewayError, _a6 = symbol6, _b6) {
   constructor({
     message = "Internal server error",
     statusCode = 500,
     cause
   } = {}) {
     super({ message, statusCode, cause });
-    this[_a6$1] = true;
+    this[_a6] = true;
     // used in isInstance
-    this.name = name5$2;
+    this.name = name5$1;
     this.type = "internal_server_error";
   }
   static isInstance(error) {
-    return GatewayError.hasMarker(error) && symbol6$1 in error;
+    return GatewayError.hasMarker(error) && symbol6 in error;
   }
 };
 
 // src/errors/gateway-response-error.ts
-var name6$1 = "GatewayResponseError";
-var marker7$2 = `vercel.ai.gateway.error.${name6$1}`;
-var symbol7$2 = Symbol.for(marker7$2);
-var _a7$2, _b7;
-var GatewayResponseError = class extends (_b7 = GatewayError, _a7$2 = symbol7$2, _b7) {
+var name6 = "GatewayResponseError";
+var marker7$1 = `vercel.ai.gateway.error.${name6}`;
+var symbol7$1 = Symbol.for(marker7$1);
+var _a7$1, _b7;
+var GatewayResponseError = class extends (_b7 = GatewayError, _a7$1 = symbol7$1, _b7) {
   constructor({
     message = "Invalid response from Gateway",
     statusCode = 502,
@@ -8246,15 +8501,15 @@ var GatewayResponseError = class extends (_b7 = GatewayError, _a7$2 = symbol7$2,
     cause
   } = {}) {
     super({ message, statusCode, cause });
-    this[_a7$2] = true;
+    this[_a7$1] = true;
     // used in isInstance
-    this.name = name6$1;
+    this.name = name6;
     this.type = "response_error";
     this.response = response;
     this.validationError = validationError;
   }
   static isInstance(error) {
-    return GatewayError.hasMarker(error) && symbol7$2 in error;
+    return GatewayError.hasMarker(error) && symbol7$1 in error;
   }
 };
 async function createGatewayErrorFromResponse({
@@ -8264,7 +8519,7 @@ async function createGatewayErrorFromResponse({
   cause,
   authMethod
 }) {
-  const parseResult = await safeValidateTypes$1({
+  const parseResult = await safeValidateTypes({
     value: response,
     schema: gatewayErrorResponseSchema
   });
@@ -8293,7 +8548,7 @@ async function createGatewayErrorFromResponse({
     case "rate_limit_exceeded":
       return new GatewayRateLimitError({ message, statusCode, cause });
     case "model_not_found": {
-      const modelResult = await safeValidateTypes$1({
+      const modelResult = await safeValidateTypes({
         value: validatedResponse.error.param,
         schema: modelNotFoundParamSchema
       });
@@ -8329,7 +8584,7 @@ function asGatewayError(error, authMethod) {
   if (GatewayError.isInstance(error)) {
     return error;
   }
-  if (APICallError$1.isInstance(error)) {
+  if (APICallError.isInstance(error)) {
     return createGatewayErrorFromResponse({
       response: extractApiCallResponse(error),
       statusCode: (_a8 = error.statusCode) != null ? _a8 : 500,
@@ -8363,7 +8618,7 @@ function extractApiCallResponse(error) {
 }
 var GATEWAY_AUTH_METHOD_HEADER = "ai-gateway-auth-method";
 async function parseAuthMethod(headers) {
-  const result = await safeValidateTypes$1({
+  const result = await safeValidateTypes({
     value: headers[GATEWAY_AUTH_METHOD_HEADER],
     schema: gatewayAuthMethodSchema
   });
@@ -8381,10 +8636,10 @@ var GatewayFetchMetadata = class {
       const { value } = await getFromApi({
         url: `${this.config.baseURL}/config`,
         headers: await resolve(this.config.headers()),
-        successfulResponseHandler: createJsonResponseHandler$1(
+        successfulResponseHandler: createJsonResponseHandler(
           gatewayAvailableModelsResponseSchema
         ),
-        failedResponseHandler: createJsonErrorResponseHandler$1({
+        failedResponseHandler: createJsonErrorResponseHandler({
           errorSchema: any(),
           errorToMessage: (data) => data
         }),
@@ -8401,10 +8656,10 @@ var GatewayFetchMetadata = class {
       const { value } = await getFromApi({
         url: `${baseUrl.origin}/v1/credits`,
         headers: await resolve(this.config.headers()),
-        successfulResponseHandler: createJsonResponseHandler$1(
+        successfulResponseHandler: createJsonResponseHandler(
           gatewayCreditsResponseSchema
         ),
-        failedResponseHandler: createJsonErrorResponseHandler$1({
+        failedResponseHandler: createJsonErrorResponseHandler({
           errorSchema: any(),
           errorToMessage: (data) => data
         }),
@@ -8485,17 +8740,17 @@ var GatewayLanguageModel = class {
         responseHeaders,
         value: responseBody,
         rawValue: rawResponse
-      } = await postJsonToApi$1({
+      } = await postJsonToApi({
         url: this.getUrl(),
-        headers: combineHeaders$1(
+        headers: combineHeaders(
           resolvedHeaders,
           options.headers,
           this.getModelConfigHeaders(this.modelId, false),
           await resolve(this.config.o11yHeaders)
         ),
         body: args,
-        successfulResponseHandler: createJsonResponseHandler$1(any()),
-        failedResponseHandler: createJsonErrorResponseHandler$1({
+        successfulResponseHandler: createJsonResponseHandler(any()),
+        failedResponseHandler: createJsonErrorResponseHandler({
           errorSchema: any(),
           errorToMessage: (data) => data
         }),
@@ -8517,9 +8772,9 @@ var GatewayLanguageModel = class {
     const { abortSignal } = options;
     const resolvedHeaders = await resolve(this.config.headers());
     try {
-      const { value: response, responseHeaders } = await postJsonToApi$1({
+      const { value: response, responseHeaders } = await postJsonToApi({
         url: this.getUrl(),
-        headers: combineHeaders$1(
+        headers: combineHeaders(
           resolvedHeaders,
           options.headers,
           this.getModelConfigHeaders(this.modelId, true),
@@ -8527,7 +8782,7 @@ var GatewayLanguageModel = class {
         ),
         body: args,
         successfulResponseHandler: createEventSourceResponseHandler(any()),
-        failedResponseHandler: createJsonErrorResponseHandler$1({
+        failedResponseHandler: createJsonErrorResponseHandler({
           errorSchema: any(),
           errorToMessage: (data) => data
         }),
@@ -8598,7 +8853,7 @@ var GatewayLanguageModel = class {
   }
   getModelConfigHeaders(modelId, streaming) {
     return {
-      "ai-language-model-specification-version": "2",
+      "ai-language-model-specification-version": "3",
       "ai-language-model-id": modelId,
       "ai-language-model-streaming": String(streaming)
     };
@@ -8628,9 +8883,9 @@ var GatewayEmbeddingModel = class {
         responseHeaders,
         value: responseBody,
         rawValue
-      } = await postJsonToApi$1({
+      } = await postJsonToApi({
         url: this.getUrl(),
-        headers: combineHeaders$1(
+        headers: combineHeaders(
           resolvedHeaders,
           headers != null ? headers : {},
           this.getModelConfigHeaders(),
@@ -8640,10 +8895,10 @@ var GatewayEmbeddingModel = class {
           values,
           ...providerOptions ? { providerOptions } : {}
         },
-        successfulResponseHandler: createJsonResponseHandler$1(
+        successfulResponseHandler: createJsonResponseHandler(
           gatewayEmbeddingResponseSchema
         ),
-        failedResponseHandler: createJsonErrorResponseHandler$1({
+        failedResponseHandler: createJsonErrorResponseHandler({
           errorSchema: any(),
           errorToMessage: (data) => data
         }),
@@ -8666,7 +8921,7 @@ var GatewayEmbeddingModel = class {
   }
   getModelConfigHeaders() {
     return {
-      "ai-embedding-model-specification-version": "2",
+      "ai-embedding-model-specification-version": "3",
       "ai-model-id": this.modelId
     };
   }
@@ -8708,9 +8963,9 @@ var GatewayImageModel = class {
         responseHeaders,
         value: responseBody,
         rawValue
-      } = await postJsonToApi$1({
+      } = await postJsonToApi({
         url: this.getUrl(),
-        headers: combineHeaders$1(
+        headers: combineHeaders(
           resolvedHeaders,
           headers != null ? headers : {},
           this.getModelConfigHeaders(),
@@ -8724,10 +8979,10 @@ var GatewayImageModel = class {
           ...seed && { seed },
           ...providerOptions && { providerOptions }
         },
-        successfulResponseHandler: createJsonResponseHandler$1(
+        successfulResponseHandler: createJsonResponseHandler(
           gatewayImageResponseSchema
         ),
-        failedResponseHandler: createJsonErrorResponseHandler$1({
+        failedResponseHandler: createJsonErrorResponseHandler({
           errorSchema: any(),
           errorToMessage: (data) => data
         }),
@@ -8754,7 +9009,7 @@ var GatewayImageModel = class {
   }
   getModelConfigHeaders() {
     return {
-      "ai-image-model-specification-version": "2",
+      "ai-image-model-specification-version": "3",
       "ai-model-id": this.modelId
     };
   }
@@ -8779,7 +9034,7 @@ async function getVercelRequestId() {
 }
 
 // src/version.ts
-var VERSION$a = "3.0.2" ;
+var VERSION$9 = "3.0.5" ;
 
 // src/gateway-provider.ts
 var AI_GATEWAY_PROTOCOL_VERSION = "0.0.1";
@@ -8789,25 +9044,27 @@ function createGatewayProvider(options = {}) {
   let metadataCache = null;
   const cacheRefreshMillis = (_a8 = options.metadataCacheRefreshMillis) != null ? _a8 : 1e3 * 60 * 5;
   let lastFetchTime = 0;
-  const baseURL = (_b8 = withoutTrailingSlash$1(options.baseURL)) != null ? _b8 : "https://ai-gateway.vercel.sh/v3/ai";
+  const baseURL = (_b8 = withoutTrailingSlash(options.baseURL)) != null ? _b8 : "https://ai-gateway.vercel.sh/v3/ai";
   const getHeaders = async () => {
-    const auth = await getGatewayAuthToken(options);
-    if (auth) {
-      return withUserAgentSuffix$1(
+    try {
+      const auth = await getGatewayAuthToken(options);
+      return withUserAgentSuffix(
         {
           Authorization: `Bearer ${auth.token}`,
           "ai-gateway-protocol-version": AI_GATEWAY_PROTOCOL_VERSION,
           [GATEWAY_AUTH_METHOD_HEADER]: auth.authMethod,
           ...options.headers
         },
-        `ai-sdk/gateway/${VERSION$a}`
+        `ai-sdk/gateway/${VERSION$9}`
       );
+    } catch (error) {
+      throw GatewayAuthenticationError.createContextualError({
+        apiKeyProvided: false,
+        oidcTokenProvided: false,
+        statusCode: 401,
+        cause: error
+      });
     }
-    throw GatewayAuthenticationError.createContextualError({
-      apiKeyProvided: false,
-      oidcTokenProvided: false,
-      statusCode: 401
-    });
   };
   const createO11yHeaders = () => {
     const deploymentId = loadOptionalSetting({
@@ -8920,15 +9177,11 @@ async function getGatewayAuthToken(options) {
       authMethod: "api-key"
     };
   }
-  try {
-    const oidcToken = await indexBrowserExports.getVercelOidcToken();
-    return {
-      token: oidcToken,
-      authMethod: "oidc"
-    };
-  } catch (e) {
-    return null;
-  }
+  const oidcToken = await indexBrowserExports.getVercelOidcToken();
+  return {
+    token: oidcToken,
+    authMethod: "oidc"
+  };
 }
 
 /*
@@ -8982,7 +9235,7 @@ var _globalThis = typeof globalThis === 'object'
  * limitations under the License.
  */
 // this is autogenerated file, see scripts/version-update.js
-var VERSION$9 = '1.9.0';
+var VERSION$8 = '1.9.0';
 
 /*
  * Copyright The OpenTelemetry Authors
@@ -9099,7 +9352,7 @@ function _makeCompatibilityCheck(ownVersion) {
  *
  * @param version version of the API requesting an instance of the global API
  */
-var isCompatible = _makeCompatibilityCheck(VERSION$9);
+var isCompatible = _makeCompatibilityCheck(VERSION$8);
 
 /*
  * Copyright The OpenTelemetry Authors
@@ -9116,14 +9369,14 @@ var isCompatible = _makeCompatibilityCheck(VERSION$9);
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-var major = VERSION$9.split('.')[0];
+var major = VERSION$8.split('.')[0];
 var GLOBAL_OPENTELEMETRY_API_KEY = Symbol.for("opentelemetry.js.api." + major);
 var _global = _globalThis;
 function registerGlobal(type, instance, diag, allowOverride) {
     var _a;
     if (allowOverride === void 0) { allowOverride = false; }
     var api = (_global[GLOBAL_OPENTELEMETRY_API_KEY] = (_a = _global[GLOBAL_OPENTELEMETRY_API_KEY]) !== null && _a !== void 0 ? _a : {
-        version: VERSION$9,
+        version: VERSION$8,
     });
     if (!allowOverride && api[type]) {
         // already registered an API of this type
@@ -9131,14 +9384,14 @@ function registerGlobal(type, instance, diag, allowOverride) {
         diag.error(err.stack || err.message);
         return false;
     }
-    if (api.version !== VERSION$9) {
+    if (api.version !== VERSION$8) {
         // All registered APIs must be of the same version exactly
-        var err = new Error("@opentelemetry/api: Registration of version v" + api.version + " for " + type + " does not match previously registered API v" + VERSION$9);
+        var err = new Error("@opentelemetry/api: Registration of version v" + api.version + " for " + type + " does not match previously registered API v" + VERSION$8);
         diag.error(err.stack || err.message);
         return false;
     }
     api[type] = instance;
-    diag.debug("@opentelemetry/api: Registered a global for " + type + " v" + VERSION$9 + ".");
+    diag.debug("@opentelemetry/api: Registered a global for " + type + " v" + VERSION$8 + ".");
     return true;
 }
 function getGlobal(type) {
@@ -9150,7 +9403,7 @@ function getGlobal(type) {
     return (_b = _global[GLOBAL_OPENTELEMETRY_API_KEY]) === null || _b === void 0 ? void 0 : _b[type];
 }
 function unregisterGlobal(type, diag) {
-    diag.debug("@opentelemetry/api: Unregistering a global for " + type + " v" + VERSION$9 + ".");
+    diag.debug("@opentelemetry/api: Unregistering a global for " + type + " v" + VERSION$8 + ".");
     var api = _global[GLOBAL_OPENTELEMETRY_API_KEY];
     if (api) {
         delete api[type];
@@ -10883,95 +11136,95 @@ var __export = (target, all) => {
   for (var name16 in all)
     __defProp(target, name16, { get: all[name16], enumerable: true });
 };
-var name$1 = "AI_InvalidArgumentError";
-var marker$1 = `vercel.ai.error.${name$1}`;
-var symbol$1 = Symbol.for(marker$1);
-var _a$1;
-var InvalidArgumentError$1 = class InvalidArgumentError extends AISDKError$1 {
+var name = "AI_InvalidArgumentError";
+var marker = `vercel.ai.error.${name}`;
+var symbol = Symbol.for(marker);
+var _a;
+var InvalidArgumentError = class extends AISDKError {
   constructor({
     parameter,
     value,
     message
   }) {
     super({
-      name: name$1,
+      name,
       message: `Invalid argument for parameter ${parameter}: ${message}`
     });
-    this[_a$1] = true;
+    this[_a] = true;
     this.parameter = parameter;
     this.value = value;
   }
   static isInstance(error) {
-    return AISDKError$1.hasMarker(error, marker$1);
+    return AISDKError.hasMarker(error, marker);
   }
 };
-_a$1 = symbol$1;
-var name3$1 = "AI_InvalidToolApprovalError";
-var marker3$1 = `vercel.ai.error.${name3$1}`;
-var symbol3$1 = Symbol.for(marker3$1);
-var _a3$1;
-var InvalidToolApprovalError = class extends AISDKError$1 {
+_a = symbol;
+var name3 = "AI_InvalidToolApprovalError";
+var marker3 = `vercel.ai.error.${name3}`;
+var symbol3 = Symbol.for(marker3);
+var _a3;
+var InvalidToolApprovalError = class extends AISDKError {
   constructor({ approvalId }) {
     super({
-      name: name3$1,
+      name: name3,
       message: `Tool approval response references unknown approvalId: "${approvalId}". No matching tool-approval-request found in message history.`
     });
-    this[_a3$1] = true;
+    this[_a3] = true;
     this.approvalId = approvalId;
   }
   static isInstance(error) {
-    return AISDKError$1.hasMarker(error, marker3$1);
+    return AISDKError.hasMarker(error, marker3);
   }
 };
-_a3$1 = symbol3$1;
-var name4$1 = "AI_InvalidToolInputError";
-var marker4$1 = `vercel.ai.error.${name4$1}`;
-var symbol4$1 = Symbol.for(marker4$1);
-var _a4$1;
-var InvalidToolInputError = class extends AISDKError$1 {
+_a3 = symbol3;
+var name4 = "AI_InvalidToolInputError";
+var marker4 = `vercel.ai.error.${name4}`;
+var symbol4 = Symbol.for(marker4);
+var _a4;
+var InvalidToolInputError = class extends AISDKError {
   constructor({
     toolInput,
     toolName,
     cause,
-    message = `Invalid input for tool ${toolName}: ${getErrorMessage$2(cause)}`
+    message = `Invalid input for tool ${toolName}: ${getErrorMessage$1(cause)}`
   }) {
-    super({ name: name4$1, message, cause });
-    this[_a4$1] = true;
+    super({ name: name4, message, cause });
+    this[_a4] = true;
     this.toolInput = toolInput;
     this.toolName = toolName;
   }
   static isInstance(error) {
-    return AISDKError$1.hasMarker(error, marker4$1);
+    return AISDKError.hasMarker(error, marker4);
   }
 };
-_a4$1 = symbol4$1;
-var name5$1 = "AI_ToolCallNotFoundForApprovalError";
-var marker5$1 = `vercel.ai.error.${name5$1}`;
-var symbol5$1 = Symbol.for(marker5$1);
-var _a5$1;
-var ToolCallNotFoundForApprovalError = class extends AISDKError$1 {
+_a4 = symbol4;
+var name5 = "AI_ToolCallNotFoundForApprovalError";
+var marker5 = `vercel.ai.error.${name5}`;
+var symbol5 = Symbol.for(marker5);
+var _a5;
+var ToolCallNotFoundForApprovalError = class extends AISDKError {
   constructor({
     toolCallId,
     approvalId
   }) {
     super({
-      name: name5$1,
+      name: name5,
       message: `Tool call "${toolCallId}" not found for approval request "${approvalId}".`
     });
-    this[_a5$1] = true;
+    this[_a5] = true;
     this.toolCallId = toolCallId;
     this.approvalId = approvalId;
   }
   static isInstance(error) {
-    return AISDKError$1.hasMarker(error, marker5$1);
+    return AISDKError.hasMarker(error, marker5);
   }
 };
-_a5$1 = symbol5$1;
+_a5 = symbol5;
 var name7 = "AI_NoObjectGeneratedError";
-var marker7$1 = `vercel.ai.error.${name7}`;
-var symbol7$1 = Symbol.for(marker7$1);
-var _a7$1;
-var NoObjectGeneratedError = class extends AISDKError$1 {
+var marker7 = `vercel.ai.error.${name7}`;
+var symbol7 = Symbol.for(marker7);
+var _a7;
+var NoObjectGeneratedError = class extends AISDKError {
   constructor({
     message = "No object generated.",
     cause,
@@ -10981,22 +11234,22 @@ var NoObjectGeneratedError = class extends AISDKError$1 {
     finishReason
   }) {
     super({ name: name7, message, cause });
-    this[_a7$1] = true;
+    this[_a7] = true;
     this.text = text2;
     this.response = response;
     this.usage = usage;
     this.finishReason = finishReason;
   }
   static isInstance(error) {
-    return AISDKError$1.hasMarker(error, marker7$1);
+    return AISDKError.hasMarker(error, marker7);
   }
 };
-_a7$1 = symbol7$1;
+_a7 = symbol7;
 var name8 = "AI_NoOutputGeneratedError";
 var marker8 = `vercel.ai.error.${name8}`;
 var symbol8 = Symbol.for(marker8);
 var _a8;
-var NoOutputGeneratedError = class extends AISDKError$1 {
+var NoOutputGeneratedError = class extends AISDKError {
   // used in isInstance
   constructor({
     message = "No output generated.",
@@ -11006,7 +11259,7 @@ var NoOutputGeneratedError = class extends AISDKError$1 {
     this[_a8] = true;
   }
   static isInstance(error) {
-    return AISDKError$1.hasMarker(error, marker8);
+    return AISDKError.hasMarker(error, marker8);
   }
 };
 _a8 = symbol8;
@@ -11014,7 +11267,7 @@ var name9 = "AI_NoSuchToolError";
 var marker9 = `vercel.ai.error.${name9}`;
 var symbol9 = Symbol.for(marker9);
 var _a9;
-var NoSuchToolError = class extends AISDKError$1 {
+var NoSuchToolError = class extends AISDKError {
   constructor({
     toolName,
     availableTools = void 0,
@@ -11026,30 +11279,30 @@ var NoSuchToolError = class extends AISDKError$1 {
     this.availableTools = availableTools;
   }
   static isInstance(error) {
-    return AISDKError$1.hasMarker(error, marker9);
+    return AISDKError.hasMarker(error, marker9);
   }
 };
 _a9 = symbol9;
-var name10$1 = "AI_ToolCallRepairError";
-var marker10 = `vercel.ai.error.${name10$1}`;
+var name10 = "AI_ToolCallRepairError";
+var marker10 = `vercel.ai.error.${name10}`;
 var symbol10 = Symbol.for(marker10);
 var _a10;
-var ToolCallRepairError = class extends AISDKError$1 {
+var ToolCallRepairError = class extends AISDKError {
   constructor({
     cause,
     originalError,
-    message = `Error repairing tool call: ${getErrorMessage$2(cause)}`
+    message = `Error repairing tool call: ${getErrorMessage$1(cause)}`
   }) {
-    super({ name: name10$1, message, cause });
+    super({ name: name10, message, cause });
     this[_a10] = true;
     this.originalError = originalError;
   }
   static isInstance(error) {
-    return AISDKError$1.hasMarker(error, marker10);
+    return AISDKError.hasMarker(error, marker10);
   }
 };
 _a10 = symbol10;
-var UnsupportedModelVersionError = class extends AISDKError$1 {
+var UnsupportedModelVersionError = class extends AISDKError {
   constructor(options) {
     super({
       name: "AI_UnsupportedModelVersionError",
@@ -11060,45 +11313,45 @@ var UnsupportedModelVersionError = class extends AISDKError$1 {
     this.modelId = options.modelId;
   }
 };
-var name12$1 = "AI_InvalidMessageRoleError";
-var marker12$1 = `vercel.ai.error.${name12$1}`;
-var symbol12$1 = Symbol.for(marker12$1);
-var _a12$1;
-var InvalidMessageRoleError = class extends AISDKError$1 {
+var name12 = "AI_InvalidMessageRoleError";
+var marker12 = `vercel.ai.error.${name12}`;
+var symbol12 = Symbol.for(marker12);
+var _a12;
+var InvalidMessageRoleError = class extends AISDKError {
   constructor({
     role,
     message = `Invalid message role: '${role}'. Must be one of: "system", "user", "assistant", "tool".`
   }) {
-    super({ name: name12$1, message });
-    this[_a12$1] = true;
+    super({ name: name12, message });
+    this[_a12] = true;
     this.role = role;
   }
   static isInstance(error) {
-    return AISDKError$1.hasMarker(error, marker12$1);
+    return AISDKError.hasMarker(error, marker12);
   }
 };
-_a12$1 = symbol12$1;
+_a12 = symbol12;
 var name14 = "AI_RetryError";
-var marker14$1 = `vercel.ai.error.${name14}`;
-var symbol14$1 = Symbol.for(marker14$1);
-var _a14$1;
-var RetryError = class extends AISDKError$1 {
+var marker14 = `vercel.ai.error.${name14}`;
+var symbol14 = Symbol.for(marker14);
+var _a14;
+var RetryError = class extends AISDKError {
   constructor({
     message,
     reason,
     errors
   }) {
     super({ name: name14, message });
-    this[_a14$1] = true;
+    this[_a14] = true;
     this.reason = reason;
     this.errors = errors;
     this.lastError = errors[errors.length - 1];
   }
   static isInstance(error) {
-    return AISDKError$1.hasMarker(error, marker14$1);
+    return AISDKError.hasMarker(error, marker14);
   }
 };
-_a14$1 = symbol14$1;
+_a14 = symbol14;
 
 // src/logger/log-warnings.ts
 function formatWarning({
@@ -11388,7 +11641,7 @@ function detectMediaType({
 }
 
 // src/version.ts
-var VERSION$8 = "6.0.3" ;
+var VERSION$7 = "6.0.6" ;
 
 // src/util/download/download.ts
 var download = async ({ url }) => {
@@ -11396,10 +11649,10 @@ var download = async ({ url }) => {
   const urlText = url.toString();
   try {
     const response = await fetch(urlText, {
-      headers: withUserAgentSuffix$1(
+      headers: withUserAgentSuffix(
         {},
-        `ai-sdk/${VERSION$8}`,
-        getRuntimeEnvironmentUserAgent$1()
+        `ai-sdk/${VERSION$7}`,
+        getRuntimeEnvironmentUserAgent()
       )
     });
     if (!response.ok) {
@@ -11476,7 +11729,7 @@ function convertToLanguageModelV3DataContent(content) {
       content.toString()
     );
     if (dataUrlMediaType == null || base64Content == null) {
-      throw new AISDKError$1({
+      throw new AISDKError({
         name: "InvalidDataContentError",
         message: `Invalid data URL format in content ${content.toString()}`
       });
@@ -11795,7 +12048,7 @@ async function createToolModelOutput({
   errorMode
 }) {
   if (errorMode === "text") {
-    return { type: "error-text", value: getErrorMessage$2(output) };
+    return { type: "error-text", value: getErrorMessage$1(output) };
   } else if (errorMode === "json") {
     return { type: "error-json", value: toJSONValue(output) };
   }
@@ -11821,14 +12074,14 @@ function prepareCallSettings({
 }) {
   if (maxOutputTokens != null) {
     if (!Number.isInteger(maxOutputTokens)) {
-      throw new InvalidArgumentError$1({
+      throw new InvalidArgumentError({
         parameter: "maxOutputTokens",
         value: maxOutputTokens,
         message: "maxOutputTokens must be an integer"
       });
     }
     if (maxOutputTokens < 1) {
-      throw new InvalidArgumentError$1({
+      throw new InvalidArgumentError({
         parameter: "maxOutputTokens",
         value: maxOutputTokens,
         message: "maxOutputTokens must be >= 1"
@@ -11837,7 +12090,7 @@ function prepareCallSettings({
   }
   if (temperature != null) {
     if (typeof temperature !== "number") {
-      throw new InvalidArgumentError$1({
+      throw new InvalidArgumentError({
         parameter: "temperature",
         value: temperature,
         message: "temperature must be a number"
@@ -11846,7 +12099,7 @@ function prepareCallSettings({
   }
   if (topP != null) {
     if (typeof topP !== "number") {
-      throw new InvalidArgumentError$1({
+      throw new InvalidArgumentError({
         parameter: "topP",
         value: topP,
         message: "topP must be a number"
@@ -11855,7 +12108,7 @@ function prepareCallSettings({
   }
   if (topK != null) {
     if (typeof topK !== "number") {
-      throw new InvalidArgumentError$1({
+      throw new InvalidArgumentError({
         parameter: "topK",
         value: topK,
         message: "topK must be a number"
@@ -11864,7 +12117,7 @@ function prepareCallSettings({
   }
   if (presencePenalty != null) {
     if (typeof presencePenalty !== "number") {
-      throw new InvalidArgumentError$1({
+      throw new InvalidArgumentError({
         parameter: "presencePenalty",
         value: presencePenalty,
         message: "presencePenalty must be a number"
@@ -11873,7 +12126,7 @@ function prepareCallSettings({
   }
   if (frequencyPenalty != null) {
     if (typeof frequencyPenalty !== "number") {
-      throw new InvalidArgumentError$1({
+      throw new InvalidArgumentError({
         parameter: "frequencyPenalty",
         value: frequencyPenalty,
         message: "frequencyPenalty must be a number"
@@ -11882,7 +12135,7 @@ function prepareCallSettings({
   }
   if (seed != null) {
     if (!Number.isInteger(seed)) {
-      throw new InvalidArgumentError$1({
+      throw new InvalidArgumentError({
         parameter: "seed",
         value: seed,
         message: "seed must be an integer"
@@ -12155,13 +12408,13 @@ var modelMessageSchema = union([
 // src/prompt/standardize-prompt.ts
 async function standardizePrompt(prompt) {
   if (prompt.prompt == null && prompt.messages == null) {
-    throw new InvalidPromptError$1({
+    throw new InvalidPromptError({
       prompt,
       message: "prompt or messages must be defined"
     });
   }
   if (prompt.prompt != null && prompt.messages != null) {
-    throw new InvalidPromptError$1({
+    throw new InvalidPromptError({
       prompt,
       message: "prompt and messages cannot be defined at the same time"
     });
@@ -12169,7 +12422,7 @@ async function standardizePrompt(prompt) {
   if (prompt.system != null && typeof prompt.system !== "string" && !asArray(prompt.system).every(
     (message) => typeof message === "object" && message !== null && "role" in message && message.role === "system"
   )) {
-    throw new InvalidPromptError$1({
+    throw new InvalidPromptError({
       prompt,
       message: "system must be a string, SystemModelMessage, or array of SystemModelMessage"
     });
@@ -12182,23 +12435,23 @@ async function standardizePrompt(prompt) {
   } else if (prompt.messages != null) {
     messages = prompt.messages;
   } else {
-    throw new InvalidPromptError$1({
+    throw new InvalidPromptError({
       prompt,
       message: "prompt or messages must be defined"
     });
   }
   if (messages.length === 0) {
-    throw new InvalidPromptError$1({
+    throw new InvalidPromptError({
       prompt,
       message: "messages must not be empty"
     });
   }
-  const validationResult = await safeValidateTypes$1({
+  const validationResult = await safeValidateTypes({
     value: messages,
     schema: array$1(modelMessageSchema)
   });
   if (!validationResult.success) {
-    throw new InvalidPromptError$1({
+    throw new InvalidPromptError({
       prompt,
       message: "The messages do not match the ModelMessage[] schema.",
       cause: validationResult.error
@@ -12215,7 +12468,7 @@ function wrapGatewayError(error) {
   const isProductionEnv = (process == null ? void 0 : process.env.NODE_ENV) === "production";
   const moreInfoURL = "https://ai-sdk.dev/unauthenticated-ai-gateway";
   if (isProductionEnv) {
-    return new AISDKError$1({
+    return new AISDKError({
       name: "GatewayError",
       message: `Unauthenticated. Configure AI_GATEWAY_API_KEY or use a provider module. Learn more: ${moreInfoURL}`
     });
@@ -12616,13 +12869,13 @@ async function _retryWithExponentialBackoff(f, {
   try {
     return await f();
   } catch (error) {
-    if (isAbortError$1(error)) {
+    if (isAbortError(error)) {
       throw error;
     }
     if (maxRetries === 0) {
       throw error;
     }
-    const errorMessage = getErrorMessage$1(error);
+    const errorMessage = getErrorMessage(error);
     const newErrors = [...errors, error];
     const tryNumber = newErrors.length;
     if (tryNumber > maxRetries) {
@@ -12632,7 +12885,7 @@ async function _retryWithExponentialBackoff(f, {
         errors: newErrors
       });
     }
-    if (error instanceof Error && APICallError$1.isInstance(error) && error.isRetryable === true && tryNumber <= maxRetries) {
+    if (error instanceof Error && APICallError.isInstance(error) && error.isRetryable === true && tryNumber <= maxRetries) {
       await delay(
         getRetryDelayInMs({
           error,
@@ -12669,14 +12922,14 @@ function prepareRetries({
 }) {
   if (maxRetries != null) {
     if (!Number.isInteger(maxRetries)) {
-      throw new InvalidArgumentError$1({
+      throw new InvalidArgumentError({
         parameter: "maxRetries",
         value: maxRetries,
         message: "maxRetries must be an integer"
       });
     }
     if (maxRetries < 0) {
-      throw new InvalidArgumentError$1({
+      throw new InvalidArgumentError({
         parameter: "maxRetries",
         value: maxRetries,
         message: "maxRetries must be >= 0"
@@ -13257,11 +13510,11 @@ async function parsePartialJson(jsonText) {
   if (jsonText === void 0) {
     return { value: void 0, state: "undefined-input" };
   }
-  let result = await safeParseJSON$1({ text: jsonText });
+  let result = await safeParseJSON({ text: jsonText });
   if (result.success) {
     return { value: result.value, state: "successful-parse" };
   }
-  result = await safeParseJSON$1({ text: fixJson(jsonText) });
+  result = await safeParseJSON({ text: fixJson(jsonText) });
   if (result.success) {
     return { value: result.value, state: "repaired-parse" };
   }
@@ -13292,7 +13545,7 @@ var object = ({
       ...description != null && { description }
     })),
     async parseCompleteOutput({ text: text2 }, context) {
-      const parseResult = await safeParseJSON$1({ text: text2 });
+      const parseResult = await safeParseJSON({ text: text2 });
       if (!parseResult.success) {
         throw new NoObjectGeneratedError({
           message: "No object generated: could not parse the response.",
@@ -13303,7 +13556,7 @@ var object = ({
           finishReason: context.finishReason
         });
       }
-      const validationResult = await safeValidateTypes$1({
+      const validationResult = await safeValidateTypes({
         value: parseResult.value,
         schema
       });
@@ -13363,7 +13616,7 @@ var array = ({
       };
     }),
     async parseCompleteOutput({ text: text2 }, context) {
-      const parseResult = await safeParseJSON$1({ text: text2 });
+      const parseResult = await safeParseJSON({ text: text2 });
       if (!parseResult.success) {
         throw new NoObjectGeneratedError({
           message: "No object generated: could not parse the response.",
@@ -13378,7 +13631,7 @@ var array = ({
       if (outerValue == null || typeof outerValue !== "object" || !("elements" in outerValue) || !Array.isArray(outerValue.elements)) {
         throw new NoObjectGeneratedError({
           message: "No object generated: response did not match schema.",
-          cause: new TypeValidationError$1({
+          cause: new TypeValidationError({
             value: outerValue,
             cause: "response must be an object with an elements array"
           }),
@@ -13389,7 +13642,7 @@ var array = ({
         });
       }
       for (const element of outerValue.elements) {
-        const validationResult = await safeValidateTypes$1({
+        const validationResult = await safeValidateTypes({
           value: element,
           schema: elementSchema
         });
@@ -13422,7 +13675,7 @@ var array = ({
           const rawElements = result.state === "repaired-parse" && outerValue.elements.length > 0 ? outerValue.elements.slice(0, -1) : outerValue.elements;
           const parsedElements = [];
           for (const rawElement of rawElements) {
-            const validationResult = await safeValidateTypes$1({
+            const validationResult = await safeValidateTypes({
               value: rawElement,
               schema: elementSchema
             });
@@ -13458,7 +13711,7 @@ var choice = ({
       ...description != null && { description }
     }),
     async parseCompleteOutput({ text: text2 }, context) {
-      const parseResult = await safeParseJSON$1({ text: text2 });
+      const parseResult = await safeParseJSON({ text: text2 });
       if (!parseResult.success) {
         throw new NoObjectGeneratedError({
           message: "No object generated: could not parse the response.",
@@ -13473,7 +13726,7 @@ var choice = ({
       if (outerValue == null || typeof outerValue !== "object" || !("result" in outerValue) || typeof outerValue.result !== "string" || !choiceOptions.includes(outerValue.result)) {
         throw new NoObjectGeneratedError({
           message: "No object generated: response did not match schema.",
-          cause: new TypeValidationError$1({
+          cause: new TypeValidationError({
             value: outerValue,
             cause: "response must be an object that contains a choice value."
           }),
@@ -13522,7 +13775,7 @@ var json = ({
       ...description != null && { description }
     }),
     async parseCompleteOutput({ text: text2 }, context) {
-      const parseResult = await safeParseJSON$1({ text: text2 });
+      const parseResult = await safeParseJSON({ text: text2 });
       if (!parseResult.success) {
         throw new NoObjectGeneratedError({
           message: "No object generated: could not parse the response.",
@@ -13596,7 +13849,7 @@ async function parseToolCall({
       return await doParseToolCall({ toolCall: repairedToolCall, tools });
     }
   } catch (error) {
-    const parsedInput = await safeParseJSON$1({ text: toolCall.input });
+    const parsedInput = await safeParseJSON({ text: toolCall.input });
     const input = parsedInput.success ? parsedInput.value : toolCall.input;
     return {
       type: "tool-call",
@@ -13613,7 +13866,7 @@ async function parseToolCall({
   }
 }
 async function parseProviderExecutedDynamicToolCall(toolCall) {
-  const parseResult = toolCall.input.trim() === "" ? { success: true, value: {} } : await safeParseJSON$1({ text: toolCall.input });
+  const parseResult = toolCall.input.trim() === "" ? { success: true, value: {} } : await safeParseJSON({ text: toolCall.input });
   if (parseResult.success === false) {
     throw new InvalidToolInputError({
       toolName: toolCall.toolName,
@@ -13647,7 +13900,7 @@ async function doParseToolCall({
     });
   }
   const schema = asSchema(tool2.inputSchema);
-  const parseResult = toolCall.input.trim() === "" ? await safeValidateTypes$1({ value: {}, schema }) : await safeParseJSON$1({ text: toolCall.input, schema });
+  const parseResult = toolCall.input.trim() === "" ? await safeValidateTypes({ value: {}, schema }) : await safeParseJSON({ text: toolCall.input, schema });
   if (parseResult.success === false) {
     throw new InvalidToolInputError({
       toolName,
@@ -13879,7 +14132,7 @@ async function toResponseMessages({
 }
 
 // src/generate-text/generate-text.ts
-var originalGenerateId = createIdGenerator$1({
+var originalGenerateId = createIdGenerator({
   prefix: "aitxt",
   size: 24
 });
@@ -13920,9 +14173,9 @@ async function generateText({
     abortSignal
   });
   const callSettings = prepareCallSettings(settings);
-  const headersWithUserAgent = withUserAgentSuffix$1(
+  const headersWithUserAgent = withUserAgentSuffix(
     headers != null ? headers : {},
-    `ai/${VERSION$8}`
+    `ai/${VERSION$7}`
   );
   const baseTelemetryAttributes = getBaseTelemetryAttributes({
     model,
@@ -14223,7 +14476,7 @@ async function generateText({
               toolCallId: toolCall.toolCallId,
               toolName: toolCall.toolName,
               input: toolCall.input,
-              error: getErrorMessage$1(toolCall.error),
+              error: getErrorMessage(toolCall.error),
               dynamic: true
             });
           }
@@ -14892,7 +15145,7 @@ function processUIMessageStream({
             if (metadata != null) {
               const mergedMetadata = state.message.metadata != null ? mergeObjects(state.message.metadata, metadata) : metadata;
               if (messageMetadataSchema != null) {
-                await validateTypes$1({
+                await validateTypes({
                   value: mergedMetadata,
                   schema: messageMetadataSchema
                 });
@@ -15211,7 +15464,7 @@ function processUIMessageStream({
             default: {
               if (isDataUIMessageChunk(chunk)) {
                 if ((dataPartSchemas == null ? void 0 : dataPartSchemas[chunk.type]) != null) {
-                  await validateTypes$1({
+                  await validateTypes({
                     value: chunk.data,
                     schema: dataPartSchemas[chunk.type]
                   });
@@ -15636,7 +15889,7 @@ function runToolsTransformation({
                 toolCallId: toolCall.toolCallId,
                 toolName: toolCall.toolName,
                 input: toolCall.input,
-                error: getErrorMessage$1(toolCall.error),
+                error: getErrorMessage(toolCall.error),
                 dynamic: true,
                 title: toolCall.title
               });
@@ -15758,7 +16011,7 @@ function runToolsTransformation({
 }
 
 // src/generate-text/stream-text.ts
-var originalGenerateId2 = createIdGenerator$1({
+var originalGenerateId2 = createIdGenerator({
   prefix: "aitxt",
   size: 24
 });
@@ -16190,7 +16443,7 @@ var DefaultStreamTextResult = class {
           }
           controller.enqueue(value);
         } catch (error) {
-          if (isAbortError$1(error) && (abortSignal == null ? void 0 : abortSignal.aborted)) {
+          if (isAbortError(error) && (abortSignal == null ? void 0 : abortSignal.aborted)) {
             abort();
           } else {
             controller.error(error);
@@ -16936,7 +17189,7 @@ var DefaultStreamTextResult = class {
     sendSources = false,
     sendStart = true,
     sendFinish = true,
-    onError = getErrorMessage$2
+    onError = getErrorMessage$1
   } = {}) {
     const responseMessageId = generateMessageId != null ? getResponseUIMessageId({
       originalMessages,
@@ -17263,714 +17516,11 @@ var DefaultStreamTextResult = class {
   }
 };
 
-// src/generate-text/extract-reasoning-content.ts
-function extractReasoningContent$1(content) {
-  const parts = content.filter(
-    (content2) => content2.type === "reasoning"
-  );
-  return parts.length === 0 ? void 0 : parts.map((content2) => content2.text).join("\n");
-}
-var noSchemaOutputStrategy = {
-  type: "no-schema",
-  jsonSchema: async () => void 0,
-  async validatePartialResult({ value, textDelta }) {
-    return { success: true, value: { partial: value, textDelta } };
-  },
-  async validateFinalResult(value, context) {
-    return value === void 0 ? {
-      success: false,
-      error: new NoObjectGeneratedError({
-        message: "No object generated: response did not match schema.",
-        text: context.text,
-        response: context.response,
-        usage: context.usage,
-        finishReason: context.finishReason
-      })
-    } : { success: true, value };
-  },
-  createElementStream() {
-    throw new UnsupportedFunctionalityError$1({
-      functionality: "element streams in no-schema mode"
-    });
-  }
-};
-var objectOutputStrategy = (schema) => ({
-  type: "object",
-  jsonSchema: async () => await schema.jsonSchema,
-  async validatePartialResult({ value, textDelta }) {
-    return {
-      success: true,
-      value: {
-        // Note: currently no validation of partial results:
-        partial: value,
-        textDelta
-      }
-    };
-  },
-  async validateFinalResult(value) {
-    return safeValidateTypes$1({ value, schema });
-  },
-  createElementStream() {
-    throw new UnsupportedFunctionalityError$1({
-      functionality: "element streams in object mode"
-    });
-  }
-});
-var arrayOutputStrategy = (schema) => {
-  return {
-    type: "array",
-    // wrap in object that contains array of elements, since most LLMs will not
-    // be able to generate an array directly:
-    // possible future optimization: use arrays directly when model supports grammar-guided generation
-    jsonSchema: async () => {
-      const { $schema, ...itemSchema } = await schema.jsonSchema;
-      return {
-        $schema: "http://json-schema.org/draft-07/schema#",
-        type: "object",
-        properties: {
-          elements: { type: "array", items: itemSchema }
-        },
-        required: ["elements"],
-        additionalProperties: false
-      };
-    },
-    async validatePartialResult({
-      value,
-      latestObject,
-      isFirstDelta,
-      isFinalDelta
-    }) {
-      var _a16;
-      if (!isJSONObject(value) || !isJSONArray(value.elements)) {
-        return {
-          success: false,
-          error: new TypeValidationError$1({
-            value,
-            cause: "value must be an object that contains an array of elements"
-          })
-        };
-      }
-      const inputArray = value.elements;
-      const resultArray = [];
-      for (let i = 0; i < inputArray.length; i++) {
-        const element = inputArray[i];
-        const result = await safeValidateTypes$1({ value: element, schema });
-        if (i === inputArray.length - 1 && !isFinalDelta) {
-          continue;
-        }
-        if (!result.success) {
-          return result;
-        }
-        resultArray.push(result.value);
-      }
-      const publishedElementCount = (_a16 = latestObject == null ? void 0 : latestObject.length) != null ? _a16 : 0;
-      let textDelta = "";
-      if (isFirstDelta) {
-        textDelta += "[";
-      }
-      if (publishedElementCount > 0) {
-        textDelta += ",";
-      }
-      textDelta += resultArray.slice(publishedElementCount).map((element) => JSON.stringify(element)).join(",");
-      if (isFinalDelta) {
-        textDelta += "]";
-      }
-      return {
-        success: true,
-        value: {
-          partial: resultArray,
-          textDelta
-        }
-      };
-    },
-    async validateFinalResult(value) {
-      if (!isJSONObject(value) || !isJSONArray(value.elements)) {
-        return {
-          success: false,
-          error: new TypeValidationError$1({
-            value,
-            cause: "value must be an object that contains an array of elements"
-          })
-        };
-      }
-      const inputArray = value.elements;
-      for (const element of inputArray) {
-        const result = await safeValidateTypes$1({ value: element, schema });
-        if (!result.success) {
-          return result;
-        }
-      }
-      return { success: true, value: inputArray };
-    },
-    createElementStream(originalStream) {
-      let publishedElements = 0;
-      return createAsyncIterableStream(
-        originalStream.pipeThrough(
-          new TransformStream({
-            transform(chunk, controller) {
-              switch (chunk.type) {
-                case "object": {
-                  const array2 = chunk.object;
-                  for (; publishedElements < array2.length; publishedElements++) {
-                    controller.enqueue(array2[publishedElements]);
-                  }
-                  break;
-                }
-                case "text-delta":
-                case "finish":
-                case "error":
-                  break;
-                default: {
-                  const _exhaustiveCheck = chunk;
-                  throw new Error(
-                    `Unsupported chunk type: ${_exhaustiveCheck}`
-                  );
-                }
-              }
-            }
-          })
-        )
-      );
-    }
-  };
-};
-var enumOutputStrategy = (enumValues) => {
-  return {
-    type: "enum",
-    // wrap in object that contains result, since most LLMs will not
-    // be able to generate an enum value directly:
-    // possible future optimization: use enums directly when model supports top-level enums
-    jsonSchema: async () => ({
-      $schema: "http://json-schema.org/draft-07/schema#",
-      type: "object",
-      properties: {
-        result: { type: "string", enum: enumValues }
-      },
-      required: ["result"],
-      additionalProperties: false
-    }),
-    async validateFinalResult(value) {
-      if (!isJSONObject(value) || typeof value.result !== "string") {
-        return {
-          success: false,
-          error: new TypeValidationError$1({
-            value,
-            cause: 'value must be an object that contains a string in the "result" property.'
-          })
-        };
-      }
-      const result = value.result;
-      return enumValues.includes(result) ? { success: true, value: result } : {
-        success: false,
-        error: new TypeValidationError$1({
-          value,
-          cause: "value must be a string in the enum"
-        })
-      };
-    },
-    async validatePartialResult({ value, textDelta }) {
-      if (!isJSONObject(value) || typeof value.result !== "string") {
-        return {
-          success: false,
-          error: new TypeValidationError$1({
-            value,
-            cause: 'value must be an object that contains a string in the "result" property.'
-          })
-        };
-      }
-      const result = value.result;
-      const possibleEnumValues = enumValues.filter(
-        (enumValue) => enumValue.startsWith(result)
-      );
-      if (value.result.length === 0 || possibleEnumValues.length === 0) {
-        return {
-          success: false,
-          error: new TypeValidationError$1({
-            value,
-            cause: "value must be a string in the enum"
-          })
-        };
-      }
-      return {
-        success: true,
-        value: {
-          partial: possibleEnumValues.length > 1 ? result : possibleEnumValues[0],
-          textDelta
-        }
-      };
-    },
-    createElementStream() {
-      throw new UnsupportedFunctionalityError$1({
-        functionality: "element streams in enum mode"
-      });
-    }
-  };
-};
-function getOutputStrategy({
-  output,
-  schema,
-  enumValues
-}) {
-  switch (output) {
-    case "object":
-      return objectOutputStrategy(asSchema(schema));
-    case "array":
-      return arrayOutputStrategy(asSchema(schema));
-    case "enum":
-      return enumOutputStrategy(enumValues);
-    case "no-schema":
-      return noSchemaOutputStrategy;
-    default: {
-      const _exhaustiveCheck = output;
-      throw new Error(`Unsupported output: ${_exhaustiveCheck}`);
-    }
-  }
-}
-async function parseAndValidateObjectResult(result, outputStrategy, context) {
-  const parseResult = await safeParseJSON$1({ text: result });
-  if (!parseResult.success) {
-    throw new NoObjectGeneratedError({
-      message: "No object generated: could not parse the response.",
-      cause: parseResult.error,
-      text: result,
-      response: context.response,
-      usage: context.usage,
-      finishReason: context.finishReason
-    });
-  }
-  const validationResult = await outputStrategy.validateFinalResult(
-    parseResult.value,
-    {
-      text: result,
-      response: context.response,
-      usage: context.usage
-    }
-  );
-  if (!validationResult.success) {
-    throw new NoObjectGeneratedError({
-      message: "No object generated: response did not match schema.",
-      cause: validationResult.error,
-      text: result,
-      response: context.response,
-      usage: context.usage,
-      finishReason: context.finishReason
-    });
-  }
-  return validationResult.value;
-}
-async function parseAndValidateObjectResultWithRepair(result, outputStrategy, repairText, context) {
-  try {
-    return await parseAndValidateObjectResult(result, outputStrategy, context);
-  } catch (error) {
-    if (repairText != null && NoObjectGeneratedError.isInstance(error) && (JSONParseError$1.isInstance(error.cause) || TypeValidationError$1.isInstance(error.cause))) {
-      const repairedText = await repairText({
-        text: result,
-        error: error.cause
-      });
-      if (repairedText === null) {
-        throw error;
-      }
-      return await parseAndValidateObjectResult(
-        repairedText,
-        outputStrategy,
-        context
-      );
-    }
-    throw error;
-  }
-}
-
-// src/generate-object/validate-object-generation-input.ts
-function validateObjectGenerationInput({
-  output,
-  schema,
-  schemaName,
-  schemaDescription,
-  enumValues
-}) {
-  if (output != null && output !== "object" && output !== "array" && output !== "enum" && output !== "no-schema") {
-    throw new InvalidArgumentError$1({
-      parameter: "output",
-      value: output,
-      message: "Invalid output type."
-    });
-  }
-  if (output === "no-schema") {
-    if (schema != null) {
-      throw new InvalidArgumentError$1({
-        parameter: "schema",
-        value: schema,
-        message: "Schema is not supported for no-schema output."
-      });
-    }
-    if (schemaDescription != null) {
-      throw new InvalidArgumentError$1({
-        parameter: "schemaDescription",
-        value: schemaDescription,
-        message: "Schema description is not supported for no-schema output."
-      });
-    }
-    if (schemaName != null) {
-      throw new InvalidArgumentError$1({
-        parameter: "schemaName",
-        value: schemaName,
-        message: "Schema name is not supported for no-schema output."
-      });
-    }
-    if (enumValues != null) {
-      throw new InvalidArgumentError$1({
-        parameter: "enumValues",
-        value: enumValues,
-        message: "Enum values are not supported for no-schema output."
-      });
-    }
-  }
-  if (output === "object") {
-    if (schema == null) {
-      throw new InvalidArgumentError$1({
-        parameter: "schema",
-        value: schema,
-        message: "Schema is required for object output."
-      });
-    }
-    if (enumValues != null) {
-      throw new InvalidArgumentError$1({
-        parameter: "enumValues",
-        value: enumValues,
-        message: "Enum values are not supported for object output."
-      });
-    }
-  }
-  if (output === "array") {
-    if (schema == null) {
-      throw new InvalidArgumentError$1({
-        parameter: "schema",
-        value: schema,
-        message: "Element schema is required for array output."
-      });
-    }
-    if (enumValues != null) {
-      throw new InvalidArgumentError$1({
-        parameter: "enumValues",
-        value: enumValues,
-        message: "Enum values are not supported for array output."
-      });
-    }
-  }
-  if (output === "enum") {
-    if (schema != null) {
-      throw new InvalidArgumentError$1({
-        parameter: "schema",
-        value: schema,
-        message: "Schema is not supported for enum output."
-      });
-    }
-    if (schemaDescription != null) {
-      throw new InvalidArgumentError$1({
-        parameter: "schemaDescription",
-        value: schemaDescription,
-        message: "Schema description is not supported for enum output."
-      });
-    }
-    if (schemaName != null) {
-      throw new InvalidArgumentError$1({
-        parameter: "schemaName",
-        value: schemaName,
-        message: "Schema name is not supported for enum output."
-      });
-    }
-    if (enumValues == null) {
-      throw new InvalidArgumentError$1({
-        parameter: "enumValues",
-        value: enumValues,
-        message: "Enum values are required for enum output."
-      });
-    }
-    for (const value of enumValues) {
-      if (typeof value !== "string") {
-        throw new InvalidArgumentError$1({
-          parameter: "enumValues",
-          value,
-          message: "Enum values must be strings."
-        });
-      }
-    }
-  }
-}
-
 // src/generate-object/generate-object.ts
-var originalGenerateId3 = createIdGenerator$1({ prefix: "aiobj", size: 24 });
-async function generateObject(options) {
-  const {
-    model: modelArg,
-    output = "object",
-    system,
-    prompt,
-    messages,
-    maxRetries: maxRetriesArg,
-    abortSignal,
-    headers,
-    experimental_repairText: repairText,
-    experimental_telemetry: telemetry,
-    experimental_download: download2,
-    providerOptions,
-    _internal: {
-      generateId: generateId2 = originalGenerateId3,
-      currentDate = () => /* @__PURE__ */ new Date()
-    } = {},
-    ...settings
-  } = options;
-  const model = resolveLanguageModel(modelArg);
-  const enumValues = "enum" in options ? options.enum : void 0;
-  const {
-    schema: inputSchema,
-    schemaDescription,
-    schemaName
-  } = "schema" in options ? options : {};
-  validateObjectGenerationInput({
-    output,
-    schema: inputSchema,
-    schemaName,
-    schemaDescription,
-    enumValues
-  });
-  const { maxRetries, retry } = prepareRetries({
-    maxRetries: maxRetriesArg,
-    abortSignal
-  });
-  const outputStrategy = getOutputStrategy({
-    output,
-    schema: inputSchema,
-    enumValues
-  });
-  const callSettings = prepareCallSettings(settings);
-  const headersWithUserAgent = withUserAgentSuffix$1(
-    headers != null ? headers : {},
-    `ai/${VERSION$8}`
-  );
-  const baseTelemetryAttributes = getBaseTelemetryAttributes({
-    model,
-    telemetry,
-    headers: headersWithUserAgent,
-    settings: { ...callSettings, maxRetries }
-  });
-  const tracer = getTracer(telemetry);
-  const jsonSchema2 = await outputStrategy.jsonSchema();
-  try {
-    return await recordSpan({
-      name: "ai.generateObject",
-      attributes: selectTelemetryAttributes({
-        telemetry,
-        attributes: {
-          ...assembleOperationName({
-            operationId: "ai.generateObject",
-            telemetry
-          }),
-          ...baseTelemetryAttributes,
-          // specific settings that only make sense on the outer level:
-          "ai.prompt": {
-            input: () => JSON.stringify({ system, prompt, messages })
-          },
-          "ai.schema": jsonSchema2 != null ? { input: () => JSON.stringify(jsonSchema2) } : void 0,
-          "ai.schema.name": schemaName,
-          "ai.schema.description": schemaDescription,
-          "ai.settings.output": outputStrategy.type
-        }
-      }),
-      tracer,
-      fn: async (span) => {
-        var _a16;
-        let result;
-        let finishReason;
-        let usage;
-        let warnings;
-        let response;
-        let request;
-        let resultProviderMetadata;
-        let reasoning;
-        const standardizedPrompt = await standardizePrompt({
-          system,
-          prompt,
-          messages
-        });
-        const promptMessages = await convertToLanguageModelPrompt({
-          prompt: standardizedPrompt,
-          supportedUrls: await model.supportedUrls,
-          download: download2
-        });
-        const generateResult = await retry(
-          () => recordSpan({
-            name: "ai.generateObject.doGenerate",
-            attributes: selectTelemetryAttributes({
-              telemetry,
-              attributes: {
-                ...assembleOperationName({
-                  operationId: "ai.generateObject.doGenerate",
-                  telemetry
-                }),
-                ...baseTelemetryAttributes,
-                "ai.prompt.messages": {
-                  input: () => stringifyForTelemetry(promptMessages)
-                },
-                // standardized gen-ai llm span attributes:
-                "gen_ai.system": model.provider,
-                "gen_ai.request.model": model.modelId,
-                "gen_ai.request.frequency_penalty": callSettings.frequencyPenalty,
-                "gen_ai.request.max_tokens": callSettings.maxOutputTokens,
-                "gen_ai.request.presence_penalty": callSettings.presencePenalty,
-                "gen_ai.request.temperature": callSettings.temperature,
-                "gen_ai.request.top_k": callSettings.topK,
-                "gen_ai.request.top_p": callSettings.topP
-              }
-            }),
-            tracer,
-            fn: async (span2) => {
-              var _a17, _b, _c, _d, _e, _f, _g, _h;
-              const result2 = await model.doGenerate({
-                responseFormat: {
-                  type: "json",
-                  schema: jsonSchema2,
-                  name: schemaName,
-                  description: schemaDescription
-                },
-                ...prepareCallSettings(settings),
-                prompt: promptMessages,
-                providerOptions,
-                abortSignal,
-                headers: headersWithUserAgent
-              });
-              const responseData = {
-                id: (_b = (_a17 = result2.response) == null ? void 0 : _a17.id) != null ? _b : generateId2(),
-                timestamp: (_d = (_c = result2.response) == null ? void 0 : _c.timestamp) != null ? _d : currentDate(),
-                modelId: (_f = (_e = result2.response) == null ? void 0 : _e.modelId) != null ? _f : model.modelId,
-                headers: (_g = result2.response) == null ? void 0 : _g.headers,
-                body: (_h = result2.response) == null ? void 0 : _h.body
-              };
-              const text2 = extractTextContent$1(result2.content);
-              const reasoning2 = extractReasoningContent$1(result2.content);
-              if (text2 === void 0) {
-                throw new NoObjectGeneratedError({
-                  message: "No object generated: the model did not return a response.",
-                  response: responseData,
-                  usage: asLanguageModelUsage(result2.usage),
-                  finishReason: result2.finishReason.unified
-                });
-              }
-              span2.setAttributes(
-                await selectTelemetryAttributes({
-                  telemetry,
-                  attributes: {
-                    "ai.response.finishReason": result2.finishReason.unified,
-                    "ai.response.object": { output: () => text2 },
-                    "ai.response.id": responseData.id,
-                    "ai.response.model": responseData.modelId,
-                    "ai.response.timestamp": responseData.timestamp.toISOString(),
-                    "ai.response.providerMetadata": JSON.stringify(
-                      result2.providerMetadata
-                    ),
-                    // TODO rename telemetry attributes to inputTokens and outputTokens
-                    "ai.usage.promptTokens": result2.usage.inputTokens.total,
-                    "ai.usage.completionTokens": result2.usage.outputTokens.total,
-                    // standardized gen-ai llm span attributes:
-                    "gen_ai.response.finish_reasons": [
-                      result2.finishReason.unified
-                    ],
-                    "gen_ai.response.id": responseData.id,
-                    "gen_ai.response.model": responseData.modelId,
-                    "gen_ai.usage.input_tokens": result2.usage.inputTokens.total,
-                    "gen_ai.usage.output_tokens": result2.usage.outputTokens.total
-                  }
-                })
-              );
-              return {
-                ...result2,
-                objectText: text2,
-                reasoning: reasoning2,
-                responseData
-              };
-            }
-          })
-        );
-        result = generateResult.objectText;
-        finishReason = generateResult.finishReason.unified;
-        usage = asLanguageModelUsage(generateResult.usage);
-        warnings = generateResult.warnings;
-        resultProviderMetadata = generateResult.providerMetadata;
-        request = (_a16 = generateResult.request) != null ? _a16 : {};
-        response = generateResult.responseData;
-        reasoning = generateResult.reasoning;
-        logWarnings({
-          warnings,
-          provider: model.provider,
-          model: model.modelId
-        });
-        const object2 = await parseAndValidateObjectResultWithRepair(
-          result,
-          outputStrategy,
-          repairText,
-          {
-            response,
-            usage,
-            finishReason
-          }
-        );
-        span.setAttributes(
-          await selectTelemetryAttributes({
-            telemetry,
-            attributes: {
-              "ai.response.finishReason": finishReason,
-              "ai.response.object": {
-                output: () => JSON.stringify(object2)
-              },
-              "ai.response.providerMetadata": JSON.stringify(
-                resultProviderMetadata
-              ),
-              // TODO rename telemetry attributes to inputTokens and outputTokens
-              "ai.usage.promptTokens": usage.inputTokens,
-              "ai.usage.completionTokens": usage.outputTokens
-            }
-          })
-        );
-        return new DefaultGenerateObjectResult({
-          object: object2,
-          reasoning,
-          finishReason,
-          usage,
-          warnings,
-          request,
-          response,
-          providerMetadata: resultProviderMetadata
-        });
-      }
-    });
-  } catch (error) {
-    throw wrapGatewayError(error);
-  }
-}
-var DefaultGenerateObjectResult = class {
-  constructor(options) {
-    this.object = options.object;
-    this.finishReason = options.finishReason;
-    this.usage = options.usage;
-    this.warnings = options.warnings;
-    this.providerMetadata = options.providerMetadata;
-    this.response = options.response;
-    this.request = options.request;
-    this.reasoning = options.reasoning;
-  }
-  toJsonResponse(init) {
-    var _a16;
-    return new Response(JSON.stringify(this.object), {
-      status: (_a16 = init == null ? void 0 : init.status) != null ? _a16 : 200,
-      headers: prepareHeaders(init == null ? void 0 : init.headers, {
-        "content-type": "application/json; charset=utf-8"
-      })
-    });
-  }
-};
+createIdGenerator({ prefix: "aiobj", size: 24 });
 
 // src/generate-object/stream-object.ts
-createIdGenerator$1({ prefix: "aiobj", size: 24 });
+createIdGenerator({ prefix: "aiobj", size: 24 });
 
 // src/mistral-provider.ts
 
@@ -18050,7 +17600,7 @@ function convertToMistralChatMessages(prompt) {
                     })
                   };
                 } else {
-                  throw new UnsupportedFunctionalityError$1({
+                  throw new UnsupportedFunctionalityError({
                     functionality: "Only images and PDF file parts are supported"
                   });
                 }
@@ -18201,7 +17751,7 @@ var mistralErrorDataSchema = object$1({
   param: string().nullable(),
   code: string().nullable()
 });
-var mistralFailedResponseHandler = createJsonErrorResponseHandler$1({
+var mistralFailedResponseHandler = createJsonErrorResponseHandler({
   errorSchema: mistralErrorDataSchema,
   errorToMessage: (data) => data.message
 });
@@ -18255,7 +17805,7 @@ function prepareTools$4({
       };
     default: {
       const _exhaustiveCheck = type;
-      throw new UnsupportedFunctionalityError$1({
+      throw new UnsupportedFunctionalityError({
         functionality: `tool choice type: ${_exhaustiveCheck}`
       });
     }
@@ -18272,7 +17822,7 @@ var MistralChatLanguageModel = class {
     var _a;
     this.modelId = modelId;
     this.config = config;
-    this.generateId = (_a = config.generateId) != null ? _a : generateId$1;
+    this.generateId = (_a = config.generateId) != null ? _a : generateId;
   }
   get provider() {
     return this.config.provider;
@@ -18294,7 +17844,7 @@ var MistralChatLanguageModel = class {
   }) {
     var _a, _b, _c, _d;
     const warnings = [];
-    const options = (_a = await parseProviderOptions$1({
+    const options = (_a = await parseProviderOptions({
       provider: "mistral",
       providerOptions,
       schema: mistralLanguageModelOptions
@@ -18370,12 +17920,12 @@ var MistralChatLanguageModel = class {
       responseHeaders,
       value: response,
       rawValue: rawResponse
-    } = await postJsonToApi$1({
+    } = await postJsonToApi({
       url: `${this.config.baseURL}/chat/completions`,
-      headers: combineHeaders$1(this.config.headers(), options.headers),
+      headers: combineHeaders(this.config.headers(), options.headers),
       body,
       failedResponseHandler: mistralFailedResponseHandler,
-      successfulResponseHandler: createJsonResponseHandler$1(
+      successfulResponseHandler: createJsonResponseHandler(
         mistralChatResponseSchema
       ),
       abortSignal: options.abortSignal,
@@ -18431,9 +17981,9 @@ var MistralChatLanguageModel = class {
   async doStream(options) {
     const { args, warnings } = await this.getArgs(options);
     const body = { ...args, stream: true };
-    const { responseHeaders, value: response } = await postJsonToApi$1({
+    const { responseHeaders, value: response } = await postJsonToApi({
       url: `${this.config.baseURL}/chat/completions`,
-      headers: combineHeaders$1(this.config.headers(), options.headers),
+      headers: combineHeaders(this.config.headers(), options.headers),
       body,
       failedResponseHandler: mistralFailedResponseHandler,
       successfulResponseHandler: createEventSourceResponseHandler(
@@ -18709,7 +18259,7 @@ var MistralEmbeddingModel = class {
     headers
   }) {
     if (values.length > this.maxEmbeddingsPerCall) {
-      throw new TooManyEmbeddingValuesForCallError$1({
+      throw new TooManyEmbeddingValuesForCallError({
         provider: this.provider,
         modelId: this.modelId,
         maxEmbeddingsPerCall: this.maxEmbeddingsPerCall,
@@ -18720,16 +18270,16 @@ var MistralEmbeddingModel = class {
       responseHeaders,
       value: response,
       rawValue
-    } = await postJsonToApi$1({
+    } = await postJsonToApi({
       url: `${this.config.baseURL}/embeddings`,
-      headers: combineHeaders$1(this.config.headers(), headers),
+      headers: combineHeaders(this.config.headers(), headers),
       body: {
         model: this.modelId,
         input: values,
         encoding_format: "float"
       },
       failedResponseHandler: mistralFailedResponseHandler,
-      successfulResponseHandler: createJsonResponseHandler$1(
+      successfulResponseHandler: createJsonResponseHandler(
         MistralTextEmbeddingResponseSchema
       ),
       abortSignal,
@@ -18749,13 +18299,13 @@ var MistralTextEmbeddingResponseSchema = object$1({
 });
 
 // src/version.ts
-var VERSION$7 = "3.0.1" ;
+var VERSION$6 = "3.0.2" ;
 
 // src/mistral-provider.ts
 function createMistral(options = {}) {
   var _a;
-  const baseURL = (_a = withoutTrailingSlash$1(options.baseURL)) != null ? _a : "https://api.mistral.ai/v1";
-  const getHeaders = () => withUserAgentSuffix$1(
+  const baseURL = (_a = withoutTrailingSlash(options.baseURL)) != null ? _a : "https://api.mistral.ai/v1";
+  const getHeaders = () => withUserAgentSuffix(
     {
       Authorization: `Bearer ${loadApiKey({
         apiKey: options.apiKey,
@@ -18764,7 +18314,7 @@ function createMistral(options = {}) {
       })}`,
       ...options.headers
     },
-    `ai-sdk/mistral/${VERSION$7}`
+    `ai-sdk/mistral/${VERSION$6}`
   );
   const createChatModel = (modelId) => new MistralChatLanguageModel(modelId, {
     provider: "mistral.chat",
@@ -18795,7 +18345,7 @@ function createMistral(options = {}) {
   provider.textEmbedding = createEmbeddingModel;
   provider.textEmbeddingModel = createEmbeddingModel;
   provider.imageModel = (modelId) => {
-    throw new NoSuchModelError$1({ modelId, modelType: "imageModel" });
+    throw new NoSuchModelError({ modelId, modelType: "imageModel" });
   };
   return provider;
 }
@@ -18804,7 +18354,7 @@ createMistral();
 // src/google-provider.ts
 
 // src/version.ts
-var VERSION$6 = "3.0.1" ;
+var VERSION$5 = "3.0.2" ;
 var googleErrorDataSchema = lazySchema(
   () => zodSchema(
     object$1({
@@ -18816,7 +18366,7 @@ var googleErrorDataSchema = lazySchema(
     })
   )
 );
-var googleFailedResponseHandler = createJsonErrorResponseHandler$1({
+var googleFailedResponseHandler = createJsonErrorResponseHandler({
   errorSchema: googleErrorDataSchema,
   errorToMessage: (data) => data.error.message
 });
@@ -18872,20 +18422,20 @@ var GoogleGenerativeAIEmbeddingModel = class {
     abortSignal,
     providerOptions
   }) {
-    const googleOptions = await parseProviderOptions$1({
+    const googleOptions = await parseProviderOptions({
       provider: "google",
       providerOptions,
       schema: googleGenerativeAIEmbeddingProviderOptions
     });
     if (values.length > this.maxEmbeddingsPerCall) {
-      throw new TooManyEmbeddingValuesForCallError$1({
+      throw new TooManyEmbeddingValuesForCallError({
         provider: this.provider,
         modelId: this.modelId,
         maxEmbeddingsPerCall: this.maxEmbeddingsPerCall,
         values
       });
     }
-    const mergedHeaders = combineHeaders$1(
+    const mergedHeaders = combineHeaders(
       await resolve(this.config.headers),
       headers
     );
@@ -18894,7 +18444,7 @@ var GoogleGenerativeAIEmbeddingModel = class {
         responseHeaders: responseHeaders2,
         value: response2,
         rawValue: rawValue2
-      } = await postJsonToApi$1({
+      } = await postJsonToApi({
         url: `${this.config.baseURL}/models/${this.modelId}:embedContent`,
         headers: mergedHeaders,
         body: {
@@ -18906,7 +18456,7 @@ var GoogleGenerativeAIEmbeddingModel = class {
           taskType: googleOptions == null ? void 0 : googleOptions.taskType
         },
         failedResponseHandler: googleFailedResponseHandler,
-        successfulResponseHandler: createJsonResponseHandler$1(
+        successfulResponseHandler: createJsonResponseHandler(
           googleGenerativeAISingleEmbeddingResponseSchema
         ),
         abortSignal,
@@ -18923,7 +18473,7 @@ var GoogleGenerativeAIEmbeddingModel = class {
       responseHeaders,
       value: response,
       rawValue
-    } = await postJsonToApi$1({
+    } = await postJsonToApi({
       url: `${this.config.baseURL}/models/${this.modelId}:batchEmbedContents`,
       headers: mergedHeaders,
       body: {
@@ -18935,7 +18485,7 @@ var GoogleGenerativeAIEmbeddingModel = class {
         }))
       },
       failedResponseHandler: googleFailedResponseHandler,
-      successfulResponseHandler: createJsonResponseHandler$1(
+      successfulResponseHandler: createJsonResponseHandler(
         googleGenerativeAITextEmbeddingResponseSchema
       ),
       abortSignal,
@@ -19129,7 +18679,7 @@ function convertToGoogleGenerativeAIMessages(prompt, options) {
     switch (role) {
       case "system": {
         if (!systemMessagesAllowed) {
-          throw new UnsupportedFunctionalityError$1({
+          throw new UnsupportedFunctionalityError({
             functionality: "system messages are only supported at the beginning of the conversation"
           });
         }
@@ -19191,7 +18741,7 @@ function convertToGoogleGenerativeAIMessages(prompt, options) {
               }
               case "file": {
                 if (part.data instanceof URL) {
-                  throw new UnsupportedFunctionalityError$1({
+                  throw new UnsupportedFunctionalityError({
                     functionality: "File data URLs in assistant messages are not supported"
                   });
                 }
@@ -19600,7 +19150,7 @@ function prepareTools$3({
       };
     default: {
       const _exhaustiveCheck = type;
-      throw new UnsupportedFunctionalityError$1({
+      throw new UnsupportedFunctionalityError({
         functionality: `tool choice type: ${_exhaustiveCheck}`
       });
     }
@@ -19640,7 +19190,7 @@ var GoogleGenerativeAILanguageModel = class {
     var _a;
     this.modelId = modelId;
     this.config = config;
-    this.generateId = (_a = config.generateId) != null ? _a : generateId$1;
+    this.generateId = (_a = config.generateId) != null ? _a : generateId;
   }
   get provider() {
     return this.config.provider;
@@ -19667,13 +19217,13 @@ var GoogleGenerativeAILanguageModel = class {
     var _a;
     const warnings = [];
     const providerOptionsName = this.config.provider.includes("vertex") ? "vertex" : "google";
-    let googleOptions = await parseProviderOptions$1({
+    let googleOptions = await parseProviderOptions({
       provider: providerOptionsName,
       providerOptions,
       schema: googleGenerativeAIProviderOptions
     });
     if (googleOptions == null && providerOptionsName !== "google") {
-      googleOptions = await parseProviderOptions$1({
+      googleOptions = await parseProviderOptions({
         provider: "google",
         providerOptions,
         schema: googleGenerativeAIProviderOptions
@@ -19750,7 +19300,7 @@ var GoogleGenerativeAILanguageModel = class {
   async doGenerate(options) {
     var _a, _b, _c, _d, _e, _f, _g, _h, _i;
     const { args, warnings, providerOptionsName } = await this.getArgs(options);
-    const mergedHeaders = combineHeaders$1(
+    const mergedHeaders = combineHeaders(
       await resolve(this.config.headers),
       options.headers
     );
@@ -19758,14 +19308,14 @@ var GoogleGenerativeAILanguageModel = class {
       responseHeaders,
       value: response,
       rawValue: rawResponse
-    } = await postJsonToApi$1({
+    } = await postJsonToApi({
       url: `${this.config.baseURL}/${getModelPath(
         this.modelId
       )}:generateContent`,
       headers: mergedHeaders,
       body: args,
       failedResponseHandler: googleFailedResponseHandler,
-      successfulResponseHandler: createJsonResponseHandler$1(responseSchema),
+      successfulResponseHandler: createJsonResponseHandler(responseSchema),
       abortSignal: options.abortSignal,
       fetch: this.config.fetch
     });
@@ -19869,11 +19419,11 @@ var GoogleGenerativeAILanguageModel = class {
   }
   async doStream(options) {
     const { args, warnings, providerOptionsName } = await this.getArgs(options);
-    const headers = combineHeaders$1(
+    const headers = combineHeaders(
       await resolve(this.config.headers),
       options.headers
     );
-    const { responseHeaders, value: response } = await postJsonToApi$1({
+    const { responseHeaders, value: response } = await postJsonToApi({
       url: `${this.config.baseURL}/${getModelPath(
         this.modelId
       )}:streamGenerateContent?alt=sse`,
@@ -20537,7 +20087,7 @@ var GoogleGenerativeAIImageModel = class {
         details: "This model does not support the `seed` option through this provider."
       });
     }
-    const googleOptions = await parseProviderOptions$1({
+    const googleOptions = await parseProviderOptions({
       provider: "google",
       providerOptions,
       schema: googleImageProviderOptionsSchema
@@ -20556,12 +20106,12 @@ var GoogleGenerativeAIImageModel = class {
       instances: [{ prompt }],
       parameters
     };
-    const { responseHeaders, value: response } = await postJsonToApi$1({
+    const { responseHeaders, value: response } = await postJsonToApi({
       url: `${this.config.baseURL}/models/${this.modelId}:predict`,
-      headers: combineHeaders$1(await resolve(this.config.headers), headers),
+      headers: combineHeaders(await resolve(this.config.headers), headers),
       body,
       failedResponseHandler: googleFailedResponseHandler,
-      successfulResponseHandler: createJsonResponseHandler$1(
+      successfulResponseHandler: createJsonResponseHandler(
         googleImageResponseSchema
       ),
       abortSignal,
@@ -20606,9 +20156,9 @@ var googleImageProviderOptionsSchema = lazySchema(
 // src/google-provider.ts
 function createGoogleGenerativeAI(options = {}) {
   var _a, _b;
-  const baseURL = (_a = withoutTrailingSlash$1(options.baseURL)) != null ? _a : "https://generativelanguage.googleapis.com/v1beta";
+  const baseURL = (_a = withoutTrailingSlash(options.baseURL)) != null ? _a : "https://generativelanguage.googleapis.com/v1beta";
   const providerName = (_b = options.name) != null ? _b : "google.generative-ai";
-  const getHeaders = () => withUserAgentSuffix$1(
+  const getHeaders = () => withUserAgentSuffix(
     {
       "x-goog-api-key": loadApiKey({
         apiKey: options.apiKey,
@@ -20617,7 +20167,7 @@ function createGoogleGenerativeAI(options = {}) {
       }),
       ...options.headers
     },
-    `ai-sdk/google/${VERSION$6}`
+    `ai-sdk/google/${VERSION$5}`
   );
   const createChatModel = (modelId) => {
     var _a2;
@@ -20625,7 +20175,7 @@ function createGoogleGenerativeAI(options = {}) {
       provider: providerName,
       baseURL,
       headers: getHeaders,
-      generateId: (_a2 = options.generateId) != null ? _a2 : generateId$1,
+      generateId: (_a2 = options.generateId) != null ? _a2 : generateId,
       supportedUrls: () => ({
         "*": [
           // Google Generative Language "files" endpoint
@@ -20688,7 +20238,7 @@ var openaiErrorDataSchema = object$1({
     code: union([string(), number$1()]).nullish()
   })
 });
-var openaiFailedResponseHandler = createJsonErrorResponseHandler$1({
+var openaiFailedResponseHandler = createJsonErrorResponseHandler({
   errorSchema: openaiErrorDataSchema,
   errorToMessage: (data) => data.error.message
 });
@@ -20808,7 +20358,7 @@ function convertToOpenAIChatMessages({
                   };
                 } else if (part.mediaType.startsWith("audio/")) {
                   if (part.data instanceof URL) {
-                    throw new UnsupportedFunctionalityError$1({
+                    throw new UnsupportedFunctionalityError({
                       functionality: "audio file parts with URLs"
                     });
                   }
@@ -20833,14 +20383,14 @@ function convertToOpenAIChatMessages({
                       };
                     }
                     default: {
-                      throw new UnsupportedFunctionalityError$1({
+                      throw new UnsupportedFunctionalityError({
                         functionality: `audio content parts with media type ${part.mediaType}`
                       });
                     }
                   }
                 } else if (part.mediaType === "application/pdf") {
                   if (part.data instanceof URL) {
-                    throw new UnsupportedFunctionalityError$1({
+                    throw new UnsupportedFunctionalityError({
                       functionality: "PDF file parts with URLs"
                     });
                   }
@@ -20852,7 +20402,7 @@ function convertToOpenAIChatMessages({
                     }
                   };
                 } else {
-                  throw new UnsupportedFunctionalityError$1({
+                  throw new UnsupportedFunctionalityError({
                     functionality: `file part media type ${part.mediaType}`
                   });
                 }
@@ -21264,7 +20814,7 @@ function prepareChatTools({
       };
     default: {
       const _exhaustiveCheck = type;
-      throw new UnsupportedFunctionalityError$1({
+      throw new UnsupportedFunctionalityError({
         functionality: `tool choice type: ${_exhaustiveCheck}`
       });
     }
@@ -21301,7 +20851,7 @@ var OpenAIChatLanguageModel = class {
   }) {
     var _a, _b, _c, _d, _e;
     const warnings = [];
-    const openaiOptions = (_a = await parseProviderOptions$1({
+    const openaiOptions = (_a = await parseProviderOptions({
       provider: "openai",
       providerOptions,
       schema: openaiChatLanguageModelOptions
@@ -21472,15 +21022,15 @@ var OpenAIChatLanguageModel = class {
       responseHeaders,
       value: response,
       rawValue: rawResponse
-    } = await postJsonToApi$1({
+    } = await postJsonToApi({
       url: this.config.url({
         path: "/chat/completions",
         modelId: this.modelId
       }),
-      headers: combineHeaders$1(this.config.headers(), options.headers),
+      headers: combineHeaders(this.config.headers(), options.headers),
       body,
       failedResponseHandler: openaiFailedResponseHandler,
-      successfulResponseHandler: createJsonResponseHandler$1(
+      successfulResponseHandler: createJsonResponseHandler(
         openaiChatResponseSchema
       ),
       abortSignal: options.abortSignal,
@@ -21495,7 +21045,7 @@ var OpenAIChatLanguageModel = class {
     for (const toolCall of (_a = choice.message.tool_calls) != null ? _a : []) {
       content.push({
         type: "tool-call",
-        toolCallId: (_b = toolCall.id) != null ? _b : generateId$1(),
+        toolCallId: (_b = toolCall.id) != null ? _b : generateId(),
         toolName: toolCall.function.name,
         input: toolCall.function.arguments
       });
@@ -21504,7 +21054,7 @@ var OpenAIChatLanguageModel = class {
       content.push({
         type: "source",
         sourceType: "url",
-        id: generateId$1(),
+        id: generateId(),
         url: annotation.url_citation.url,
         title: annotation.url_citation.title
       });
@@ -21547,12 +21097,12 @@ var OpenAIChatLanguageModel = class {
         include_usage: true
       }
     };
-    const { responseHeaders, value: response } = await postJsonToApi$1({
+    const { responseHeaders, value: response } = await postJsonToApi({
       url: this.config.url({
         path: "/chat/completions",
         modelId: this.modelId
       }),
-      headers: combineHeaders$1(this.config.headers(), options.headers),
+      headers: combineHeaders(this.config.headers(), options.headers),
       body,
       failedResponseHandler: openaiFailedResponseHandler,
       successfulResponseHandler: createEventSourceResponseHandler(
@@ -21641,19 +21191,19 @@ var OpenAIChatLanguageModel = class {
                 const index = toolCallDelta.index;
                 if (toolCalls[index] == null) {
                   if (toolCallDelta.type !== "function") {
-                    throw new InvalidResponseDataError$1({
+                    throw new InvalidResponseDataError({
                       data: toolCallDelta,
                       message: `Expected 'function' type.`
                     });
                   }
                   if (toolCallDelta.id == null) {
-                    throw new InvalidResponseDataError$1({
+                    throw new InvalidResponseDataError({
                       data: toolCallDelta,
                       message: `Expected 'id' to be a string.`
                     });
                   }
                   if (((_f = toolCallDelta.function) == null ? void 0 : _f.name) == null) {
-                    throw new InvalidResponseDataError$1({
+                    throw new InvalidResponseDataError({
                       data: toolCallDelta,
                       message: `Expected 'function.name' to be a string.`
                     });
@@ -21688,7 +21238,7 @@ var OpenAIChatLanguageModel = class {
                       });
                       controller.enqueue({
                         type: "tool-call",
-                        toolCallId: (_j = toolCall2.id) != null ? _j : generateId$1(),
+                        toolCallId: (_j = toolCall2.id) != null ? _j : generateId(),
                         toolName: toolCall2.function.name,
                         input: toolCall2.function.arguments
                       });
@@ -21716,7 +21266,7 @@ var OpenAIChatLanguageModel = class {
                   });
                   controller.enqueue({
                     type: "tool-call",
-                    toolCallId: (_q = toolCall.id) != null ? _q : generateId$1(),
+                    toolCallId: (_q = toolCall.id) != null ? _q : generateId(),
                     toolName: toolCall.function.name,
                     input: toolCall.function.arguments
                   });
@@ -21729,7 +21279,7 @@ var OpenAIChatLanguageModel = class {
                 controller.enqueue({
                   type: "source",
                   sourceType: "url",
-                  id: generateId$1(),
+                  id: generateId(),
                   url: annotation.url_citation.url,
                   title: annotation.url_citation.title
                 });
@@ -21806,7 +21356,7 @@ function convertToOpenAICompletionPrompt({
   for (const { role, content } of prompt) {
     switch (role) {
       case "system": {
-        throw new InvalidPromptError$1({
+        throw new InvalidPromptError({
           message: "Unexpected system message in prompt: ${content}",
           prompt
         });
@@ -21832,7 +21382,7 @@ ${userMessage}
               return part.text;
             }
             case "tool-call": {
-              throw new UnsupportedFunctionalityError$1({
+              throw new UnsupportedFunctionalityError({
                 functionality: "tool-call messages"
               });
             }
@@ -21845,7 +21395,7 @@ ${assistantMessage}
         break;
       }
       case "tool": {
-        throw new UnsupportedFunctionalityError$1({
+        throw new UnsupportedFunctionalityError({
           functionality: "tool messages"
         });
       }
@@ -22025,12 +21575,12 @@ var OpenAICompletionLanguageModel = class {
   }) {
     const warnings = [];
     const openaiOptions = {
-      ...await parseProviderOptions$1({
+      ...await parseProviderOptions({
         provider: "openai",
         providerOptions,
         schema: openaiCompletionProviderOptions
       }),
-      ...await parseProviderOptions$1({
+      ...await parseProviderOptions({
         provider: this.providerOptionsName,
         providerOptions,
         schema: openaiCompletionProviderOptions
@@ -22086,15 +21636,15 @@ var OpenAICompletionLanguageModel = class {
       responseHeaders,
       value: response,
       rawValue: rawResponse
-    } = await postJsonToApi$1({
+    } = await postJsonToApi({
       url: this.config.url({
         path: "/completions",
         modelId: this.modelId
       }),
-      headers: combineHeaders$1(this.config.headers(), options.headers),
+      headers: combineHeaders(this.config.headers(), options.headers),
       body: args,
       failedResponseHandler: openaiFailedResponseHandler,
-      successfulResponseHandler: createJsonResponseHandler$1(
+      successfulResponseHandler: createJsonResponseHandler(
         openaiCompletionResponseSchema
       ),
       abortSignal: options.abortSignal,
@@ -22131,12 +21681,12 @@ var OpenAICompletionLanguageModel = class {
         include_usage: true
       }
     };
-    const { responseHeaders, value: response } = await postJsonToApi$1({
+    const { responseHeaders, value: response } = await postJsonToApi({
       url: this.config.url({
         path: "/completions",
         modelId: this.modelId
       }),
-      headers: combineHeaders$1(this.config.headers(), options.headers),
+      headers: combineHeaders(this.config.headers(), options.headers),
       body,
       failedResponseHandler: openaiFailedResponseHandler,
       successfulResponseHandler: createEventSourceResponseHandler(
@@ -22265,14 +21815,14 @@ var OpenAIEmbeddingModel = class {
   }) {
     var _a;
     if (values.length > this.maxEmbeddingsPerCall) {
-      throw new TooManyEmbeddingValuesForCallError$1({
+      throw new TooManyEmbeddingValuesForCallError({
         provider: this.provider,
         modelId: this.modelId,
         maxEmbeddingsPerCall: this.maxEmbeddingsPerCall,
         values
       });
     }
-    const openaiOptions = (_a = await parseProviderOptions$1({
+    const openaiOptions = (_a = await parseProviderOptions({
       provider: "openai",
       providerOptions,
       schema: openaiEmbeddingProviderOptions
@@ -22281,12 +21831,12 @@ var OpenAIEmbeddingModel = class {
       responseHeaders,
       value: response,
       rawValue
-    } = await postJsonToApi$1({
+    } = await postJsonToApi({
       url: this.config.url({
         path: "/embeddings",
         modelId: this.modelId
       }),
-      headers: combineHeaders$1(this.config.headers(), headers),
+      headers: combineHeaders(this.config.headers(), headers),
       body: {
         model: this.modelId,
         input: values,
@@ -22295,7 +21845,7 @@ var OpenAIEmbeddingModel = class {
         user: openaiOptions.user
       },
       failedResponseHandler: openaiFailedResponseHandler,
-      successfulResponseHandler: createJsonResponseHandler$1(
+      successfulResponseHandler: createJsonResponseHandler(
         openaiTextEmbeddingResponseSchema
       ),
       abortSignal,
@@ -22395,7 +21945,7 @@ var OpenAIImageModel = class {
           path: "/images/edits",
           modelId: this.modelId
         }),
-        headers: combineHeaders$1(this.config.headers(), headers),
+        headers: combineHeaders(this.config.headers(), headers),
         formData: convertToFormData({
           model: this.modelId,
           prompt,
@@ -22419,7 +21969,7 @@ var OpenAIImageModel = class {
           ...(_d = providerOptions.openai) != null ? _d : {}
         }),
         failedResponseHandler: openaiFailedResponseHandler,
-        successfulResponseHandler: createJsonResponseHandler$1(
+        successfulResponseHandler: createJsonResponseHandler(
           openaiImageResponseSchema
         ),
         abortSignal,
@@ -22455,12 +22005,12 @@ var OpenAIImageModel = class {
         }
       };
     }
-    const { value: response, responseHeaders } = await postJsonToApi$1({
+    const { value: response, responseHeaders } = await postJsonToApi({
       url: this.config.url({
         path: "/images/generations",
         modelId: this.modelId
       }),
-      headers: combineHeaders$1(this.config.headers(), headers),
+      headers: combineHeaders(this.config.headers(), headers),
       body: {
         model: this.modelId,
         prompt,
@@ -22470,7 +22020,7 @@ var OpenAIImageModel = class {
         ...!hasDefaultResponseFormat.has(this.modelId) ? { response_format: "b64_json" } : {}
       },
       failedResponseHandler: openaiFailedResponseHandler,
-      successfulResponseHandler: createJsonResponseHandler$1(
+      successfulResponseHandler: createJsonResponseHandler(
         openaiImageResponseSchema
       ),
       abortSignal,
@@ -23091,7 +22641,7 @@ async function convertToOpenAIResponsesInput({
                     }
                   };
                 } else {
-                  throw new UnsupportedFunctionalityError$1({
+                  throw new UnsupportedFunctionalityError({
                     functionality: `file part media type ${part.mediaType}`
                   });
                 }
@@ -23134,7 +22684,7 @@ async function convertToOpenAIResponsesInput({
                 part.toolName
               );
               if (hasLocalShellTool && resolvedToolName === "local_shell") {
-                const parsedInput = await validateTypes$1({
+                const parsedInput = await validateTypes({
                   value: part.input,
                   schema: localShellInputSchema
                 });
@@ -23154,7 +22704,7 @@ async function convertToOpenAIResponsesInput({
                 break;
               }
               if (hasShellTool && resolvedToolName === "shell") {
-                const parsedInput = await validateTypes$1({
+                const parsedInput = await validateTypes({
                   value: part.input,
                   schema: shellInputSchema
                 });
@@ -23197,7 +22747,7 @@ async function convertToOpenAIResponsesInput({
               break;
             }
             case "reasoning": {
-              const providerOptions = await parseProviderOptions$1({
+              const providerOptions = await parseProviderOptions({
                 provider: "openai",
                 providerOptions: part.providerOptions,
                 schema: openaiResponsesReasoningProviderOptionsSchema
@@ -23286,7 +22836,7 @@ async function convertToOpenAIResponsesInput({
             part.toolName
           );
           if (hasLocalShellTool && resolvedToolName === "local_shell" && output.type === "json") {
-            const parsedOutput = await validateTypes$1({
+            const parsedOutput = await validateTypes({
               value: output.value,
               schema: localShellOutputSchema
             });
@@ -23298,7 +22848,7 @@ async function convertToOpenAIResponsesInput({
             continue;
           }
           if (hasShellTool && resolvedToolName === "shell" && output.type === "json") {
-            const parsedOutput = await validateTypes$1({
+            const parsedOutput = await validateTypes({
               value: output.value,
               schema: shellOutputSchema
             });
@@ -23317,7 +22867,7 @@ async function convertToOpenAIResponsesInput({
             continue;
           }
           if (hasApplyPatchTool && part.toolName === "apply_patch" && output.type === "json") {
-            const parsedOutput = await validateTypes$1({
+            const parsedOutput = await validateTypes({
               value: output.value,
               schema: applyPatchOutputSchema
             });
@@ -24273,7 +23823,7 @@ async function prepareResponsesTools$2({
       case "provider": {
         switch (tool.id) {
           case "openai.file_search": {
-            const args = await validateTypes$1({
+            const args = await validateTypes({
               value: tool.args,
               schema: fileSearchArgsSchema
             });
@@ -24308,7 +23858,7 @@ async function prepareResponsesTools$2({
             break;
           }
           case "openai.web_search_preview": {
-            const args = await validateTypes$1({
+            const args = await validateTypes({
               value: tool.args,
               schema: webSearchPreviewArgsSchema
             });
@@ -24320,7 +23870,7 @@ async function prepareResponsesTools$2({
             break;
           }
           case "openai.web_search": {
-            const args = await validateTypes$1({
+            const args = await validateTypes({
               value: tool.args,
               schema: webSearchArgsSchema$1
             });
@@ -24334,7 +23884,7 @@ async function prepareResponsesTools$2({
             break;
           }
           case "openai.code_interpreter": {
-            const args = await validateTypes$1({
+            const args = await validateTypes({
               value: tool.args,
               schema: codeInterpreterArgsSchema
             });
@@ -24345,7 +23895,7 @@ async function prepareResponsesTools$2({
             break;
           }
           case "openai.image_generation": {
-            const args = await validateTypes$1({
+            const args = await validateTypes({
               value: tool.args,
               schema: imageGenerationArgsSchema
             });
@@ -24368,7 +23918,7 @@ async function prepareResponsesTools$2({
             break;
           }
           case "openai.mcp": {
-            const args = await validateTypes$1({
+            const args = await validateTypes({
               value: tool.args,
               schema: mcpArgsSchema
             });
@@ -24421,7 +23971,7 @@ async function prepareResponsesTools$2({
       };
     default: {
       const _exhaustiveCheck = type;
-      throw new UnsupportedFunctionalityError$1({
+      throw new UnsupportedFunctionalityError({
         functionality: `tool choice type: ${_exhaustiveCheck}`
       });
     }
@@ -24490,7 +24040,7 @@ var OpenAIResponsesLanguageModel = class {
     if (stopSequences != null) {
       warnings.push({ type: "unsupported", feature: "stopSequences" });
     }
-    const openaiOptions = await parseProviderOptions$1({
+    const openaiOptions = await parseProviderOptions({
       provider: "openai",
       providerOptions,
       schema: openaiResponsesProviderOptionsSchema
@@ -24696,19 +24246,19 @@ var OpenAIResponsesLanguageModel = class {
       responseHeaders,
       value: response,
       rawValue: rawResponse
-    } = await postJsonToApi$1({
+    } = await postJsonToApi({
       url,
-      headers: combineHeaders$1(this.config.headers(), options.headers),
+      headers: combineHeaders(this.config.headers(), options.headers),
       body,
       failedResponseHandler: openaiFailedResponseHandler,
-      successfulResponseHandler: createJsonResponseHandler$1(
+      successfulResponseHandler: createJsonResponseHandler(
         openaiResponsesResponseSchema
       ),
       abortSignal: options.abortSignal,
       fetch: this.config.fetch
     });
     if (response.error) {
-      throw new APICallError$1({
+      throw new APICallError({
         message: response.error.message,
         url,
         requestBodyValues: body,
@@ -24816,7 +24366,7 @@ var OpenAIResponsesLanguageModel = class {
                 content.push({
                   type: "source",
                   sourceType: "url",
-                  id: (_f = (_e = (_d = this.config).generateId) == null ? void 0 : _e.call(_d)) != null ? _f : generateId$1(),
+                  id: (_f = (_e = (_d = this.config).generateId) == null ? void 0 : _e.call(_d)) != null ? _f : generateId(),
                   url: annotation.url,
                   title: annotation.title
                 });
@@ -24824,7 +24374,7 @@ var OpenAIResponsesLanguageModel = class {
                 content.push({
                   type: "source",
                   sourceType: "document",
-                  id: (_i = (_h = (_g = this.config).generateId) == null ? void 0 : _h.call(_g)) != null ? _i : generateId$1(),
+                  id: (_i = (_h = (_g = this.config).generateId) == null ? void 0 : _h.call(_g)) != null ? _i : generateId(),
                   mediaType: "text/plain",
                   title: (_k = (_j = annotation.quote) != null ? _j : annotation.filename) != null ? _k : "Document",
                   filename: (_l = annotation.filename) != null ? _l : annotation.file_id,
@@ -24840,7 +24390,7 @@ var OpenAIResponsesLanguageModel = class {
                 content.push({
                   type: "source",
                   sourceType: "document",
-                  id: (_o = (_n = (_m = this.config).generateId) == null ? void 0 : _n.call(_m)) != null ? _o : generateId$1(),
+                  id: (_o = (_n = (_m = this.config).generateId) == null ? void 0 : _n.call(_m)) != null ? _o : generateId(),
                   mediaType: "text/plain",
                   title: (_q = (_p = annotation.filename) != null ? _p : annotation.file_id) != null ? _q : "Document",
                   filename: (_r = annotation.filename) != null ? _r : annotation.file_id,
@@ -24856,7 +24406,7 @@ var OpenAIResponsesLanguageModel = class {
                 content.push({
                   type: "source",
                   sourceType: "document",
-                  id: (_u = (_t = (_s = this.config).generateId) == null ? void 0 : _t.call(_s)) != null ? _u : generateId$1(),
+                  id: (_u = (_t = (_s = this.config).generateId) == null ? void 0 : _t.call(_s)) != null ? _u : generateId(),
                   mediaType: "application/octet-stream",
                   title: annotation.file_id,
                   filename: annotation.file_id,
@@ -24943,7 +24493,7 @@ var OpenAIResponsesLanguageModel = class {
         }
         case "mcp_approval_request": {
           const approvalRequestId = (_w = part.approval_request_id) != null ? _w : part.id;
-          const dummyToolCallId = (_z = (_y = (_x = this.config).generateId) == null ? void 0 : _y.call(_x)) != null ? _z : generateId$1();
+          const dummyToolCallId = (_z = (_y = (_x = this.config).generateId) == null ? void 0 : _y.call(_x)) != null ? _z : generateId();
           const toolName = `mcp.${part.name}`;
           content.push({
             type: "tool-call",
@@ -25084,12 +24634,12 @@ var OpenAIResponsesLanguageModel = class {
       toolNameMapping,
       store
     } = await this.getArgs(options);
-    const { responseHeaders, value: response } = await postJsonToApi$1({
+    const { responseHeaders, value: response } = await postJsonToApi({
       url: this.config.url({
         path: "/responses",
         modelId: this.modelId
       }),
-      headers: combineHeaders$1(this.config.headers(), options.headers),
+      headers: combineHeaders(this.config.headers(), options.headers),
       body: {
         ...body,
         stream: true
@@ -25463,7 +25013,7 @@ var OpenAIResponsesLanguageModel = class {
                 ongoingToolCalls[value.output_index] = void 0;
               } else if (value.item.type === "mcp_approval_request") {
                 ongoingToolCalls[value.output_index] = void 0;
-                const dummyToolCallId = (_i = (_h = (_g = self.config).generateId) == null ? void 0 : _h.call(_g)) != null ? _i : generateId$1();
+                const dummyToolCallId = (_i = (_h = (_g = self.config).generateId) == null ? void 0 : _h.call(_g)) != null ? _i : generateId();
                 const approvalRequestId = (_j = value.item.approval_request_id) != null ? _j : value.item.id;
                 approvalRequestIdToDummyToolCallIdFromStream.set(
                   approvalRequestId,
@@ -25710,7 +25260,7 @@ var OpenAIResponsesLanguageModel = class {
                 controller.enqueue({
                   type: "source",
                   sourceType: "url",
-                  id: (_u = (_t = (_s = self.config).generateId) == null ? void 0 : _t.call(_s)) != null ? _u : generateId$1(),
+                  id: (_u = (_t = (_s = self.config).generateId) == null ? void 0 : _t.call(_s)) != null ? _u : generateId(),
                   url: value.annotation.url,
                   title: value.annotation.title
                 });
@@ -25718,7 +25268,7 @@ var OpenAIResponsesLanguageModel = class {
                 controller.enqueue({
                   type: "source",
                   sourceType: "document",
-                  id: (_x = (_w = (_v = self.config).generateId) == null ? void 0 : _w.call(_v)) != null ? _x : generateId$1(),
+                  id: (_x = (_w = (_v = self.config).generateId) == null ? void 0 : _w.call(_v)) != null ? _x : generateId(),
                   mediaType: "text/plain",
                   title: (_z = (_y = value.annotation.quote) != null ? _y : value.annotation.filename) != null ? _z : "Document",
                   filename: (_A = value.annotation.filename) != null ? _A : value.annotation.file_id,
@@ -25734,7 +25284,7 @@ var OpenAIResponsesLanguageModel = class {
                 controller.enqueue({
                   type: "source",
                   sourceType: "document",
-                  id: (_D = (_C = (_B = self.config).generateId) == null ? void 0 : _C.call(_B)) != null ? _D : generateId$1(),
+                  id: (_D = (_C = (_B = self.config).generateId) == null ? void 0 : _C.call(_B)) != null ? _D : generateId(),
                   mediaType: "text/plain",
                   title: (_F = (_E = value.annotation.filename) != null ? _E : value.annotation.file_id) != null ? _F : "Document",
                   filename: (_G = value.annotation.filename) != null ? _G : value.annotation.file_id,
@@ -25750,7 +25300,7 @@ var OpenAIResponsesLanguageModel = class {
                 controller.enqueue({
                   type: "source",
                   sourceType: "document",
-                  id: (_J = (_I = (_H = self.config).generateId) == null ? void 0 : _I.call(_H)) != null ? _J : generateId$1(),
+                  id: (_J = (_I = (_H = self.config).generateId) == null ? void 0 : _I.call(_H)) != null ? _J : generateId(),
                   mediaType: "application/octet-stream",
                   title: value.annotation.file_id,
                   filename: value.annotation.file_id,
@@ -25884,7 +25434,7 @@ var OpenAISpeechModel = class {
     providerOptions
   }) {
     const warnings = [];
-    const openAIOptions = await parseProviderOptions$1({
+    const openAIOptions = await parseProviderOptions({
       provider: "openai",
       providerOptions,
       schema: openaiSpeechProviderOptionsSchema
@@ -25937,12 +25487,12 @@ var OpenAISpeechModel = class {
       value: audio,
       responseHeaders,
       rawValue: rawResponse
-    } = await postJsonToApi$1({
+    } = await postJsonToApi({
       url: this.config.url({
         path: "/audio/speech",
         modelId: this.modelId
       }),
-      headers: combineHeaders$1(this.config.headers(), options.headers),
+      headers: combineHeaders(this.config.headers(), options.headers),
       body: requestBody,
       failedResponseHandler: openaiFailedResponseHandler,
       successfulResponseHandler: createBinaryResponseHandler(),
@@ -26098,7 +25648,7 @@ var OpenAITranscriptionModel = class {
     providerOptions
   }) {
     const warnings = [];
-    const openAIOptions = await parseProviderOptions$1({
+    const openAIOptions = await parseProviderOptions({
       provider: "openai",
       providerOptions,
       schema: openAITranscriptionProviderOptions
@@ -26156,10 +25706,10 @@ var OpenAITranscriptionModel = class {
         path: "/audio/transcriptions",
         modelId: this.modelId
       }),
-      headers: combineHeaders$1(this.config.headers(), options.headers),
+      headers: combineHeaders(this.config.headers(), options.headers),
       formData,
       failedResponseHandler: openaiFailedResponseHandler,
-      successfulResponseHandler: createJsonResponseHandler$1(
+      successfulResponseHandler: createJsonResponseHandler(
         openaiTranscriptionResponseSchema
       ),
       abortSignal: options.abortSignal,
@@ -26191,19 +25741,19 @@ var OpenAITranscriptionModel = class {
 };
 
 // src/version.ts
-var VERSION$5 = "3.0.1" ;
+var VERSION$4 = "3.0.2" ;
 
 // src/openai-provider.ts
 function createOpenAI(options = {}) {
   var _a, _b;
-  const baseURL = (_a = withoutTrailingSlash$1(
+  const baseURL = (_a = withoutTrailingSlash(
     loadOptionalSetting({
       settingValue: options.baseURL,
       environmentVariableName: "OPENAI_BASE_URL"
     })
   )) != null ? _a : "https://api.openai.com/v1";
   const providerName = (_b = options.name) != null ? _b : "openai";
-  const getHeaders = () => withUserAgentSuffix$1(
+  const getHeaders = () => withUserAgentSuffix(
     {
       Authorization: `Bearer ${loadApiKey({
         apiKey: options.apiKey,
@@ -26214,7 +25764,7 @@ function createOpenAI(options = {}) {
       "OpenAI-Project": options.project,
       ...options.headers
     },
-    `ai-sdk/openai/${VERSION$5}`
+    `ai-sdk/openai/${VERSION$4}`
   );
   const createChatModel = (modelId) => new OpenAIChatLanguageModel(modelId, {
     provider: `${providerName}.chat`,
@@ -26295,7 +25845,7 @@ createOpenAI();
 // src/anthropic-provider.ts
 
 // src/version.ts
-var VERSION$4 = "3.0.1" ;
+var VERSION$3 = "3.0.2" ;
 var anthropicErrorDataSchema = lazySchema(
   () => zodSchema(
     object$1({
@@ -26307,7 +25857,7 @@ var anthropicErrorDataSchema = lazySchema(
     })
   )
 );
-var anthropicFailedResponseHandler = createJsonErrorResponseHandler$1({
+var anthropicFailedResponseHandler = createJsonErrorResponseHandler({
   errorSchema: anthropicErrorDataSchema,
   errorToMessage: (data) => data.error.message
 });
@@ -27386,7 +26936,7 @@ async function prepareTools$2({
             break;
           }
           case "anthropic.text_editor_20250728": {
-            const args = await validateTypes$1({
+            const args = await validateTypes({
               value: tool.args,
               schema: textEditor_20250728ArgsSchema
             });
@@ -27426,7 +26976,7 @@ async function prepareTools$2({
           }
           case "anthropic.web_fetch_20250910": {
             betas.add("web-fetch-2025-09-10");
-            const args = await validateTypes$1({
+            const args = await validateTypes({
               value: tool.args,
               schema: webFetch_20250910ArgsSchema
             });
@@ -27443,7 +26993,7 @@ async function prepareTools$2({
             break;
           }
           case "anthropic.web_search_20250305": {
-            const args = await validateTypes$1({
+            const args = await validateTypes({
               value: tool.args,
               schema: webSearch_20250305ArgsSchema
             });
@@ -27538,7 +27088,7 @@ async function prepareTools$2({
       };
     default: {
       const _exhaustiveCheck = type;
-      throw new UnsupportedFunctionalityError$1({
+      throw new UnsupportedFunctionalityError({
         functionality: `tool choice type: ${_exhaustiveCheck}`
       });
     }
@@ -27752,11 +27302,11 @@ function convertToString(data) {
     return new TextDecoder().decode(data);
   }
   if (data instanceof URL) {
-    throw new UnsupportedFunctionalityError$1({
+    throw new UnsupportedFunctionalityError({
       functionality: "URL-based text documents are not supported for citations"
     });
   }
-  throw new UnsupportedFunctionalityError$1({
+  throw new UnsupportedFunctionalityError({
     functionality: `unsupported data type for text documents: ${typeof data}`
   });
 }
@@ -27775,7 +27325,7 @@ async function convertToAnthropicMessagesPrompt({
   const messages = [];
   async function shouldEnableCitations(providerMetadata) {
     var _a2, _b2;
-    const anthropicOptions = await parseProviderOptions$1({
+    const anthropicOptions = await parseProviderOptions({
       provider: "anthropic",
       providerOptions: providerMetadata,
       schema: anthropicFilePartProviderOptions
@@ -27783,7 +27333,7 @@ async function convertToAnthropicMessagesPrompt({
     return (_b2 = (_a2 = anthropicOptions == null ? void 0 : anthropicOptions.citations) == null ? void 0 : _a2.enabled) != null ? _b2 : false;
   }
   async function getDocumentMetadata(providerMetadata) {
-    const anthropicOptions = await parseProviderOptions$1({
+    const anthropicOptions = await parseProviderOptions({
       provider: "anthropic",
       providerOptions: providerMetadata,
       schema: anthropicFilePartProviderOptions
@@ -27800,7 +27350,7 @@ async function convertToAnthropicMessagesPrompt({
     switch (type) {
       case "system": {
         if (system != null) {
-          throw new UnsupportedFunctionalityError$1({
+          throw new UnsupportedFunctionalityError({
             functionality: "Multiple system messages that are separated by user/assistant messages"
           });
         }
@@ -27903,7 +27453,7 @@ async function convertToAnthropicMessagesPrompt({
                         cache_control: cacheControl
                       });
                     } else {
-                      throw new UnsupportedFunctionalityError$1({
+                      throw new UnsupportedFunctionalityError({
                         functionality: `media type: ${part.mediaType}`
                       });
                     }
@@ -28059,7 +27609,7 @@ async function convertToAnthropicMessagesPrompt({
               }
               case "reasoning": {
                 if (sendReasoning) {
-                  const reasoningMetadata = await parseProviderOptions$1({
+                  const reasoningMetadata = await parseProviderOptions({
                     provider: "anthropic",
                     providerOptions: part.providerOptions,
                     schema: anthropicReasoningMetadataSchema
@@ -28265,7 +27815,7 @@ async function convertToAnthropicMessagesPrompt({
                     break;
                   }
                   if (output.value.type === "code_execution_result") {
-                    const codeExecutionOutput = await validateTypes$1({
+                    const codeExecutionOutput = await validateTypes({
                       value: output.value,
                       schema: codeExecution_20250522OutputSchema
                     });
@@ -28282,7 +27832,7 @@ async function convertToAnthropicMessagesPrompt({
                       cache_control: cacheControl
                     });
                   } else {
-                    const codeExecutionOutput = await validateTypes$1({
+                    const codeExecutionOutput = await validateTypes({
                       value: output.value,
                       schema: codeExecution_20250825OutputSchema
                     });
@@ -28339,7 +27889,7 @@ async function convertToAnthropicMessagesPrompt({
                     });
                     break;
                   }
-                  const webFetchOutput = await validateTypes$1({
+                  const webFetchOutput = await validateTypes({
                     value: output.value,
                     schema: webFetch_20250910OutputSchema
                   });
@@ -28374,7 +27924,7 @@ async function convertToAnthropicMessagesPrompt({
                     });
                     break;
                   }
-                  const webSearchOutput = await validateTypes$1({
+                  const webSearchOutput = await validateTypes({
                     value: output.value,
                     schema: webSearch_20250305OutputSchema
                   });
@@ -28401,7 +27951,7 @@ async function convertToAnthropicMessagesPrompt({
                     });
                     break;
                   }
-                  const toolSearchOutput = await validateTypes$1({
+                  const toolSearchOutput = await validateTypes({
                     value: output.value,
                     schema: toolSearchRegex_20251119OutputSchema
                   });
@@ -28548,7 +28098,7 @@ var AnthropicMessagesLanguageModel = class {
     var _a;
     this.modelId = modelId;
     this.config = config;
-    this.generateId = (_a = config.generateId) != null ? _a : generateId$1;
+    this.generateId = (_a = config.generateId) != null ? _a : generateId;
   }
   supportsUrl(url) {
     return url.protocol === "https:";
@@ -28612,7 +28162,7 @@ var AnthropicMessagesLanguageModel = class {
         });
       }
     }
-    const anthropicOptions = await parseProviderOptions$1({
+    const anthropicOptions = await parseProviderOptions({
       provider: "anthropic",
       providerOptions,
       schema: anthropicProviderOptions
@@ -28874,7 +28424,7 @@ var AnthropicMessagesLanguageModel = class {
     betas,
     headers
   }) {
-    return combineHeaders$1(
+    return combineHeaders(
       await resolve(this.config.headers),
       headers,
       betas.size > 0 ? { "anthropic-beta": Array.from(betas).join(",") } : {}
@@ -28935,12 +28485,12 @@ var AnthropicMessagesLanguageModel = class {
       responseHeaders,
       value: response,
       rawValue: rawResponse
-    } = await postJsonToApi$1({
+    } = await postJsonToApi({
       url: this.buildRequestUrl(false),
       headers: await this.getHeaders({ betas, headers: options.headers }),
       body: this.transformRequestBody(args),
       failedResponseHandler: anthropicFailedResponseHandler,
-      successfulResponseHandler: createJsonResponseHandler$1(
+      successfulResponseHandler: createJsonResponseHandler(
         anthropicMessagesResponseSchema
       ),
       abortSignal: options.abortSignal,
@@ -29285,7 +28835,7 @@ var AnthropicMessagesLanguageModel = class {
     });
     const citationDocuments = this.extractCitationDocuments(options.prompt);
     const url = this.buildRequestUrl(true);
-    const { responseHeaders, value: response } = await postJsonToApi$1({
+    const { responseHeaders, value: response } = await postJsonToApi({
       url,
       headers: await this.getHeaders({ betas, headers: options.headers }),
       body: this.transformRequestBody(body),
@@ -29929,7 +29479,7 @@ var AnthropicMessagesLanguageModel = class {
       }
       if (((_b = result.value) == null ? void 0 : _b.type) === "error") {
         const error = result.value.error;
-        throw new APICallError$1({
+        throw new APICallError({
           message: error.message,
           url,
           requestBodyValues: body,
@@ -30382,14 +29932,14 @@ var anthropicTools = {
 // src/anthropic-provider.ts
 function createAnthropic(options = {}) {
   var _a, _b;
-  const baseURL = (_a = withoutTrailingSlash$1(
+  const baseURL = (_a = withoutTrailingSlash(
     loadOptionalSetting({
       settingValue: options.baseURL,
       environmentVariableName: "ANTHROPIC_BASE_URL"
     })
   )) != null ? _a : "https://api.anthropic.com/v1";
   const providerName = (_b = options.name) != null ? _b : "anthropic.messages";
-  const getHeaders = () => withUserAgentSuffix$1(
+  const getHeaders = () => withUserAgentSuffix(
     {
       "anthropic-version": "2023-06-01",
       "x-api-key": loadApiKey({
@@ -30399,7 +29949,7 @@ function createAnthropic(options = {}) {
       }),
       ...options.headers
     },
-    `ai-sdk/anthropic/${VERSION$4}`
+    `ai-sdk/anthropic/${VERSION$3}`
   );
   const createChatModel = (modelId) => {
     var _a2;
@@ -30408,7 +29958,7 @@ function createAnthropic(options = {}) {
       baseURL,
       headers: getHeaders,
       fetch: options.fetch,
-      generateId: (_a2 = options.generateId) != null ? _a2 : generateId$1,
+      generateId: (_a2 = options.generateId) != null ? _a2 : generateId,
       supportedUrls: () => ({
         "image/*": [/^https?:\/\/.*$/]
       })
@@ -30427,11 +29977,11 @@ function createAnthropic(options = {}) {
   provider.chat = createChatModel;
   provider.messages = createChatModel;
   provider.embeddingModel = (modelId) => {
-    throw new NoSuchModelError$1({ modelId, modelType: "embeddingModel" });
+    throw new NoSuchModelError({ modelId, modelType: "embeddingModel" });
   };
   provider.textEmbeddingModel = provider.embeddingModel;
   provider.imageModel = (modelId) => {
-    throw new NoSuchModelError$1({ modelId, modelType: "imageModel" });
+    throw new NoSuchModelError({ modelId, modelType: "imageModel" });
   };
   provider.tools = anthropicTools;
   return provider;
@@ -30535,7 +30085,7 @@ function convertToOpenAICompatibleChatMessages(prompt) {
                     ...partMetadata
                   };
                 } else {
-                  throw new UnsupportedFunctionalityError$1({
+                  throw new UnsupportedFunctionalityError({
                     functionality: `file part media type ${part.mediaType}`
                   });
                 }
@@ -30710,7 +30260,7 @@ function prepareTools$1({
       };
     default: {
       const _exhaustiveCheck = type;
-      throw new UnsupportedFunctionalityError$1({
+      throw new UnsupportedFunctionalityError({
         functionality: `tool choice type: ${_exhaustiveCheck}`
       });
     }
@@ -30729,7 +30279,7 @@ var OpenAICompatibleChatLanguageModel = class {
     this.chunkSchema = createOpenAICompatibleChatChunkSchema(
       errorStructure.errorSchema
     );
-    this.failedResponseHandler = createJsonErrorResponseHandler$1(errorStructure);
+    this.failedResponseHandler = createJsonErrorResponseHandler(errorStructure);
     this.supportsStructuredOutputs = (_b = config.supportsStructuredOutputs) != null ? _b : false;
   }
   get provider() {
@@ -30760,12 +30310,12 @@ var OpenAICompatibleChatLanguageModel = class {
     var _a, _b, _c, _d;
     const warnings = [];
     const compatibleOptions = Object.assign(
-      (_a = await parseProviderOptions$1({
+      (_a = await parseProviderOptions({
         provider: "openai-compatible",
         providerOptions,
         schema: openaiCompatibleProviderOptions
       })) != null ? _a : {},
-      (_b = await parseProviderOptions$1({
+      (_b = await parseProviderOptions({
         provider: this.providerOptionsName,
         providerOptions,
         schema: openaiCompatibleProviderOptions
@@ -30837,15 +30387,15 @@ var OpenAICompatibleChatLanguageModel = class {
       responseHeaders,
       value: responseBody,
       rawValue: rawResponse
-    } = await postJsonToApi$1({
+    } = await postJsonToApi({
       url: this.config.url({
         path: "/chat/completions",
         modelId: this.modelId
       }),
-      headers: combineHeaders$1(this.config.headers(), options.headers),
+      headers: combineHeaders(this.config.headers(), options.headers),
       body: args,
       failedResponseHandler: this.failedResponseHandler,
-      successfulResponseHandler: createJsonResponseHandler$1(
+      successfulResponseHandler: createJsonResponseHandler(
         OpenAICompatibleChatResponseSchema
       ),
       abortSignal: options.abortSignal,
@@ -30868,7 +30418,7 @@ var OpenAICompatibleChatLanguageModel = class {
       for (const toolCall of choice.message.tool_calls) {
         content.push({
           type: "tool-call",
-          toolCallId: (_b = toolCall.id) != null ? _b : generateId$1(),
+          toolCallId: (_b = toolCall.id) != null ? _b : generateId(),
           toolName: toolCall.function.name,
           input: toolCall.function.arguments
         });
@@ -30914,12 +30464,12 @@ var OpenAICompatibleChatLanguageModel = class {
       stream_options: this.config.includeUsage ? { include_usage: true } : void 0
     };
     const metadataExtractor = (_a = this.config.metadataExtractor) == null ? void 0 : _a.createStreamExtractor();
-    const { responseHeaders, value: response } = await postJsonToApi$1({
+    const { responseHeaders, value: response } = await postJsonToApi({
       url: this.config.url({
         path: "/chat/completions",
         modelId: this.modelId
       }),
-      headers: combineHeaders$1(this.config.headers(), options.headers),
+      headers: combineHeaders(this.config.headers(), options.headers),
       body,
       failedResponseHandler: this.failedResponseHandler,
       successfulResponseHandler: createEventSourceResponseHandler(
@@ -31016,13 +30566,13 @@ var OpenAICompatibleChatLanguageModel = class {
                 const index = toolCallDelta.index;
                 if (toolCalls[index] == null) {
                   if (toolCallDelta.id == null) {
-                    throw new InvalidResponseDataError$1({
+                    throw new InvalidResponseDataError({
                       data: toolCallDelta,
                       message: `Expected 'id' to be a string.`
                     });
                   }
                   if (((_c = toolCallDelta.function) == null ? void 0 : _c.name) == null) {
-                    throw new InvalidResponseDataError$1({
+                    throw new InvalidResponseDataError({
                       data: toolCallDelta,
                       message: `Expected 'function.name' to be a string.`
                     });
@@ -31057,7 +30607,7 @@ var OpenAICompatibleChatLanguageModel = class {
                       });
                       controller.enqueue({
                         type: "tool-call",
-                        toolCallId: (_g = toolCall2.id) != null ? _g : generateId$1(),
+                        toolCallId: (_g = toolCall2.id) != null ? _g : generateId(),
                         toolName: toolCall2.function.name,
                         input: toolCall2.function.arguments
                       });
@@ -31085,7 +30635,7 @@ var OpenAICompatibleChatLanguageModel = class {
                   });
                   controller.enqueue({
                     type: "tool-call",
-                    toolCallId: (_n = toolCall.id) != null ? _n : generateId$1(),
+                    toolCallId: (_n = toolCall.id) != null ? _n : generateId(),
                     toolName: toolCall.function.name,
                     input: toolCall.function.arguments
                   });
@@ -31111,7 +30661,7 @@ var OpenAICompatibleChatLanguageModel = class {
               });
               controller.enqueue({
                 type: "tool-call",
-                toolCallId: (_a2 = toolCall.id) != null ? _a2 : generateId$1(),
+                toolCallId: (_a2 = toolCall.id) != null ? _a2 : generateId(),
                 toolName: toolCall.function.name,
                 input: toolCall.function.arguments
               });
@@ -31306,7 +30856,7 @@ var OpenAICompatibleImageModel = class {
           path: "/images/edits",
           modelId: this.modelId
         }),
-        headers: combineHeaders$1(this.config.headers(), headers),
+        headers: combineHeaders(this.config.headers(), headers),
         formData: convertToFormData({
           model: this.modelId,
           prompt,
@@ -31316,10 +30866,10 @@ var OpenAICompatibleImageModel = class {
           size,
           ...(_d = providerOptions.openai) != null ? _d : {}
         }),
-        failedResponseHandler: createJsonErrorResponseHandler$1(
+        failedResponseHandler: createJsonErrorResponseHandler(
           (_e = this.config.errorStructure) != null ? _e : defaultOpenAICompatibleErrorStructure
         ),
-        successfulResponseHandler: createJsonResponseHandler$1(
+        successfulResponseHandler: createJsonResponseHandler(
           openaiCompatibleImageResponseSchema
         ),
         abortSignal,
@@ -31335,12 +30885,12 @@ var OpenAICompatibleImageModel = class {
         }
       };
     }
-    const { value: response, responseHeaders } = await postJsonToApi$1({
+    const { value: response, responseHeaders } = await postJsonToApi({
       url: this.config.url({
         path: "/images/generations",
         modelId: this.modelId
       }),
-      headers: combineHeaders$1(this.config.headers(), headers),
+      headers: combineHeaders(this.config.headers(), headers),
       body: {
         model: this.modelId,
         prompt,
@@ -31349,10 +30899,10 @@ var OpenAICompatibleImageModel = class {
         ...(_f = providerOptions.openai) != null ? _f : {},
         response_format: "b64_json"
       },
-      failedResponseHandler: createJsonErrorResponseHandler$1(
+      failedResponseHandler: createJsonErrorResponseHandler(
         (_g = this.config.errorStructure) != null ? _g : defaultOpenAICompatibleErrorStructure
       ),
-      successfulResponseHandler: createJsonResponseHandler$1(
+      successfulResponseHandler: createJsonResponseHandler(
         openaiCompatibleImageResponseSchema
       ),
       abortSignal,
@@ -31413,7 +30963,7 @@ function convertToXaiChatMessages(prompt) {
                     }
                   };
                 } else {
-                  throw new UnsupportedFunctionalityError$1({
+                  throw new UnsupportedFunctionalityError({
                     functionality: `file part media type ${part.mediaType}`
                   });
                 }
@@ -31503,8 +31053,8 @@ function convertXaiChatUsage(usage) {
       cacheWrite: void 0
     },
     outputTokens: {
-      total: usage.completion_tokens,
-      text: usage.completion_tokens - reasoningTokens,
+      total: usage.completion_tokens + reasoningTokens,
+      text: usage.completion_tokens,
       reasoning: reasoningTokens
     },
     raw: usage
@@ -31630,7 +31180,7 @@ var xaiErrorDataSchema = object$1({
     code: union([string(), number$1()]).nullish()
   })
 });
-var xaiFailedResponseHandler = createJsonErrorResponseHandler$1({
+var xaiFailedResponseHandler = createJsonErrorResponseHandler({
   errorSchema: xaiErrorDataSchema,
   errorToMessage: (data) => data.error.message
 });
@@ -31682,7 +31232,7 @@ function prepareTools({
       };
     default: {
       const _exhaustiveCheck = type;
-      throw new UnsupportedFunctionalityError$1({
+      throw new UnsupportedFunctionalityError({
         functionality: `tool choice type: ${_exhaustiveCheck}`
       });
     }
@@ -31719,7 +31269,7 @@ var XaiChatLanguageModel = class {
   }) {
     var _a, _b, _c;
     const warnings = [];
-    const options = (_a = await parseProviderOptions$1({
+    const options = (_a = await parseProviderOptions({
       provider: "xai",
       providerOptions,
       schema: xaiProviderOptions
@@ -31819,12 +31369,12 @@ var XaiChatLanguageModel = class {
       responseHeaders,
       value: response,
       rawValue: rawResponse
-    } = await postJsonToApi$1({
+    } = await postJsonToApi({
       url: `${(_a = this.config.baseURL) != null ? _a : "https://api.x.ai/v1"}/chat/completions`,
-      headers: combineHeaders$1(this.config.headers(), options.headers),
+      headers: combineHeaders(this.config.headers(), options.headers),
       body,
       failedResponseHandler: xaiFailedResponseHandler,
-      successfulResponseHandler: createJsonResponseHandler$1(
+      successfulResponseHandler: createJsonResponseHandler(
         xaiChatResponseSchema
       ),
       abortSignal: options.abortSignal,
@@ -31894,9 +31444,9 @@ var XaiChatLanguageModel = class {
         include_usage: true
       }
     };
-    const { responseHeaders, value: response } = await postJsonToApi$1({
+    const { responseHeaders, value: response } = await postJsonToApi({
       url: `${(_a = this.config.baseURL) != null ? _a : "https://api.x.ai/v1"}/chat/completions`,
-      headers: combineHeaders$1(this.config.headers(), options.headers),
+      headers: combineHeaders(this.config.headers(), options.headers),
       body,
       failedResponseHandler: xaiFailedResponseHandler,
       successfulResponseHandler: createEventSourceResponseHandler(xaiChatChunkSchema),
@@ -32648,7 +32198,7 @@ async function prepareResponsesTools$1({
     if (tool.type === "provider") {
       switch (tool.id) {
         case "xai.web_search": {
-          const args = await validateTypes$1({
+          const args = await validateTypes({
             value: tool.args,
             schema: webSearchArgsSchema
           });
@@ -32661,7 +32211,7 @@ async function prepareResponsesTools$1({
           break;
         }
         case "xai.x_search": {
-          const args = await validateTypes$1({
+          const args = await validateTypes({
             value: tool.args,
             schema: xSearchArgsSchema
           });
@@ -32804,7 +32354,7 @@ async function prepareResponsesTools$1({
     }
     default: {
       const _exhaustiveCheck = type;
-      throw new UnsupportedFunctionalityError$1({
+      throw new UnsupportedFunctionalityError({
         functionality: `tool choice type: ${_exhaustiveCheck}`
       });
     }
@@ -32837,7 +32387,7 @@ var XaiResponsesLanguageModel = class {
   }) {
     var _a, _b, _c, _d;
     const warnings = [];
-    const options = (_a = await parseProviderOptions$1({
+    const options = (_a = await parseProviderOptions({
       provider: "xai",
       providerOptions,
       schema: xaiResponsesProviderOptions
@@ -32911,12 +32461,12 @@ var XaiResponsesLanguageModel = class {
       responseHeaders,
       value: response,
       rawValue: rawResponse
-    } = await postJsonToApi$1({
+    } = await postJsonToApi({
       url: `${(_a = this.config.baseURL) != null ? _a : "https://api.x.ai/v1"}/responses`,
-      headers: combineHeaders$1(this.config.headers(), options.headers),
+      headers: combineHeaders(this.config.headers(), options.headers),
       body,
       failedResponseHandler: xaiFailedResponseHandler,
-      successfulResponseHandler: createJsonResponseHandler$1(
+      successfulResponseHandler: createJsonResponseHandler(
         xaiResponsesResponseSchema
       ),
       abortSignal: options.abortSignal,
@@ -33019,9 +32569,9 @@ var XaiResponsesLanguageModel = class {
       ...args,
       stream: true
     };
-    const { responseHeaders, value: response } = await postJsonToApi$1({
+    const { responseHeaders, value: response } = await postJsonToApi({
       url: `${(_a = this.config.baseURL) != null ? _a : "https://api.x.ai/v1"}/responses`,
-      headers: combineHeaders$1(this.config.headers(), options.headers),
+      headers: combineHeaders(this.config.headers(), options.headers),
       body,
       failedResponseHandler: xaiFailedResponseHandler,
       successfulResponseHandler: createEventSourceResponseHandler(
@@ -33313,7 +32863,7 @@ var xaiTools = {
 };
 
 // src/version.ts
-var VERSION$3 = "3.0.1" ;
+var VERSION$2 = "3.0.3" ;
 
 // src/xai-provider.ts
 var xaiErrorStructure = {
@@ -33322,10 +32872,10 @@ var xaiErrorStructure = {
 };
 function createXai(options = {}) {
   var _a;
-  const baseURL = withoutTrailingSlash$1(
+  const baseURL = withoutTrailingSlash(
     (_a = options.baseURL) != null ? _a : "https://api.x.ai/v1"
   );
-  const getHeaders = () => withUserAgentSuffix$1(
+  const getHeaders = () => withUserAgentSuffix(
     {
       Authorization: `Bearer ${loadApiKey({
         apiKey: options.apiKey,
@@ -33334,14 +32884,14 @@ function createXai(options = {}) {
       })}`,
       ...options.headers
     },
-    `ai-sdk/xai/${VERSION$3}`
+    `ai-sdk/xai/${VERSION$2}`
   );
   const createChatLanguageModel = (modelId) => {
     return new XaiChatLanguageModel(modelId, {
       provider: "xai.chat",
       baseURL,
       headers: getHeaders,
-      generateId: generateId$1,
+      generateId,
       fetch: options.fetch
     });
   };
@@ -33350,7 +32900,7 @@ function createXai(options = {}) {
       provider: "xai.responses",
       baseURL,
       headers: getHeaders,
-      generateId: generateId$1,
+      generateId,
       fetch: options.fetch
     });
   };
@@ -33369,7 +32919,7 @@ function createXai(options = {}) {
   provider.chat = createChatLanguageModel;
   provider.responses = createResponsesLanguageModel;
   provider.embeddingModel = (modelId) => {
-    throw new NoSuchModelError$1({ modelId, modelType: "embeddingModel" });
+    throw new NoSuchModelError({ modelId, modelType: "embeddingModel" });
   };
   provider.textEmbeddingModel = provider.embeddingModel;
   provider.imageModel = createImageModel;
@@ -33478,7 +33028,7 @@ function convertToPerplexityMessages(prompt) {
         break;
       }
       case "tool": {
-        throw new UnsupportedFunctionalityError$1({
+        throw new UnsupportedFunctionalityError({
           functionality: "Tool messages"
         });
       }
@@ -33568,15 +33118,15 @@ var PerplexityLanguageModel = class {
       responseHeaders,
       value: response,
       rawValue: rawResponse
-    } = await postJsonToApi$1({
+    } = await postJsonToApi({
       url: `${this.config.baseURL}/chat/completions`,
-      headers: combineHeaders$1(this.config.headers(), options.headers),
+      headers: combineHeaders(this.config.headers(), options.headers),
       body,
-      failedResponseHandler: createJsonErrorResponseHandler$1({
+      failedResponseHandler: createJsonErrorResponseHandler({
         errorSchema: perplexityErrorSchema,
         errorToMessage
       }),
-      successfulResponseHandler: createJsonResponseHandler$1(
+      successfulResponseHandler: createJsonResponseHandler(
         perplexityResponseSchema
       ),
       abortSignal: options.abortSignal,
@@ -33631,11 +33181,11 @@ var PerplexityLanguageModel = class {
   async doStream(options) {
     const { args, warnings } = this.getArgs(options);
     const body = { ...args, stream: true };
-    const { responseHeaders, value: response } = await postJsonToApi$1({
+    const { responseHeaders, value: response } = await postJsonToApi({
       url: `${this.config.baseURL}/chat/completions`,
-      headers: combineHeaders$1(this.config.headers(), options.headers),
+      headers: combineHeaders(this.config.headers(), options.headers),
       body,
-      failedResponseHandler: createJsonErrorResponseHandler$1({
+      failedResponseHandler: createJsonErrorResponseHandler({
         errorSchema: perplexityErrorSchema,
         errorToMessage
       }),
@@ -33822,11 +33372,11 @@ var errorToMessage = (data) => {
 };
 
 // src/version.ts
-var VERSION$2 = "3.0.1" ;
+var VERSION$1 = "3.0.2" ;
 
 // src/perplexity-provider.ts
 function createPerplexity(options = {}) {
-  const getHeaders = () => withUserAgentSuffix$1(
+  const getHeaders = () => withUserAgentSuffix(
     {
       Authorization: `Bearer ${loadApiKey({
         apiKey: options.apiKey,
@@ -33835,16 +33385,16 @@ function createPerplexity(options = {}) {
       })}`,
       ...options.headers
     },
-    `ai-sdk/perplexity/${VERSION$2}`
+    `ai-sdk/perplexity/${VERSION$1}`
   );
   const createLanguageModel = (modelId) => {
     var _a;
     return new PerplexityLanguageModel(modelId, {
-      baseURL: withoutTrailingSlash$1(
+      baseURL: withoutTrailingSlash(
         (_a = options.baseURL) != null ? _a : "https://api.perplexity.ai"
       ),
       headers: getHeaders,
-      generateId: generateId$1,
+      generateId,
       fetch: options.fetch
     });
   };
@@ -33852,11 +33402,11 @@ function createPerplexity(options = {}) {
   provider.specificationVersion = "v3";
   provider.languageModel = createLanguageModel;
   provider.embeddingModel = (modelId) => {
-    throw new NoSuchModelError$1({ modelId, modelType: "embeddingModel" });
+    throw new NoSuchModelError({ modelId, modelType: "embeddingModel" });
   };
   provider.textEmbeddingModel = provider.embeddingModel;
   provider.imageModel = (modelId) => {
-    throw new NoSuchModelError$1({ modelId, modelType: "imageModel" });
+    throw new NoSuchModelError({ modelId, modelType: "imageModel" });
   };
   return provider;
 }
@@ -33865,7 +33415,7 @@ createPerplexity();
 // src/cerebras-provider.ts
 
 // src/version.ts
-var VERSION$1 = "2.0.2" ;
+var VERSION = "2.0.3" ;
 
 // src/cerebras-provider.ts
 var cerebrasErrorSchema = object$1({
@@ -33880,10 +33430,10 @@ var cerebrasErrorStructure = {
 };
 function createCerebras(options = {}) {
   var _a;
-  const baseURL = withoutTrailingSlash$1(
+  const baseURL = withoutTrailingSlash(
     (_a = options.baseURL) != null ? _a : "https://api.cerebras.ai/v1"
   );
-  const getHeaders = () => withUserAgentSuffix$1(
+  const getHeaders = () => withUserAgentSuffix(
     {
       Authorization: `Bearer ${loadApiKey({
         apiKey: options.apiKey,
@@ -33892,7 +33442,7 @@ function createCerebras(options = {}) {
       })}`,
       ...options.headers
     },
-    `ai-sdk/cerebras/${VERSION$1}`
+    `ai-sdk/cerebras/${VERSION}`
   );
   const createLanguageModel = (modelId) => {
     return new OpenAICompatibleChatLanguageModel(modelId, {
@@ -33909,830 +33459,17 @@ function createCerebras(options = {}) {
   provider.languageModel = createLanguageModel;
   provider.chat = createLanguageModel;
   provider.embeddingModel = (modelId) => {
-    throw new NoSuchModelError$1({ modelId, modelType: "embeddingModel" });
+    throw new NoSuchModelError({ modelId, modelType: "embeddingModel" });
   };
   provider.textEmbeddingModel = provider.embeddingModel;
   provider.imageModel = (modelId) => {
-    throw new NoSuchModelError$1({ modelId, modelType: "imageModel" });
+    throw new NoSuchModelError({ modelId, modelType: "imageModel" });
   };
   return provider;
 }
 createCerebras();
 
-// src/errors/ai-sdk-error.ts
-var marker = "vercel.ai.error";
-var symbol = Symbol.for(marker);
-var _a;
-var _AISDKError = class _AISDKError extends Error {
-  /**
-   * Creates an AI SDK Error.
-   *
-   * @param {Object} params - The parameters for creating the error.
-   * @param {string} params.name - The name of the error.
-   * @param {string} params.message - The error message.
-   * @param {unknown} [params.cause] - The underlying cause of the error.
-   */
-  constructor({
-    name: name14,
-    message,
-    cause
-  }) {
-    super(message);
-    this[_a] = true;
-    this.name = name14;
-    this.cause = cause;
-  }
-  /**
-   * Checks if the given error is an AI SDK Error.
-   * @param {unknown} error - The error to check.
-   * @returns {boolean} True if the error is an AI SDK Error, false otherwise.
-   */
-  static isInstance(error) {
-    return _AISDKError.hasMarker(error, marker);
-  }
-  static hasMarker(error, marker15) {
-    const markerSymbol = Symbol.for(marker15);
-    return error != null && typeof error === "object" && markerSymbol in error && typeof error[markerSymbol] === "boolean" && error[markerSymbol] === true;
-  }
-};
-_a = symbol;
-var AISDKError = _AISDKError;
-
-// src/errors/api-call-error.ts
-var name = "AI_APICallError";
-var marker2 = `vercel.ai.error.${name}`;
-var symbol2 = Symbol.for(marker2);
-var _a2;
-var APICallError = class extends AISDKError {
-  constructor({
-    message,
-    url,
-    requestBodyValues,
-    statusCode,
-    responseHeaders,
-    responseBody,
-    cause,
-    isRetryable = statusCode != null && (statusCode === 408 || // request timeout
-    statusCode === 409 || // conflict
-    statusCode === 429 || // too many requests
-    statusCode >= 500),
-    // server error
-    data
-  }) {
-    super({ name, message, cause });
-    this[_a2] = true;
-    this.url = url;
-    this.requestBodyValues = requestBodyValues;
-    this.statusCode = statusCode;
-    this.responseHeaders = responseHeaders;
-    this.responseBody = responseBody;
-    this.isRetryable = isRetryable;
-    this.data = data;
-  }
-  static isInstance(error) {
-    return AISDKError.hasMarker(error, marker2);
-  }
-};
-_a2 = symbol2;
-
-// src/errors/empty-response-body-error.ts
-var name2 = "AI_EmptyResponseBodyError";
-var marker3 = `vercel.ai.error.${name2}`;
-var symbol3 = Symbol.for(marker3);
-var _a3;
-var EmptyResponseBodyError = class extends AISDKError {
-  // used in isInstance
-  constructor({ message = "Empty response body" } = {}) {
-    super({ name: name2, message });
-    this[_a3] = true;
-  }
-  static isInstance(error) {
-    return AISDKError.hasMarker(error, marker3);
-  }
-};
-_a3 = symbol3;
-
-// src/errors/get-error-message.ts
-function getErrorMessage(error) {
-  if (error == null) {
-    return "unknown error";
-  }
-  if (typeof error === "string") {
-    return error;
-  }
-  if (error instanceof Error) {
-    return error.message;
-  }
-  return JSON.stringify(error);
-}
-
-// src/errors/invalid-argument-error.ts
-var name3 = "AI_InvalidArgumentError";
-var marker4 = `vercel.ai.error.${name3}`;
-var symbol4 = Symbol.for(marker4);
-var _a4;
-var InvalidArgumentError = class extends AISDKError {
-  constructor({
-    message,
-    cause,
-    argument
-  }) {
-    super({ name: name3, message, cause });
-    this[_a4] = true;
-    this.argument = argument;
-  }
-  static isInstance(error) {
-    return AISDKError.hasMarker(error, marker4);
-  }
-};
-_a4 = symbol4;
-
-// src/errors/invalid-prompt-error.ts
-var name4 = "AI_InvalidPromptError";
-var marker5 = `vercel.ai.error.${name4}`;
-var symbol5 = Symbol.for(marker5);
-var _a5;
-var InvalidPromptError = class extends AISDKError {
-  constructor({
-    prompt,
-    message,
-    cause
-  }) {
-    super({ name: name4, message: `Invalid prompt: ${message}`, cause });
-    this[_a5] = true;
-    this.prompt = prompt;
-  }
-  static isInstance(error) {
-    return AISDKError.hasMarker(error, marker5);
-  }
-};
-_a5 = symbol5;
-
-// src/errors/invalid-response-data-error.ts
-var name5 = "AI_InvalidResponseDataError";
-var marker6 = `vercel.ai.error.${name5}`;
-var symbol6 = Symbol.for(marker6);
-var _a6;
-var InvalidResponseDataError = class extends AISDKError {
-  constructor({
-    data,
-    message = `Invalid response data: ${JSON.stringify(data)}.`
-  }) {
-    super({ name: name5, message });
-    this[_a6] = true;
-    this.data = data;
-  }
-  static isInstance(error) {
-    return AISDKError.hasMarker(error, marker6);
-  }
-};
-_a6 = symbol6;
-
-// src/errors/json-parse-error.ts
-var name6 = "AI_JSONParseError";
-var marker7 = `vercel.ai.error.${name6}`;
-var symbol7 = Symbol.for(marker7);
-var _a7;
-var JSONParseError = class extends AISDKError {
-  constructor({ text, cause }) {
-    super({
-      name: name6,
-      message: `JSON parsing failed: Text: ${text}.
-Error message: ${getErrorMessage(cause)}`,
-      cause
-    });
-    this[_a7] = true;
-    this.text = text;
-  }
-  static isInstance(error) {
-    return AISDKError.hasMarker(error, marker7);
-  }
-};
-_a7 = symbol7;
-
-// src/errors/no-such-model-error.ts
-var name10 = "AI_NoSuchModelError";
-var marker11 = `vercel.ai.error.${name10}`;
-var symbol11 = Symbol.for(marker11);
-var _a11;
-var NoSuchModelError = class extends AISDKError {
-  constructor({
-    errorName = name10,
-    modelId,
-    modelType,
-    message = `No such ${modelType}: ${modelId}`
-  }) {
-    super({ name: errorName, message });
-    this[_a11] = true;
-    this.modelId = modelId;
-    this.modelType = modelType;
-  }
-  static isInstance(error) {
-    return AISDKError.hasMarker(error, marker11);
-  }
-};
-_a11 = symbol11;
-
-// src/errors/too-many-embedding-values-for-call-error.ts
-var name11 = "AI_TooManyEmbeddingValuesForCallError";
-var marker12 = `vercel.ai.error.${name11}`;
-var symbol12 = Symbol.for(marker12);
-var _a12;
-var TooManyEmbeddingValuesForCallError = class extends AISDKError {
-  constructor(options) {
-    super({
-      name: name11,
-      message: `Too many values for a single embedding call. The ${options.provider} model "${options.modelId}" can only embed up to ${options.maxEmbeddingsPerCall} values per call, but ${options.values.length} values were provided.`
-    });
-    this[_a12] = true;
-    this.provider = options.provider;
-    this.modelId = options.modelId;
-    this.maxEmbeddingsPerCall = options.maxEmbeddingsPerCall;
-    this.values = options.values;
-  }
-  static isInstance(error) {
-    return AISDKError.hasMarker(error, marker12);
-  }
-};
-_a12 = symbol12;
-
-// src/errors/type-validation-error.ts
-var name12 = "AI_TypeValidationError";
-var marker13 = `vercel.ai.error.${name12}`;
-var symbol13 = Symbol.for(marker13);
-var _a13;
-var _TypeValidationError = class _TypeValidationError extends AISDKError {
-  constructor({ value, cause }) {
-    super({
-      name: name12,
-      message: `Type validation failed: Value: ${JSON.stringify(value)}.
-Error message: ${getErrorMessage(cause)}`,
-      cause
-    });
-    this[_a13] = true;
-    this.value = value;
-  }
-  static isInstance(error) {
-    return AISDKError.hasMarker(error, marker13);
-  }
-  /**
-   * Wraps an error into a TypeValidationError.
-   * If the cause is already a TypeValidationError with the same value, it returns the cause.
-   * Otherwise, it creates a new TypeValidationError.
-   *
-   * @param {Object} params - The parameters for wrapping the error.
-   * @param {unknown} params.value - The value that failed validation.
-   * @param {unknown} params.cause - The original error or cause of the validation failure.
-   * @returns {TypeValidationError} A TypeValidationError instance.
-   */
-  static wrap({
-    value,
-    cause
-  }) {
-    return _TypeValidationError.isInstance(cause) && cause.value === value ? cause : new _TypeValidationError({ value, cause });
-  }
-};
-_a13 = symbol13;
-var TypeValidationError = _TypeValidationError;
-
-// src/errors/unsupported-functionality-error.ts
-var name13 = "AI_UnsupportedFunctionalityError";
-var marker14 = `vercel.ai.error.${name13}`;
-var symbol14 = Symbol.for(marker14);
-var _a14;
-var UnsupportedFunctionalityError = class extends AISDKError {
-  constructor({
-    functionality,
-    message = `'${functionality}' functionality not supported.`
-  }) {
-    super({ name: name13, message });
-    this[_a14] = true;
-    this.functionality = functionality;
-  }
-  static isInstance(error) {
-    return AISDKError.hasMarker(error, marker14);
-  }
-};
-_a14 = symbol14;
-
-// src/combine-headers.ts
-function combineHeaders(...headers) {
-  return headers.reduce(
-    (combinedHeaders, currentHeaders) => ({
-      ...combinedHeaders,
-      ...currentHeaders != null ? currentHeaders : {}
-    }),
-    {}
-  );
-}
-
-// src/extract-response-headers.ts
-function extractResponseHeaders(response) {
-  return Object.fromEntries([...response.headers]);
-}
-var createIdGenerator = ({
-  prefix,
-  size = 16,
-  alphabet = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz",
-  separator = "-"
-} = {}) => {
-  const generator = () => {
-    const alphabetLength = alphabet.length;
-    const chars = new Array(size);
-    for (let i = 0; i < size; i++) {
-      chars[i] = alphabet[Math.random() * alphabetLength | 0];
-    }
-    return chars.join("");
-  };
-  if (prefix == null) {
-    return generator;
-  }
-  if (alphabet.includes(separator)) {
-    throw new InvalidArgumentError({
-      argument: "separator",
-      message: `The separator "${separator}" must not be part of the alphabet "${alphabet}".`
-    });
-  }
-  return () => `${prefix}${separator}${generator()}`;
-};
-var generateId = createIdGenerator();
-
-// src/is-abort-error.ts
-function isAbortError(error) {
-  return (error instanceof Error || error instanceof DOMException) && (error.name === "AbortError" || error.name === "ResponseAborted" || // Next.js
-  error.name === "TimeoutError");
-}
-
-// src/handle-fetch-error.ts
-var FETCH_FAILED_ERROR_MESSAGES = ["fetch failed", "failed to fetch"];
-function handleFetchError({
-  error,
-  url,
-  requestBodyValues
-}) {
-  if (isAbortError(error)) {
-    return error;
-  }
-  if (error instanceof TypeError && FETCH_FAILED_ERROR_MESSAGES.includes(error.message.toLowerCase())) {
-    const cause = error.cause;
-    if (cause != null) {
-      return new APICallError({
-        message: `Cannot connect to API: ${cause.message}`,
-        cause,
-        url,
-        requestBodyValues,
-        isRetryable: true
-        // retry when network error
-      });
-    }
-  }
-  return error;
-}
-
-// src/get-runtime-environment-user-agent.ts
-function getRuntimeEnvironmentUserAgent(globalThisAny = globalThis) {
-  var _a, _b, _c;
-  if (globalThisAny.window) {
-    return `runtime/browser`;
-  }
-  if ((_a = globalThisAny.navigator) == null ? void 0 : _a.userAgent) {
-    return `runtime/${globalThisAny.navigator.userAgent.toLowerCase()}`;
-  }
-  if ((_c = (_b = globalThisAny.process) == null ? void 0 : _b.versions) == null ? void 0 : _c.node) {
-    return `runtime/node.js/${globalThisAny.process.version.substring(0)}`;
-  }
-  if (globalThisAny.EdgeRuntime) {
-    return `runtime/vercel-edge`;
-  }
-  return "runtime/unknown";
-}
-
-// src/normalize-headers.ts
-function normalizeHeaders(headers) {
-  if (headers == null) {
-    return {};
-  }
-  const normalized = {};
-  if (headers instanceof Headers) {
-    headers.forEach((value, key) => {
-      normalized[key.toLowerCase()] = value;
-    });
-  } else {
-    if (!Array.isArray(headers)) {
-      headers = Object.entries(headers);
-    }
-    for (const [key, value] of headers) {
-      if (value != null) {
-        normalized[key.toLowerCase()] = value;
-      }
-    }
-  }
-  return normalized;
-}
-
-// src/with-user-agent-suffix.ts
-function withUserAgentSuffix(headers, ...userAgentSuffixParts) {
-  const normalizedHeaders = new Headers(normalizeHeaders(headers));
-  const currentUserAgentHeader = normalizedHeaders.get("user-agent") || "";
-  normalizedHeaders.set(
-    "user-agent",
-    [currentUserAgentHeader, ...userAgentSuffixParts].filter(Boolean).join(" ")
-  );
-  return Object.fromEntries(normalizedHeaders.entries());
-}
-
-// src/version.ts
-var VERSION = "3.0.19" ;
-
-// src/secure-json-parse.ts
-var suspectProtoRx = /"__proto__"\s*:/;
-var suspectConstructorRx = /"constructor"\s*:/;
-function _parse(text) {
-  const obj = JSON.parse(text);
-  if (obj === null || typeof obj !== "object") {
-    return obj;
-  }
-  if (suspectProtoRx.test(text) === false && suspectConstructorRx.test(text) === false) {
-    return obj;
-  }
-  return filter(obj);
-}
-function filter(obj) {
-  let next = [obj];
-  while (next.length) {
-    const nodes = next;
-    next = [];
-    for (const node of nodes) {
-      if (Object.prototype.hasOwnProperty.call(node, "__proto__")) {
-        throw new SyntaxError("Object contains forbidden prototype property");
-      }
-      if (Object.prototype.hasOwnProperty.call(node, "constructor") && Object.prototype.hasOwnProperty.call(node.constructor, "prototype")) {
-        throw new SyntaxError("Object contains forbidden prototype property");
-      }
-      for (const key in node) {
-        const value = node[key];
-        if (value && typeof value === "object") {
-          next.push(value);
-        }
-      }
-    }
-  }
-  return obj;
-}
-function secureJsonParse(text) {
-  const { stackTraceLimit } = Error;
-  try {
-    Error.stackTraceLimit = 0;
-  } catch (e) {
-    return _parse(text);
-  }
-  try {
-    return _parse(text);
-  } finally {
-    Error.stackTraceLimit = stackTraceLimit;
-  }
-}
-var validatorSymbol = Symbol.for("vercel.ai.validator");
-function validator(validate) {
-  return { [validatorSymbol]: true, validate };
-}
-function isValidator(value) {
-  return typeof value === "object" && value !== null && validatorSymbol in value && value[validatorSymbol] === true && "validate" in value;
-}
-function asValidator(value) {
-  return isValidator(value) ? value : typeof value === "function" ? value() : standardSchemaValidator(value);
-}
-function standardSchemaValidator(standardSchema) {
-  return validator(async (value) => {
-    const result = await standardSchema["~standard"].validate(value);
-    return result.issues == null ? { success: true, value: result.value } : {
-      success: false,
-      error: new TypeValidationError({
-        value,
-        cause: result.issues
-      })
-    };
-  });
-}
-
-// src/validate-types.ts
-async function validateTypes({
-  value,
-  schema
-}) {
-  const result = await safeValidateTypes({ value, schema });
-  if (!result.success) {
-    throw TypeValidationError.wrap({ value, cause: result.error });
-  }
-  return result.value;
-}
-async function safeValidateTypes({
-  value,
-  schema
-}) {
-  const validator2 = asValidator(schema);
-  try {
-    if (validator2.validate == null) {
-      return { success: true, value, rawValue: value };
-    }
-    const result = await validator2.validate(value);
-    if (result.success) {
-      return { success: true, value: result.value, rawValue: value };
-    }
-    return {
-      success: false,
-      error: TypeValidationError.wrap({ value, cause: result.error }),
-      rawValue: value
-    };
-  } catch (error) {
-    return {
-      success: false,
-      error: TypeValidationError.wrap({ value, cause: error }),
-      rawValue: value
-    };
-  }
-}
-
-// src/parse-json.ts
-async function parseJSON({
-  text,
-  schema
-}) {
-  try {
-    const value = secureJsonParse(text);
-    if (schema == null) {
-      return value;
-    }
-    return validateTypes({ value, schema });
-  } catch (error) {
-    if (JSONParseError.isInstance(error) || TypeValidationError.isInstance(error)) {
-      throw error;
-    }
-    throw new JSONParseError({ text, cause: error });
-  }
-}
-async function safeParseJSON({
-  text,
-  schema
-}) {
-  try {
-    const value = secureJsonParse(text);
-    if (schema == null) {
-      return { success: true, value, rawValue: value };
-    }
-    return await safeValidateTypes({ value, schema });
-  } catch (error) {
-    return {
-      success: false,
-      error: JSONParseError.isInstance(error) ? error : new JSONParseError({ text, cause: error }),
-      rawValue: void 0
-    };
-  }
-}
-async function parseProviderOptions({
-  provider,
-  providerOptions,
-  schema
-}) {
-  if ((providerOptions == null ? void 0 : providerOptions[provider]) == null) {
-    return void 0;
-  }
-  const parsedProviderOptions = await safeValidateTypes({
-    value: providerOptions[provider],
-    schema
-  });
-  if (!parsedProviderOptions.success) {
-    throw new InvalidArgumentError({
-      argument: "providerOptions",
-      message: `invalid ${provider} provider options`,
-      cause: parsedProviderOptions.error
-    });
-  }
-  return parsedProviderOptions.value;
-}
-var getOriginalFetch2 = () => globalThis.fetch;
-var postJsonToApi = async ({
-  url,
-  headers,
-  body,
-  failedResponseHandler,
-  successfulResponseHandler,
-  abortSignal,
-  fetch
-}) => postToApi({
-  url,
-  headers: {
-    "Content-Type": "application/json",
-    ...headers
-  },
-  body: {
-    content: JSON.stringify(body),
-    values: body
-  },
-  failedResponseHandler,
-  successfulResponseHandler,
-  abortSignal,
-  fetch
-});
-var postToApi = async ({
-  url,
-  headers = {},
-  body,
-  successfulResponseHandler,
-  failedResponseHandler,
-  abortSignal,
-  fetch = getOriginalFetch2()
-}) => {
-  try {
-    const response = await fetch(url, {
-      method: "POST",
-      headers: withUserAgentSuffix(
-        headers,
-        `ai-sdk/provider-utils/${VERSION}`,
-        getRuntimeEnvironmentUserAgent()
-      ),
-      body: body.content,
-      signal: abortSignal
-    });
-    const responseHeaders = extractResponseHeaders(response);
-    if (!response.ok) {
-      let errorInformation;
-      try {
-        errorInformation = await failedResponseHandler({
-          response,
-          url,
-          requestBodyValues: body.values
-        });
-      } catch (error) {
-        if (isAbortError(error) || APICallError.isInstance(error)) {
-          throw error;
-        }
-        throw new APICallError({
-          message: "Failed to process error response",
-          cause: error,
-          statusCode: response.status,
-          url,
-          responseHeaders,
-          requestBodyValues: body.values
-        });
-      }
-      throw errorInformation.value;
-    }
-    try {
-      return await successfulResponseHandler({
-        response,
-        url,
-        requestBodyValues: body.values
-      });
-    } catch (error) {
-      if (error instanceof Error) {
-        if (isAbortError(error) || APICallError.isInstance(error)) {
-          throw error;
-        }
-      }
-      throw new APICallError({
-        message: "Failed to process successful response",
-        cause: error,
-        statusCode: response.status,
-        url,
-        responseHeaders,
-        requestBodyValues: body.values
-      });
-    }
-  } catch (error) {
-    throw handleFetchError({ error, url, requestBodyValues: body.values });
-  }
-};
-var createJsonErrorResponseHandler = ({
-  errorSchema,
-  errorToMessage,
-  isRetryable
-}) => async ({ response, url, requestBodyValues }) => {
-  const responseBody = await response.text();
-  const responseHeaders = extractResponseHeaders(response);
-  if (responseBody.trim() === "") {
-    return {
-      responseHeaders,
-      value: new APICallError({
-        message: response.statusText,
-        url,
-        requestBodyValues,
-        statusCode: response.status,
-        responseHeaders,
-        responseBody,
-        isRetryable: isRetryable == null ? void 0 : isRetryable(response)
-      })
-    };
-  }
-  try {
-    const parsedError = await parseJSON({
-      text: responseBody,
-      schema: errorSchema
-    });
-    return {
-      responseHeaders,
-      value: new APICallError({
-        message: errorToMessage(parsedError),
-        url,
-        requestBodyValues,
-        statusCode: response.status,
-        responseHeaders,
-        responseBody,
-        data: parsedError,
-        isRetryable: isRetryable == null ? void 0 : isRetryable(response, parsedError)
-      })
-    };
-  } catch (parseError) {
-    return {
-      responseHeaders,
-      value: new APICallError({
-        message: response.statusText,
-        url,
-        requestBodyValues,
-        statusCode: response.status,
-        responseHeaders,
-        responseBody,
-        isRetryable: isRetryable == null ? void 0 : isRetryable(response)
-      })
-    };
-  }
-};
-var createJsonStreamResponseHandler = (chunkSchema) => async ({ response }) => {
-  const responseHeaders = extractResponseHeaders(response);
-  if (response.body == null) {
-    throw new EmptyResponseBodyError({});
-  }
-  let buffer = "";
-  return {
-    responseHeaders,
-    value: response.body.pipeThrough(new TextDecoderStream()).pipeThrough(
-      new TransformStream({
-        async transform(chunkText, controller) {
-          if (chunkText.endsWith("\n")) {
-            controller.enqueue(
-              await safeParseJSON({
-                text: buffer + chunkText,
-                schema: chunkSchema
-              })
-            );
-            buffer = "";
-          } else {
-            buffer += chunkText;
-          }
-        }
-      })
-    )
-  };
-};
-var createJsonResponseHandler = (responseSchema) => async ({ response, url, requestBodyValues }) => {
-  const responseBody = await response.text();
-  const parsedResult = await safeParseJSON({
-    text: responseBody,
-    schema: responseSchema
-  });
-  const responseHeaders = extractResponseHeaders(response);
-  if (!parsedResult.success) {
-    throw new APICallError({
-      message: "Invalid JSON response",
-      cause: parsedResult.error,
-      statusCode: response.status,
-      responseHeaders,
-      responseBody,
-      url,
-      requestBodyValues
-    });
-  }
-  return {
-    responseHeaders,
-    value: parsedResult.value,
-    rawValue: parsedResult.rawValue
-  };
-};
-new Set(
-  "ABCDEFGHIJKLMNOPQRSTUVXYZabcdefghijklmnopqrstuvxyz0123456789"
-);
-
-// src/without-trailing-slash.ts
-function withoutTrailingSlash(url) {
-  return url == null ? void 0 : url.replace(/\/$/, "");
-}
-
 // src/ollama-provider.ts
-var ollamaErrorDataSchema = object$1({
-  error: object$1({
-    message: string(),
-    // The additional information below is handled loosely to support
-    // Ollama-compatible providers that have slightly different error
-    // responses:
-    type: string().nullish(),
-    param: any().nullish(),
-    code: union([string(), number$1()]).nullish()
-  })
-});
-var ollamaFailedResponseHandler = createJsonErrorResponseHandler({
-  errorSchema: ollamaErrorDataSchema,
-  errorToMessage: (data) => data.error.message
-});
 function convertToOllamaCompletionPrompt({
   prompt,
   user = "user",
@@ -34810,16 +33547,31 @@ ${user}:`]
 function mapOllamaFinishReason(finishReason) {
   switch (finishReason) {
     case "stop":
-      return "stop";
+      return {
+        raw: finishReason,
+        unified: "stop"
+      };
     case "length":
-      return "length";
+      return {
+        raw: finishReason,
+        unified: "length"
+      };
     case "content_filter":
-      return "content-filter";
+      return {
+        raw: finishReason,
+        unified: "content-filter"
+      };
     case "function_call":
     case "tool_calls":
-      return "tool-calls";
+      return {
+        raw: finishReason,
+        unified: "tool-calls"
+      };
     default:
-      return "unknown";
+      return {
+        raw: finishReason,
+        unified: "other"
+      };
   }
 }
 
@@ -34834,9 +33586,76 @@ function getResponseMetadata({
     timestamp: created_at != null ? new Date(created_at) : void 0
   };
 }
+function createNdjsonStreamResponseHandler(schema) {
+  return async ({ response }) => {
+    const responseHeaders = extractResponseHeaders(response);
+    if (response.body == null) {
+      throw new Error("Response body is null");
+    }
+    const reader = response.body.getReader();
+    const decoder = new TextDecoder();
+    let buffer = "";
+    const stream = new ReadableStream({
+      async pull(controller) {
+        while (true) {
+          const { done, value } = await reader.read();
+          if (done) {
+            if (buffer.trim()) {
+              try {
+                const parsed = JSON.parse(buffer.trim());
+                const validated = schema.parse(parsed);
+                controller.enqueue({ success: true, value: validated, rawValue: validated });
+              } catch (e) {
+              }
+            }
+            controller.close();
+            return;
+          }
+          buffer += decoder.decode(value, { stream: true });
+          const lines = buffer.split("\n");
+          buffer = lines.pop() || "";
+          for (const line of lines) {
+            const trimmedLine = line.trim();
+            if (trimmedLine) {
+              try {
+                const parsed = JSON.parse(trimmedLine);
+                const validated = schema.parse(parsed);
+                controller.enqueue({ success: true, value: validated, rawValue: validated });
+              } catch (error) {
+                console.warn("Failed to parse NDJSON line:", error);
+              }
+            }
+          }
+        }
+      },
+      cancel() {
+        reader.cancel();
+      }
+    });
+    return {
+      responseHeaders,
+      value: stream
+    };
+  };
+}
+var ollamaErrorDataSchema = object$1({
+  error: object$1({
+    message: string(),
+    // The additional information below is handled loosely to support
+    // Ollama-compatible providers that have slightly different error
+    // responses:
+    type: string().nullish(),
+    param: any().nullish(),
+    code: union([string(), number$1()]).nullish()
+  })
+});
+var ollamaFailedResponseHandler = createJsonErrorResponseHandler({
+  errorSchema: ollamaErrorDataSchema,
+  errorToMessage: (data) => data.error.message
+});
 
 // src/completion/ollama-completion-language-model.ts
-var ollamaCompletionProviderOptions = object$1({
+object$1({
   think: boolean().optional(),
   user: string().optional(),
   suffix: string().optional(),
@@ -34844,18 +33663,18 @@ var ollamaCompletionProviderOptions = object$1({
 });
 var OllamaCompletionLanguageModel = class {
   constructor(modelId, settings, config) {
-    this.specificationVersion = "v2";
+    this.specificationVersion = "v3";
+    this.defaultObjectGenerationMode = void 0;
+    this.supportsImageUrls = false;
     this.supportedUrls = {
       // No URLs are supported for completion models.
     };
     this.modelId = modelId;
     this.settings = settings;
     this.config = config;
+    this.provider = config.provider;
   }
-  get provider() {
-    return this.config.provider;
-  }
-  async getArgs({
+  getArgs({
     prompt,
     maxOutputTokens,
     temperature,
@@ -34867,33 +33686,25 @@ var OllamaCompletionLanguageModel = class {
     responseFormat,
     tools,
     toolChoice,
-    seed,
-    providerOptions
+    seed
   }) {
-    var _a;
     const warnings = [];
-    const ollamaOptions = (_a = await parseProviderOptions({
-      provider: "ollama",
-      providerOptions,
-      schema: ollamaCompletionProviderOptions
-    })) != null ? _a : {};
     if (topK != null) {
       warnings.push({
-        type: "unsupported-setting",
-        setting: "topK"
+        type: "unsupported",
+        feature: "topK"
       });
     }
     if (tools == null ? void 0 : tools.length) {
-      warnings.push({ type: "unsupported-setting", setting: "tools" });
+      warnings.push({ type: "unsupported", feature: "tools" });
     }
     if (toolChoice != null) {
-      warnings.push({ type: "unsupported-setting", setting: "toolChoice" });
+      warnings.push({ type: "unsupported", feature: "toolChoice" });
     }
     if (responseFormat != null && responseFormat.type !== "text") {
       warnings.push({
-        type: "unsupported-setting",
-        setting: "responseFormat",
-        details: "JSON response format is not supported."
+        type: "unsupported",
+        feature: "responseFormat (JSON)"
       });
     }
     const { prompt: completionPrompt, stopSequences } = convertToOllamaCompletionPrompt({ prompt });
@@ -34903,8 +33714,8 @@ var OllamaCompletionLanguageModel = class {
         // model id:
         model: this.modelId,
         // Ollama-supported settings:
-        user: ollamaOptions.user,
-        think: ollamaOptions.think,
+        user: this.settings.user,
+        think: this.settings.think,
         // standardized settings:
         max_tokens: maxOutputTokens,
         temperature,
@@ -34915,8 +33726,8 @@ var OllamaCompletionLanguageModel = class {
         // prompt:
         prompt: completionPrompt,
         // other settings:
-        suffix: ollamaOptions.suffix,
-        echo: ollamaOptions.echo,
+        suffix: this.settings.suffix,
+        echo: this.settings.echo,
         stream: false
         // always disabled for doGenerate
       },
@@ -34924,8 +33735,8 @@ var OllamaCompletionLanguageModel = class {
     };
   }
   async doGenerate(options) {
-    var _a, _b, _c, _d;
-    const { args: body, warnings } = await this.getArgs(options);
+    var _a, _b;
+    const { args: body, warnings } = this.getArgs(options);
     const {
       responseHeaders,
       value: response,
@@ -34945,32 +33756,39 @@ var OllamaCompletionLanguageModel = class {
       fetch: this.config.fetch
     });
     const { prompt: rawPrompt, ...rawSettings } = body;
-    const providerMetadata = { ollama: {} };
+    const typedResponse = response;
     return {
       content: [
         {
           type: "text",
-          text: response.response
+          text: typedResponse.response
         }
       ],
       usage: {
-        inputTokens: (_a = response.prompt_eval_count) != null ? _a : void 0,
-        outputTokens: (_b = response.eval_count) != null ? _b : void 0,
-        totalTokens: ((_c = response.prompt_eval_count) != null ? _c : 0) + ((_d = response.eval_count) != null ? _d : 0)
+        inputTokens: {
+          total: (_a = typedResponse.prompt_eval_count) != null ? _a : 0,
+          noCache: void 0,
+          cacheRead: void 0,
+          cacheWrite: void 0
+        },
+        outputTokens: {
+          total: (_b = typedResponse.eval_count) != null ? _b : 0,
+          text: void 0,
+          reasoning: void 0
+        }
       },
       finishReason: mapOllamaFinishReason("stop"),
       request: { body: JSON.stringify(body) },
       response: {
-        ...getResponseMetadata(response),
+        ...getResponseMetadata(typedResponse),
         headers: responseHeaders,
         body: rawResponse
       },
-      warnings,
-      providerMetadata
+      warnings
     };
   }
   async doStream(options) {
-    const { args, warnings } = await this.getArgs(options);
+    const { args, warnings } = this.getArgs(options);
     const body = {
       ...args,
       stream: true
@@ -34983,27 +33801,36 @@ var OllamaCompletionLanguageModel = class {
       headers: combineHeaders(this.config.headers(), options.headers),
       body,
       failedResponseHandler: ollamaFailedResponseHandler,
-      successfulResponseHandler: createJsonStreamResponseHandler(
+      successfulResponseHandler: createNdjsonStreamResponseHandler(
         baseOllamaResponseSchema
       ),
       abortSignal: options.abortSignal,
       fetch: this.config.fetch
     });
     const { prompt: rawPrompt, ...rawSettings } = args;
-    let finishReason = "unknown";
+    let finishReason = "other";
     let usage = {
-      inputTokens: void 0,
-      outputTokens: void 0,
-      totalTokens: void 0
+      inputTokens: {
+        total: void 0,
+        noCache: void 0,
+        cacheRead: void 0,
+        cacheWrite: void 0
+      },
+      outputTokens: {
+        total: void 0,
+        text: void 0,
+        reasoning: void 0
+      }
     };
     let isFirstChunk = true;
+    let textStarted = false;
+    const textId = generateId();
     return {
       stream: response.pipeThrough(
         new TransformStream({
           transform(chunk, controller) {
             if (!chunk.success) {
-              finishReason = "error";
-              controller.enqueue({ type: "error", error: chunk.error });
+              controller.enqueue({ type: "error", error: chunk.rawValue });
               return;
             }
             const value = chunk.value;
@@ -35020,27 +33847,41 @@ var OllamaCompletionLanguageModel = class {
               });
             }
             if (value.done) {
-              finishReason = mapOllamaFinishReason("stop");
+              finishReason = "stop";
             }
             if (value.response != null) {
+              if (!textStarted) {
+                controller.enqueue({
+                  type: "text-start",
+                  id: textId
+                });
+                textStarted = true;
+              }
               controller.enqueue({
                 type: "text-delta",
-                id: "0",
+                id: textId,
                 delta: value.response
               });
             }
           },
           flush(controller) {
+            if (textStarted) {
+              controller.enqueue({
+                type: "text-end",
+                id: textId
+              });
+            }
             controller.enqueue({
               type: "finish",
-              finishReason,
+              finishReason: mapOllamaFinishReason(finishReason),
               usage
             });
           }
         })
       ),
       request: { body: JSON.stringify(body) },
-      response: { headers: responseHeaders }
+      response: { headers: responseHeaders },
+      warnings
     };
   }
 };
@@ -35064,42 +33905,26 @@ var ollamaEmbeddingProviderOptions = object$1({
 });
 var OllamaEmbeddingModel = class {
   constructor(modelId, settings, config) {
-    this.specificationVersion = "v2";
+    this.specificationVersion = "v3";
+    var _a, _b;
     this.modelId = modelId;
     this.settings = settings;
     this.config = config;
+    this.provider = config.provider;
+    this.maxEmbeddingsPerCall = (_a = settings.maxEmbeddingsPerCall) != null ? _a : 2048;
+    this.supportsParallelCalls = (_b = settings.supportsParallelCalls) != null ? _b : true;
   }
-  get provider() {
-    return this.config.provider;
-  }
-  get maxEmbeddingsPerCall() {
-    var _a;
-    return (_a = this.settings.maxEmbeddingsPerCall) != null ? _a : 2048;
-  }
-  get supportsParallelCalls() {
-    var _a;
-    return (_a = this.settings.supportsParallelCalls) != null ? _a : true;
-  }
-  async getArgs({
-    values,
-    providerOptions
+  getArgs({
+    values
   }) {
-    var _a, _b;
-    const ollamaOptions = (_a = await parseProviderOptions({
-      provider: "ollama",
-      providerOptions,
-      schema: ollamaEmbeddingProviderOptions
-    })) != null ? _a : {};
     return {
-      args: {
-        // model id:
-        model: this.modelId,
-        input: values,
-        // advanced parameters:
-        dimensions: (_b = ollamaOptions.dimensions) != null ? _b : this.settings.dimensions,
-        truncate: ollamaOptions.truncate,
-        keep_alive: ollamaOptions.keepAlive
-      }
+      // model id:
+      model: this.modelId,
+      input: values,
+      // advanced parameters:
+      dimensions: this.settings.dimensions,
+      truncate: this.settings.truncate,
+      keep_alive: this.settings.keepAlive
     };
   }
   async doEmbed({
@@ -35108,7 +33933,8 @@ var OllamaEmbeddingModel = class {
     abortSignal,
     providerOptions
   }) {
-    if (values.length > this.maxEmbeddingsPerCall) {
+    var _a, _b, _c;
+    if (this.maxEmbeddingsPerCall && values.length > this.maxEmbeddingsPerCall) {
       throw new TooManyEmbeddingValuesForCallError({
         provider: this.provider,
         modelId: this.modelId,
@@ -35116,7 +33942,21 @@ var OllamaEmbeddingModel = class {
         values
       });
     }
-    const { args: body } = await this.getArgs({ values, providerOptions });
+    const ollamaOptions = await parseProviderOptions({
+      provider: "ollama",
+      providerOptions,
+      schema: ollamaEmbeddingProviderOptions
+    });
+    const dimensions = (_a = ollamaOptions == null ? void 0 : ollamaOptions.dimensions) != null ? _a : this.settings.dimensions;
+    const truncate = (_b = ollamaOptions == null ? void 0 : ollamaOptions.truncate) != null ? _b : this.settings.truncate;
+    const keepAlive = (_c = ollamaOptions == null ? void 0 : ollamaOptions.keepAlive) != null ? _c : this.settings.keepAlive;
+    const body = {
+      model: this.modelId,
+      input: values
+    };
+    if (dimensions !== void 0) body.dimensions = dimensions;
+    if (truncate !== void 0) body.truncate = truncate;
+    if (keepAlive !== void 0) body.keep_alive = keepAlive;
     const {
       responseHeaders,
       value: response,
@@ -35135,10 +33975,12 @@ var OllamaEmbeddingModel = class {
       abortSignal,
       fetch: this.config.fetch
     });
+    const typedResponse = response;
     return {
-      embeddings: response.embeddings.map((item) => item),
-      usage: { tokens: response.prompt_eval_count },
-      response: { headers: responseHeaders, body: rawValue }
+      embeddings: typedResponse.embeddings.map((item) => item),
+      usage: { tokens: typedResponse.prompt_eval_count },
+      response: { headers: responseHeaders, body: rawValue },
+      warnings: []
     };
   }
 };
@@ -35148,6 +33990,253 @@ var ollamaTextEmbeddingResponseSchema = object$1({
   total_duration: number$1(),
   load_duration: number$1(),
   prompt_eval_count: number$1()
+});
+var baseOllamaResponseSchema2 = object$1({
+  model: string(),
+  created_at: string(),
+  done: boolean(),
+  message: object$1({
+    content: string(),
+    role: string(),
+    thinking: string().optional(),
+    tool_calls: array$1(
+      object$1({
+        function: object$1({
+          name: string(),
+          arguments: record(string(), any())
+        }),
+        id: string().optional()
+      })
+    ).optional().nullable()
+  }),
+  done_reason: string().optional(),
+  eval_count: number$1().optional(),
+  eval_duration: number$1().optional(),
+  load_duration: number$1().optional(),
+  prompt_eval_count: number$1().optional(),
+  prompt_eval_duration: number$1().optional(),
+  total_duration: number$1().optional()
+});
+var OllamaResponseProcessor = class {
+  constructor(config) {
+    this.config = config;
+  }
+  processGenerateResponse(response) {
+    const content = this.extractContent(response);
+    const finishReason = mapOllamaFinishReason(response.done_reason);
+    const usage = this.extractUsage(response);
+    const providerMetadata = { ollama: {} };
+    return {
+      content,
+      finishReason,
+      usage,
+      providerMetadata
+    };
+  }
+  extractContent(response) {
+    var _a, _b, _c, _d, _e;
+    const content = [];
+    const text = response.message.content;
+    if (text != null && text.length > 0) {
+      content.push({
+        type: "text",
+        text
+      });
+    }
+    const thinking = response.message.thinking;
+    if (thinking != null && thinking.length > 0) {
+      content.push({
+        type: "reasoning",
+        text: thinking
+      });
+    }
+    for (const toolCall of (_a = response.message.tool_calls) != null ? _a : []) {
+      content.push({
+        type: "tool-call",
+        toolCallId: (_e = toolCall.id) != null ? _e : (_d = (_c = (_b = this.config).generateId) == null ? void 0 : _c.call(_b)) != null ? _d : generateId(),
+        toolName: toolCall.function.name,
+        input: JSON.stringify(toolCall.function.arguments)
+      });
+    }
+    return content;
+  }
+  extractUsage(response) {
+    var _a, _b;
+    return {
+      inputTokens: {
+        total: (_a = response.prompt_eval_count) != null ? _a : 0,
+        noCache: void 0,
+        cacheRead: void 0,
+        cacheWrite: void 0
+      },
+      outputTokens: {
+        total: (_b = response.eval_count) != null ? _b : 0,
+        text: void 0,
+        reasoning: void 0
+      }
+    };
+  }
+};
+function extractOllamaResponseObjectsFromChunk(chunk) {
+  var _a;
+  if (chunk.success) {
+    return [chunk.value];
+  }
+  const results = [];
+  const raw = (_a = chunk.error) == null ? void 0 : _a.text;
+  if (typeof raw !== "string" || raw.length === 0) {
+    return results;
+  }
+  const lines = raw.split(/\r?\n/);
+  for (const line of lines) {
+    const trimmed = line.trim();
+    if (trimmed === "") continue;
+    try {
+      const parsed = JSON.parse(trimmed);
+      const validated = baseOllamaResponseSchema2.safeParse(parsed);
+      if (validated.success) {
+        results.push(validated.data);
+      }
+    } catch (e) {
+    }
+  }
+  return results;
+}
+
+// src/adaptors/convert-to-ollama-chat-messages.ts
+function convertToOllamaChatMessages({
+  prompt,
+  systemMessageMode = "system"
+}) {
+  const messages = [];
+  for (const { role, content } of prompt) {
+    switch (role) {
+      case "system": {
+        switch (systemMessageMode) {
+          case "system": {
+            messages.push({ role: "system", content });
+            break;
+          }
+          case "developer": {
+            messages.push({ role: "developer", content });
+            break;
+          }
+          case "remove": {
+            break;
+          }
+          default: {
+            const _exhaustiveCheck = systemMessageMode;
+            throw new Error(
+              `Unsupported system message mode: ${_exhaustiveCheck}`
+            );
+          }
+        }
+        break;
+      }
+      case "user": {
+        if (content.length === 1 && content[0].type === "text") {
+          messages.push({ role: "user", content: content[0].text });
+          break;
+        }
+        const userText = content.filter((part) => part.type === "text").map((part) => part.text).join("");
+        const images = content.filter((part) => part.type === "file" && part.mediaType.startsWith("image/")).map((part) => part.data);
+        messages.push({
+          role: "user",
+          content: userText.length > 0 ? userText : [],
+          images: images.length > 0 ? images : void 0
+        });
+        break;
+      }
+      case "assistant": {
+        let text = "";
+        let thinking = "";
+        const toolCalls = [];
+        for (const part of content) {
+          switch (part.type) {
+            case "text": {
+              text += part.text;
+              break;
+            }
+            case "tool-call": {
+              toolCalls.push({
+                id: part.toolCallId,
+                type: "function",
+                function: {
+                  name: part.toolName,
+                  arguments: part.input
+                }
+              });
+              break;
+            }
+            case "reasoning": {
+              thinking += part.text;
+              break;
+            }
+            default: {
+              throw new Error(`Unsupported part: ${part}`);
+            }
+          }
+        }
+        messages.push({
+          role: "assistant",
+          content: text,
+          ...thinking && { thinking },
+          tool_calls: toolCalls.length > 0 ? toolCalls : void 0
+        });
+        break;
+      }
+      case "tool": {
+        for (const toolResponse of content) {
+          const output = toolResponse.output;
+          let contentValue;
+          switch (output.type) {
+            case "text":
+            case "error-text":
+              contentValue = output.value;
+              break;
+            case "content":
+            case "json":
+            case "error-json":
+              contentValue = JSON.stringify(output.value);
+              break;
+          }
+          messages.push({
+            role: "tool",
+            tool_call_id: toolResponse.toolCallId,
+            content: contentValue
+          });
+        }
+        break;
+      }
+      default: {
+        const _exhaustiveCheck = role;
+        throw new Error(`Unsupported role: ${_exhaustiveCheck}`);
+      }
+    }
+  }
+  return messages;
+}
+var ollamaProviderOptions = object$1({
+  /**
+   * Enable or disable the model's thinking process. When enabled, the output will separate
+   * the model's thinking from the model's output. When disabled, the model will not think
+   * and directly output the content.
+   *
+   * Only supported by certain models like DeepSeek R1 and Qwen 3.
+   */
+  think: boolean().optional(),
+  options: object$1({
+    num_ctx: number$1().optional(),
+    repeat_last_n: number$1().optional(),
+    repeat_penalty: number$1().optional(),
+    temperature: number$1().optional(),
+    seed: number$1().optional(),
+    stop: array$1(string()).optional(),
+    num_predict: number$1().optional(),
+    top_k: number$1().optional(),
+    top_p: number$1().optional(),
+    min_p: number$1().optional()
+  }).optional()
 });
 function convertToOllamaResponsesMessages({
   prompt,
@@ -35287,120 +34376,6 @@ function convertToOllamaResponsesMessages({
   }
   return { messages, warnings };
 }
-
-// src/adaptors/convert-to-ollama-chat-messages.ts
-function convertToOllamaChatMessages({
-  prompt,
-  systemMessageMode = "system"
-}) {
-  const messages = [];
-  for (const { role, content } of prompt) {
-    switch (role) {
-      case "system": {
-        switch (systemMessageMode) {
-          case "system": {
-            messages.push({ role: "system", content });
-            break;
-          }
-          case "developer": {
-            messages.push({ role: "developer", content });
-            break;
-          }
-          case "remove": {
-            break;
-          }
-          default: {
-            const _exhaustiveCheck = systemMessageMode;
-            throw new Error(
-              `Unsupported system message mode: ${_exhaustiveCheck}`
-            );
-          }
-        }
-        break;
-      }
-      case "user": {
-        if (content.length === 1 && content[0].type === "text") {
-          messages.push({ role: "user", content: content[0].text });
-          break;
-        }
-        const userText = content.filter((part) => part.type === "text").map((part) => part.text).join("");
-        const images = content.filter((part) => part.type === "file" && part.mediaType.startsWith("image/")).map((part) => part.data);
-        messages.push({
-          role: "user",
-          content: userText.length > 0 ? userText : [],
-          images: images.length > 0 ? images : void 0
-        });
-        break;
-      }
-      case "assistant": {
-        let text = "";
-        let thinking = "";
-        const toolCalls = [];
-        for (const part of content) {
-          switch (part.type) {
-            case "text": {
-              text += part.text;
-              break;
-            }
-            case "tool-call": {
-              toolCalls.push({
-                id: part.toolCallId,
-                type: "function",
-                function: {
-                  name: part.toolName,
-                  arguments: part.input
-                }
-              });
-              break;
-            }
-            case "reasoning": {
-              thinking += part.text;
-              break;
-            }
-            default: {
-              throw new Error(`Unsupported part: ${part}`);
-            }
-          }
-        }
-        messages.push({
-          role: "assistant",
-          content: text,
-          ...thinking && { thinking },
-          tool_calls: toolCalls.length > 0 ? toolCalls : void 0
-        });
-        break;
-      }
-      case "tool": {
-        for (const toolResponse of content) {
-          const output = toolResponse.output;
-          let contentValue;
-          switch (output.type) {
-            case "text":
-            case "error-text":
-              contentValue = output.value;
-              break;
-            case "content":
-            case "json":
-            case "error-json":
-              contentValue = JSON.stringify(output.value);
-              break;
-          }
-          messages.push({
-            role: "tool",
-            tool_call_id: toolResponse.toolCallId,
-            content: contentValue
-          });
-        }
-        break;
-      }
-      default: {
-        const _exhaustiveCheck = role;
-        throw new Error(`Unsupported role: ${_exhaustiveCheck}`);
-      }
-    }
-  }
-  return messages;
-}
 function prepareResponsesTools({
   tools,
   toolChoice
@@ -35439,7 +34414,7 @@ function prepareResponsesTools({
         break;
       }
       default:
-        toolWarnings.push({ type: "unsupported-tool", tool });
+        toolWarnings.push({ type: "unsupported", feature: "tool", details: tool.name });
         break;
     }
   }
@@ -35466,28 +34441,6 @@ function prepareResponsesTools({
     }
   }
 }
-var ollamaProviderOptions = object$1({
-  /**
-   * Enable or disable the model's thinking process. When enabled, the output will separate
-   * the model's thinking from the model's output. When disabled, the model will not think
-   * and directly output the content.
-   *
-   * Only supported by certain models like DeepSeek R1 and Qwen 3.
-   */
-  think: boolean().optional(),
-  options: object$1({
-    num_ctx: number$1().optional(),
-    repeat_last_n: number$1().optional(),
-    repeat_penalty: number$1().optional(),
-    temperature: number$1().optional(),
-    seed: number$1().optional(),
-    stop: array$1(string()).optional(),
-    num_predict: number$1().optional(),
-    top_k: number$1().optional(),
-    top_p: number$1().optional(),
-    min_p: number$1().optional()
-  }).optional()
-});
 
 // src/responses/ollama-responses-request-builder.ts
 var OllamaRequestBuilder = class {
@@ -35559,7 +34512,7 @@ var OllamaRequestBuilder = class {
     ];
     for (const { value, name } of unsupportedSettings) {
       if (value != null) {
-        warnings.push({ type: "unsupported-setting", setting: name });
+        warnings.push({ type: "unsupported", feature: "setting", details: name });
       }
     }
     return warnings;
@@ -35599,112 +34552,6 @@ var OllamaRequestBuilder = class {
     };
   }
 };
-var baseOllamaResponseSchema2 = object$1({
-  model: string(),
-  created_at: string(),
-  done: boolean(),
-  message: object$1({
-    content: string(),
-    role: string(),
-    thinking: string().optional(),
-    tool_calls: array$1(
-      object$1({
-        function: object$1({
-          name: string(),
-          arguments: record(string(), any())
-        }),
-        id: string().optional()
-      })
-    ).optional().nullable()
-  }),
-  done_reason: string().optional(),
-  eval_count: number$1().optional(),
-  eval_duration: number$1().optional(),
-  load_duration: number$1().optional(),
-  prompt_eval_count: number$1().optional(),
-  prompt_eval_duration: number$1().optional(),
-  total_duration: number$1().optional()
-});
-var OllamaResponseProcessor = class {
-  constructor(config) {
-    this.config = config;
-  }
-  processGenerateResponse(response) {
-    const content = this.extractContent(response);
-    const finishReason = mapOllamaFinishReason(response.done_reason);
-    const usage = this.extractUsage(response);
-    const providerMetadata = { ollama: {} };
-    return {
-      content,
-      finishReason,
-      usage,
-      providerMetadata
-    };
-  }
-  extractContent(response) {
-    var _a, _b, _c, _d, _e;
-    const content = [];
-    const text = response.message.content;
-    if (text != null && text.length > 0) {
-      content.push({
-        type: "text",
-        text
-      });
-    }
-    const thinking = response.message.thinking;
-    if (thinking != null && thinking.length > 0) {
-      content.push({
-        type: "reasoning",
-        text: thinking
-      });
-    }
-    for (const toolCall of (_a = response.message.tool_calls) != null ? _a : []) {
-      content.push({
-        type: "tool-call",
-        toolCallId: (_e = toolCall.id) != null ? _e : (_d = (_c = (_b = this.config).generateId) == null ? void 0 : _c.call(_b)) != null ? _d : generateId(),
-        toolName: toolCall.function.name,
-        input: JSON.stringify(toolCall.function.arguments)
-      });
-    }
-    return content;
-  }
-  extractUsage(response) {
-    var _a, _b, _c, _d;
-    return {
-      inputTokens: (_a = response.prompt_eval_count) != null ? _a : void 0,
-      outputTokens: (_b = response.eval_count) != null ? _b : void 0,
-      totalTokens: ((_c = response.prompt_eval_count) != null ? _c : 0) + ((_d = response.eval_count) != null ? _d : 0),
-      reasoningTokens: void 0,
-      // Ollama doesn't provide separate reasoning tokens
-      cachedInputTokens: void 0
-    };
-  }
-};
-function extractOllamaResponseObjectsFromChunk(chunk) {
-  var _a;
-  if (chunk.success) {
-    return [chunk.value];
-  }
-  const results = [];
-  const raw = (_a = chunk.error) == null ? void 0 : _a.text;
-  if (typeof raw !== "string" || raw.length === 0) {
-    return results;
-  }
-  const lines = raw.split(/\r?\n/);
-  for (const line of lines) {
-    const trimmed = line.trim();
-    if (trimmed === "") continue;
-    try {
-      const parsed = JSON.parse(trimmed);
-      const validated = baseOllamaResponseSchema2.safeParse(parsed);
-      if (validated.success) {
-        results.push(validated.data);
-      }
-    } catch (e) {
-    }
-  }
-  return results;
-}
 var OllamaStreamProcessor = class {
   constructor(config) {
     this.config = config;
@@ -35712,9 +34559,6 @@ var OllamaStreamProcessor = class {
   }
   createTransformStream(warnings, options) {
     return new TransformStream({
-      start: (controller) => {
-        controller.enqueue({ type: "stream-start", warnings });
-      },
       transform: (chunk, controller) => {
         this.processChunk(chunk, controller, options);
       },
@@ -35725,11 +34569,22 @@ var OllamaStreamProcessor = class {
   }
   initializeState() {
     return {
-      finishReason: "unknown",
+      finishReason: {
+        unified: "other",
+        raw: void 0
+      },
       usage: {
-        inputTokens: void 0,
-        outputTokens: void 0,
-        totalTokens: void 0
+        inputTokens: {
+          total: void 0,
+          noCache: void 0,
+          cacheRead: void 0,
+          cacheWrite: void 0
+        },
+        outputTokens: {
+          total: void 0,
+          text: void 0,
+          reasoning: void 0
+        }
       },
       responseId: null,
       ongoingToolCalls: {},
@@ -35739,7 +34594,8 @@ var OllamaStreamProcessor = class {
       hasReasoningStarted: false,
       textEnded: false,
       reasoningEnded: false,
-      textId: generateId()
+      textId: generateId(),
+      reasoningId: generateId()
     };
   }
   processChunk(chunk, controller, options) {
@@ -35749,7 +34605,7 @@ var OllamaStreamProcessor = class {
     const values = extractOllamaResponseObjectsFromChunk(chunk);
     if (values.length === 0) {
       if (!chunk.success) {
-        this.state.finishReason = "error";
+        this.state.finishReason = { unified: "error", raw: void 0 };
         controller.enqueue({ type: "error", error: chunk.error });
       }
       return;
@@ -35760,7 +34616,7 @@ var OllamaStreamProcessor = class {
   }
   processResponseValue(value, controller) {
     if (value && typeof value === "object" && "error" in value) {
-      this.state.finishReason = "error";
+      this.state.finishReason = { unified: "error", raw: void 0 };
       controller.enqueue({ type: "error", error: value.error });
       return;
     }
@@ -35780,19 +34636,26 @@ var OllamaStreamProcessor = class {
     }
   }
   handleDoneChunk(value, controller) {
-    var _a, _b, _c;
     this.state.finishReason = mapOllamaFinishReason(value.done_reason);
     this.state.usage = {
-      inputTokens: value.prompt_eval_count || 0,
-      outputTokens: (_a = value.eval_count) != null ? _a : void 0,
-      totalTokens: ((_b = value.prompt_eval_count) != null ? _b : 0) + ((_c = value.eval_count) != null ? _c : 0)
+      inputTokens: {
+        total: value.prompt_eval_count || 0,
+        noCache: void 0,
+        cacheRead: void 0,
+        cacheWrite: void 0
+      },
+      outputTokens: {
+        total: value.eval_count || 0,
+        text: void 0,
+        reasoning: void 0
+      }
     };
     if (this.state.hasTextStarted && !this.state.textEnded) {
       controller.enqueue({ type: "text-end", id: this.state.textId });
       this.state.textEnded = true;
     }
     if (this.state.hasReasoningStarted && !this.state.reasoningEnded) {
-      controller.enqueue({ type: "reasoning-end", id: "0" });
+      controller.enqueue({ type: "reasoning-end", id: this.state.reasoningId });
       this.state.reasoningEnded = true;
     }
   }
@@ -35817,12 +34680,12 @@ var OllamaStreamProcessor = class {
   processThinking(delta, controller) {
     if (delta == null ? void 0 : delta.thinking) {
       if (!this.state.hasReasoningStarted) {
-        controller.enqueue({ type: "reasoning-start", id: "0" });
+        controller.enqueue({ type: "reasoning-start", id: this.state.reasoningId });
         this.state.hasReasoningStarted = true;
       }
       controller.enqueue({
         type: "reasoning-delta",
-        id: "0",
+        id: this.state.reasoningId,
         delta: delta.thinking
       });
     }
@@ -35868,10 +34731,10 @@ var OllamaStreamProcessor = class {
   }
   finalizeStream(controller) {
     if (this.state.hasTextStarted && !this.state.textEnded) {
-      controller.enqueue({ type: "text-end", id: "0" });
+      controller.enqueue({ type: "text-end", id: this.state.textId });
     }
     if (this.state.hasReasoningStarted && !this.state.reasoningEnded) {
-      controller.enqueue({ type: "reasoning-end", id: "0" });
+      controller.enqueue({ type: "reasoning-end", id: this.state.reasoningId });
     }
     controller.enqueue({
       type: "finish",
@@ -35889,7 +34752,9 @@ var OllamaStreamProcessor = class {
 // src/responses/ollama-responses-language-model.ts
 var OllamaResponsesLanguageModel = class {
   constructor(modelId, config) {
-    this.specificationVersion = "v2";
+    this.specificationVersion = "v3";
+    this.defaultObjectGenerationMode = void 0;
+    this.supportsImageUrls = true;
     this.supportedUrls = {
       "image/*": [
         /^https?:\/\/.*$/
@@ -35897,11 +34762,9 @@ var OllamaResponsesLanguageModel = class {
     };
     this.modelId = modelId;
     this.config = config;
+    this.provider = config.provider;
     this.requestBuilder = new OllamaRequestBuilder();
     this.responseProcessor = new OllamaResponseProcessor(config);
-  }
-  get provider() {
-    return this.config.provider;
   }
   async doGenerate(options) {
     const { args: body, warnings } = await this.prepareRequest(options);
@@ -35944,7 +34807,7 @@ var OllamaResponsesLanguageModel = class {
       headers: combineHeaders(this.config.headers(), options.headers),
       body: { ...body, stream: true },
       failedResponseHandler: ollamaFailedResponseHandler,
-      successfulResponseHandler: createJsonStreamResponseHandler(baseOllamaResponseSchema2),
+      successfulResponseHandler: createNdjsonStreamResponseHandler(baseOllamaResponseSchema2),
       abortSignal: options.abortSignal,
       fetch: this.config.fetch
     });
@@ -35954,7 +34817,8 @@ var OllamaResponsesLanguageModel = class {
         streamProcessor.createTransformStream(warnings, options)
       ),
       request: { body },
-      response: { headers: responseHeaders }
+      response: { headers: responseHeaders },
+      warnings
     };
   }
   async prepareRequest(options) {
@@ -36006,12 +34870,14 @@ function createOllama(options = {}) {
   const provider = function(modelId) {
     return createLanguageModel(modelId);
   };
+  provider.specificationVersion = "v3";
   provider.languageModel = createLanguageModel;
   provider.chat = createLanguageModel;
   provider.completion = createCompletionModel;
   provider.embedding = createEmbeddingModel;
   provider.textEmbedding = createEmbeddingModel;
   provider.textEmbeddingModel = createEmbeddingModel;
+  provider.embeddingModel = createEmbeddingModel;
   provider.imageModel = (modelId) => {
     throw new NoSuchModelError({
       modelId,
@@ -36023,4 +34889,4 @@ function createOllama(options = {}) {
 }
 createOllama();
 
-export { array$1 as a, createPerplexity as b, createCerebras as c, createOpenAI as d, createOllama as e, createMistral as f, createGoogleGenerativeAI as g, createAnthropic as h, stepCountIs as i, generateText as j, streamText as k, generateObject as l, number$1 as n, object$1 as o, string as s, tool as t, xai as x };
+export { array$1 as a, createPerplexity as b, createCerebras as c, createOpenAI as d, createOllama as e, createMistral as f, createGoogleGenerativeAI as g, createAnthropic as h, stepCountIs as i, generateText as j, streamText as k, output_exports as l, number$1 as n, object$1 as o, string as s, tool as t, xai as x };
