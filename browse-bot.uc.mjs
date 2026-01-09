@@ -2,8 +2,8 @@
 // @name            Browse Bot
 // @description     Transforms the standard Zen Browser findbar into a modern, floating, AI-powered chat interface. Inspired by Arc Browser.
 // @author          Bibek Bhusal
-// @version         2.5.1
-// @lastUpdated     2026-01-04
+// @version         2.5.2b
+// @lastUpdated     2026-01-09
 // @ignorecache
 // @homepage        https://github.com/Vertex-Mods/Browse-Bot
 // ==/UserScript==
@@ -15,417 +15,511 @@
 // https://github.com/BibekBhusal0/zen-custom-js
 import { n as number, t as tool, o as object, s as string, a as array, c as createCerebras, b as createPerplexity, d as createOpenAI, e as createOllama, f as createMistral, x as xai, g as createGoogleGenerativeAI, h as createAnthropic, i as stepCountIs, j as generateText, k as streamText, l as output_exports } from './vercel-ai-sdk.uc.js';
 
-const PREFS = {
-  // Findbar
-  ENABLED: "extension.browse-bot.findbar-ai.enabled",
-  MINIMAL: "extension.browse-bot.findbar-ai.minimal",
-  PERSIST: "extension.browse-bot.findbar-ai.persist-chat",
-  DND_ENABLED: "extension.browse-bot.findbar-ai.dnd-enabled",
-  POSITION: "extension.browse-bot.findbar-ai.position",
-  REMEMBER_DIMENSIONS: "extension.browse-bot.findbar-ai.remember-dimensions",
-  WIDTH: "extension.browse-bot.findbar-ai.width",
-  STREAM_ENABLED: "extension.browse-bot.findbar-ai.stream-enabled",
-  AGENTIC_MODE: "extension.browse-bot.findbar-ai.agentic-mode",
-  CITATIONS_ENABLED: "extension.browse-bot.findbar-ai.citations-enabled",
-  MAX_TOOL_CALLS: "extension.browse-bot.findbar-ai.max-tool-calls",
-  CONFORMATION: "extension.browse-bot.findbar-ai.conform-before-tool-call",
-  CONTEXT_MENU_ENABLED: "extension.browse-bot.findbar-ai.context-menu-enabled",
-  CONTEXT_MENU_AUTOSEND: "extension.browse-bot.findbar-ai.context-menu-autosend",
-  CONTEXT_MENU_COMMAND_WITH_SELECTION:
-    "extension.browse-bot.findbar-ai.context-menu-command-with-selection",
-  CONTEXT_MENU_COMMAND_NO_SELECTION:
-    "extension.browse-bot.findbar-ai.context-menu-command-no-selection",
-  BACKGROUND_STYLE: "extension.browse-bot.findbar-ai.background-style",
-  CUSTOM_SYSTEM_PROMPT: "extension.browse-bot.custom-system-prompt",
-
-  SHORTCUT_FINDBAR: "extension.browse-bot.findbar-ai.shortcut-findbar",
-  SHORTCUT_URLBAR: "extension.browse-bot.urlbar-ai.shortcut-urlbar",
-
-  // URL Bar
-  URLBAR_AI_ENABLED: "extension.browse-bot.urlbar-ai-enabled",
-  URLBAR_AI_HIDE_SUGGESTIONS: "extension.browse-bot.urlbar-ai.hide-suggestions",
-  URLBAR_AI_ANIMATIONS_ENABLED: "extension.browse-bot.urlbar-ai.animations-enabled",
-
-  // Other
-  DEBUG_MODE: "extension.browse-bot.debug-mode",
-  SOLID_BG: "extension.browse-bot.solid-bg",
-
-  // Shared LLM
-  LLM_PROVIDER: "extension.browse-bot.llm-provider",
-  MISTRAL_API_KEY: "extension.browse-bot.mistral-api-key",
-  MISTRAL_MODEL: "extension.browse-bot.mistral-model",
-  GEMINI_API_KEY: "extension.browse-bot.gemini-api-key",
-  GEMINI_MODEL: "extension.browse-bot.gemini-model",
-  OPENAI_API_KEY: "extension.browse-bot.openai-api-key",
-  OPENAI_MODEL: "extension.browse-bot.openai-model",
-  CLAUDE_API_KEY: "extension.browse-bot.claude-api-key",
-  CLAUDE_MODEL: "extension.browse-bot.claude-model",
-  GROK_API_KEY: "extension.browse-bot.grok-api-key",
-  GROK_MODEL: "extension.browse-bot.grok-model",
-  PERPLEXITY_API_KEY: "extension.browse-bot.perplexity-api-key",
-  PERPLEXITY_MODEL: "extension.browse-bot.perplexity-model",
-  CEREBRAS_API_KEY: "extension.browse-bot.cerebras-api-key",
-  CEREBRAS_MODEL: "extension.browse-bot.cerebras-model",
-  OLLAMA_MODEL: "extension.browse-bot.ollama-model",
-  OLLAMA_BASE_URL: "extension.browse-bot.ollama-base-url",
-
-  // Advanced LLM Settings
-  LLM_TEMPERATURE: "extension.browse-bot.llm.temperature",
-  LLM_TOP_P: "extension.browse-bot.llm.top-p",
-  LLM_TOP_K: "extension.browse-bot.llm.top-k",
-  LLM_FREQUENCY_PENALTY: "extension.browse-bot.llm.frequency-penalty",
-  LLM_PRESENCE_PENALTY: "extension.browse-bot.llm.presence-penalty",
-  LLM_MAX_OUTPUT_TOKENS: "extension.browse-bot.llm.max-output-tokens",
-
-  //TODO: Not yet implimented
-  COPY_BTN_ENABLED: "extension.browse-bot.findbar-ai.copy-btn-enabled",
-  MARKDOWN_ENABLED: "extension.browse-bot.findbar-ai.markdown-enabled",
-  SHOW_TOOL_CALL: "extension.browse-bot.findbar-ai.show-tool-call",
-
-  defaultValues: {},
-
-  getPref(key) {
-    try {
-      const pref = UC_API.Prefs.get(key);
-      if (!pref) return PREFS.defaultValues[key];
-      if (!pref.exists()) return PREFS.defaultValues[key];
-      return pref.value;
-    } catch {
-      return PREFS.defaultValues[key];
+function setPref(key, value) {
+  try {
+    const prefService = Services.prefs;
+    if (typeof value === "boolean") {
+      prefService.setBoolPref(key, value);
+    } else if (typeof value === "number") {
+      prefService.setIntPref(key, value);
+    } else {
+      prefService.setStringPref(key, value);
     }
-  },
+  } catch {
+    //ignore
+  }
+}
 
-  setPref(prefKey, value) {
-    UC_API.Prefs.set(prefKey, value);
-  },
+const getPref = (key, defaultValue) => {
+  try {
+    const prefService = Services.prefs;
+    if (prefService.prefHasUserValue(key)) {
+      switch (prefService.getPrefType(key)) {
+        case prefService.PREF_STRING:
+          return prefService.getStringPref(key);
+        case prefService.PREF_INT:
+          return prefService.getIntPref(key);
+        case prefService.PREF_BOOL:
+          return prefService.getBoolPref(key);
+      }
+    }
+  } catch (e) {
+    return defaultValue;
+  }
+  return defaultValue;
+};
 
-  migratePrefs() {
+const setPrefIfUnset = (key, value) => {
+  if (Services.prefs.getPrefType(key) === 0) {
+    setPref(key, value);
+  }
+};
+
+const resetPref = (key) => {
+  if (Services.prefs.getPrefType(key) !== 0) {
+    Services.prefs.clearUserPref(key);
+  }
+};
+
+function addPrefListener(name, callback) {
+  const modified_callback = () => {
+    callback({ value: getPref(name) });
+  };
+  Services.prefs.addObserver(name, modified_callback);
+  return { name, callback };
+}
+
+function removePrefListener(listener) {
+  if (listener && listener.name && listener.callback) {
+    Services.prefs.removeObserver(listener.name, listener.callback);
+  }
+}
+
+let PREFS$1 = class PREFS {
+  static MOD_NAME = "BasePrefs";
+  static DEBUG_MODE = "";
+
+  static defaultValues = {};
+
+  static getPref(key, defaultValue = undefined) {
+    const defaultVal = defaultValue !== undefined ? defaultValue : this.defaultValues[key];
+    return getPref(key, defaultVal);
+  }
+
+  static setPref(prefKey, value) {
+    setPref(prefKey, value);
+  }
+
+  static setInitialPrefs() {
+    for (const [key, value] of Object.entries(this.defaultValues)) {
+      setPrefIfUnset(key, value);
+    }
+  }
+
+  static get debugMode() {
+    if (!this.DEBUG_MODE) return false;
+    return this.getPref(this.DEBUG_MODE);
+  }
+
+  static set debugMode(value) {
+    if (!this.DEBUG_MODE) return;
+    this.setPref(this.DEBUG_MODE, value);
+  }
+
+  static debugLog(...args) {
+    if (this.debugMode) {
+      console.log(`${this.MOD_NAME}:`, ...args);
+    }
+  }
+
+  static debugError(...args) {
+    if (this.debugMode) {
+      console.error(`${this.MOD_NAME}:`, ...args);
+    }
+  }
+};
+
+class BrowseBotPREFS extends PREFS$1 {
+  static MOD_NAME = "BrowseBot";
+  static DEBUG_MODE = "extension.browse-bot.debug-mode";
+
+  static ENABLED = "extension.browse-bot.findbar-ai.enabled";
+  static MINIMAL = "extension.browse-bot.findbar-ai.minimal";
+  static PERSIST = "extension.browse-bot.findbar-ai.persist-chat";
+  static DND_ENABLED = "extension.browse-bot.findbar-ai.dnd-enabled";
+  static POSITION = "extension.browse-bot.findbar-ai.position";
+  static REMEMBER_DIMENSIONS = "extension.browse-bot.findbar-ai.remember-dimensions";
+  static WIDTH = "extension.browse-bot.findbar-ai.width";
+  static STREAM_ENABLED = "extension.browse-bot.findbar-ai.stream-enabled";
+  static AGENTIC_MODE = "extension.browse-bot.findbar-ai.agentic-mode";
+  static CITATIONS_ENABLED = "extension.browse-bot.findbar-ai.citations-enabled";
+  static MAX_TOOL_CALLS = "extension.browse-bot.findbar-ai.max-tool-calls";
+  static CONFORMATION = "extension.browse-bot.findbar-ai.conform-before-tool-call";
+  static CONTEXT_MENU_ENABLED = "extension.browse-bot.findbar-ai.context-menu-enabled";
+  static CONTEXT_MENU_AUTOSEND = "extension.browse-bot.findbar-ai.context-menu-autosend";
+  static CONTEXT_MENU_COMMAND_WITH_SELECTION =
+    "extension.browse-bot.findbar-ai.context-menu-command-with-selection";
+  static CONTEXT_MENU_COMMAND_NO_SELECTION =
+    "extension.browse-bot.findbar-ai.context-menu-command-no-selection";
+  static BACKGROUND_STYLE = "extension.browse-bot.findbar-ai.background-style";
+  static CUSTOM_SYSTEM_PROMPT = "extension.browse-bot.custom-system-prompt";
+
+  static SHORTCUT_FINDBAR = "extension.browse-bot.findbar-ai.shortcut-findbar";
+  static SHORTCUT_URLBAR = "extension.browse-bot.urlbar-ai.shortcut-urlbar";
+
+  static URLBAR_AI_ENABLED = "extension.browse-bot.urlbar-ai-enabled";
+  static URLBAR_AI_HIDE_SUGGESTIONS = "extension.browse-bot.urlbar-ai.hide-suggestions";
+  static URLBAR_AI_ANIMATIONS_ENABLED = "extension.browse-bot.urlbar-ai.animations-enabled";
+
+  static SOLID_BG = "extension.browse-bot.solid-bg";
+
+  static LLM_PROVIDER = "extension.browse-bot.llm-provider";
+  static MISTRAL_API_KEY = "extension.browse-bot.mistral-api-key";
+  static MISTRAL_MODEL = "extension.browse-bot.mistral-model";
+  static GEMINI_API_KEY = "extension.browse-bot.gemini-api-key";
+  static GEMINI_MODEL = "extension.browse-bot.gemini-model";
+  static OPENAI_API_KEY = "extension.browse-bot.openai-api-key";
+  static OPENAI_MODEL = "extension.browse-bot.openai-model";
+  static CLAUDE_API_KEY = "extension.browse-bot.claude-api-key";
+  static CLAUDE_MODEL = "extension.browse-bot.claude-model";
+  static GROK_API_KEY = "extension.browse-bot.grok-api-key";
+  static GROK_MODEL = "extension.browse-bot.grok-model";
+  static PERPLEXITY_API_KEY = "extension.browse-bot.perplexity-api-key";
+  static PERPLEXITY_MODEL = "extension.browse-bot.perplexity-model";
+  static CEREBRAS_API_KEY = "extension.browse-bot.cerebras-api-key";
+  static CEREBRAS_MODEL = "extension.browse-bot.cerebras-model";
+  static OLLAMA_MODEL = "extension.browse-bot.ollama-model";
+  static OLLAMA_BASE_URL = "extension.browse-bot.ollama-base-url";
+
+  static LLM_TEMPERATURE = "extension.browse-bot.llm.temperature";
+  static LLM_TOP_P = "extension.browse-bot.llm.top-p";
+  static LLM_TOP_K = "extension.browse-bot.llm.top-k";
+  static LLM_FREQUENCY_PENALTY = "extension.browse-bot.llm.frequency-penalty";
+  static LLM_PRESENCE_PENALTY = "extension.browse-bot.llm.presence-penalty";
+  static LLM_MAX_OUTPUT_TOKENS = "extension.browse-bot.llm.max-output-tokens";
+
+  // static COPY_BTN_ENABLED = "extension.browse-bot.findbar-ai.copy-btn-enabled";
+  // static MARKDOWN_ENABLED = "extension.browse-bot.findbar-ai.markdown-enabled";
+  // static SHOW_TOOL_CALL = "extension.browse-bot.findbar-ai.show-tool-call";
+
+  static defaultValues = {
+    [BrowseBotPREFS.ENABLED]: true,
+    [BrowseBotPREFS.URLBAR_AI_ENABLED]: true,
+    [BrowseBotPREFS.URLBAR_AI_HIDE_SUGGESTIONS]: true,
+    [BrowseBotPREFS.URLBAR_AI_ANIMATIONS_ENABLED]: true,
+    [BrowseBotPREFS.MINIMAL]: true,
+    [BrowseBotPREFS.AGENTIC_MODE]: false,
+    [BrowseBotPREFS.DEBUG_MODE]: false,
+    [BrowseBotPREFS.PERSIST]: false,
+    [BrowseBotPREFS.STREAM_ENABLED]: true,
+    [BrowseBotPREFS.CITATIONS_ENABLED]: false,
+    [BrowseBotPREFS.CONTEXT_MENU_ENABLED]: true,
+    [BrowseBotPREFS.CONTEXT_MENU_AUTOSEND]: true,
+    [BrowseBotPREFS.CONTEXT_MENU_COMMAND_NO_SELECTION]: "Summarize current page",
+    [BrowseBotPREFS.CONTEXT_MENU_COMMAND_WITH_SELECTION]:
+      "Explain this in context of current page:\n\n{selection}",
+    [BrowseBotPREFS.LLM_PROVIDER]: "gemini",
+    [BrowseBotPREFS.MISTRAL_API_KEY]: "",
+    [BrowseBotPREFS.MISTRAL_MODEL]: "mistral-medium-latest",
+    [BrowseBotPREFS.GEMINI_API_KEY]: "",
+    [BrowseBotPREFS.GEMINI_MODEL]: "gemini-2.5-flash",
+    [BrowseBotPREFS.OPENAI_API_KEY]: "",
+    [BrowseBotPREFS.OPENAI_MODEL]: "gpt-5.2",
+    [BrowseBotPREFS.CLAUDE_API_KEY]: "",
+    [BrowseBotPREFS.CLAUDE_MODEL]: "claude-4-opus",
+    [BrowseBotPREFS.GROK_API_KEY]: "",
+    [BrowseBotPREFS.GROK_MODEL]: "grok-4",
+    [BrowseBotPREFS.PERPLEXITY_API_KEY]: "",
+    [BrowseBotPREFS.PERPLEXITY_MODEL]: "sonar",
+    [BrowseBotPREFS.CEREBRAS_API_KEY]: "",
+    [BrowseBotPREFS.CEREBRAS_MODEL]: "llama3.1-8b",
+    [BrowseBotPREFS.OLLAMA_MODEL]: "llama2",
+    [BrowseBotPREFS.OLLAMA_BASE_URL]: "http://localhost:11434/api",
+    [BrowseBotPREFS.DND_ENABLED]: true,
+    [BrowseBotPREFS.POSITION]: "top-right",
+    [BrowseBotPREFS.REMEMBER_DIMENSIONS]: true,
+    [BrowseBotPREFS.WIDTH]: 500,
+    [BrowseBotPREFS.MAX_TOOL_CALLS]: 5,
+    [BrowseBotPREFS.CONFORMATION]: true,
+    [BrowseBotPREFS.BACKGROUND_STYLE]: "solid",
+    [BrowseBotPREFS.SHORTCUT_FINDBAR]: "ctrl+shift+f",
+    [BrowseBotPREFS.SHORTCUT_URLBAR]: "ctrl+space",
+    [BrowseBotPREFS.CUSTOM_SYSTEM_PROMPT]: "",
+    [BrowseBotPREFS.LLM_TEMPERATURE]: 0.7,
+    [BrowseBotPREFS.LLM_TOP_P]: 1.0,
+    [BrowseBotPREFS.LLM_TOP_K]: 40,
+    [BrowseBotPREFS.LLM_FREQUENCY_PENALTY]: 0.0,
+    [BrowseBotPREFS.LLM_PRESENCE_PENALTY]: 0.0,
+    [BrowseBotPREFS.LLM_MAX_OUTPUT_TOKENS]: 2048,
+  };
+
+  setInitialPrefs() {
+    this.migratePrefs();
+    super.setInitialPrefs();
+  }
+
+  static migratePrefs() {
     const migrationMap = {
-      "extension.browse-bot.enabled": PREFS.ENABLED,
-      "extension.browse-bot.minimal": PREFS.MINIMAL,
-      "extension.browse-bot.persist-chat": PREFS.PERSIST,
-      "extension.browse-bot.dnd-enabled": PREFS.DND_ENABLED,
-      "extension.browse-bot.position": PREFS.POSITION,
-      "extension.browse-bot.stream-enabled": PREFS.STREAM_ENABLED,
-      "extension.browse-bot.god-mode": PREFS.AGENTIC_MODE,
-      "extension.browse-bot.findbar-god-mode": PREFS.AGENTIC_MODE,
-      "extension.browse-bot.citations-enabled": PREFS.CITATIONS_ENABLED,
-      "extension.browse-bot.max-tool-calls": PREFS.MAX_TOOL_CALLS,
-      "extension.browse-bot.conform-before-tool-call": PREFS.CONFORMATION,
-      "extension.browse-bot.context-menu-enabled": PREFS.CONTEXT_MENU_ENABLED,
-      "extension.browse-bot.context-menu-autosend": PREFS.CONTEXT_MENU_AUTOSEND,
+      "extension.browse-bot.enabled": this.ENABLED,
+      "extension.browse-bot.minimal": this.MINIMAL,
+      "extension.browse-bot.persist-chat": this.PERSIST,
+      "extension.browse-bot.dnd-enabled": this.DND_ENABLED,
+      "extension.browse-bot.position": this.POSITION,
+      "extension.browse-bot.stream-enabled": this.STREAM_ENABLED,
+      "extension.browse-bot.god-mode": this.AGENTIC_MODE,
+      "extension.browse-bot.findbar-god-mode": this.AGENTIC_MODE,
+      "extension.browse-bot.citations-enabled": this.CITATIONS_ENABLED,
+      "extension.browse-bot.max-tool-calls": this.MAX_TOOL_CALLS,
+      "extension.browse-bot.conform-before-tool-call": this.CONFORMATION,
+      "extension.browse-bot.context-menu-enabled": this.CONTEXT_MENU_ENABLED,
+      "extension.browse-bot.context-menu-autosend": this.CONTEXT_MENU_AUTOSEND,
     };
 
     for (const [oldKey, newKey] of Object.entries(migrationMap)) {
       try {
-        const oldPref = UC_API.Prefs.get(oldKey);
-        if (oldPref && oldPref.exists()) {
-          const value = oldPref.value;
-          debugLog(`Migrating pref ${oldKey} to ${newKey} with value: ${value}`);
-          UC_API.Prefs.set(newKey, value);
-          oldPref.reset();
+        const oldPref = this.getPref(oldKey);
+        if (oldPref != undefined) {
+          const value = oldPref;
+          this.debugLog(`Migrating pref ${oldKey} to ${newKey} with value: ${value}`);
+          this.setPref(newKey, value);
+          resetPref(oldPref);
         }
       } catch (e) {
-        // It's fine if it fails, just log it in debug mode
-        debugError(`Could not migrate pref ${oldKey}:`, e);
+        this.debugError(`Could not migrate pref ${oldKey}:`, e);
       }
     }
-  },
+  }
 
-  setInitialPrefs() {
-    this.migratePrefs();
-    for (const [key, value] of Object.entries(PREFS.defaultValues)) {
-      UC_API.Prefs.setIfUnset(key, value);
-    }
-  },
-
-  get enabled() {
+  static get enabled() {
     return this.getPref(this.ENABLED);
-  },
-  set enabled(value) {
+  }
+
+  static set enabled(value) {
     this.setPref(this.ENABLED, value);
-  },
+  }
 
-  get minimal() {
+  static get minimal() {
     return this.getPref(this.MINIMAL);
-  },
-  set minimal(value) {
+  }
+
+  static set minimal(value) {
     this.setPref(this.MINIMAL, value);
-  },
+  }
 
-  get streamEnabled() {
+  static get streamEnabled() {
     return this.getPref(this.STREAM_ENABLED);
-  },
-  set streamEnabled(value) {
+  }
+
+  static set streamEnabled(value) {
     this.setPref(this.STREAM_ENABLED, value);
-  },
+  }
 
-  set agenticMode(value) {
+  static set agenticMode(value) {
     this.setPref(this.AGENTIC_MODE, value);
-  },
-  get agenticMode() {
+  }
+
+  static get agenticMode() {
     return this.getPref(this.AGENTIC_MODE);
-  },
+  }
 
-  get citationsEnabled() {
+  static get citationsEnabled() {
     return this.getPref(this.CITATIONS_ENABLED);
-  },
-  set citationsEnabled(value) {
+  }
+
+  static set citationsEnabled(value) {
     this.setPref(this.CITATIONS_ENABLED, value);
-  },
+  }
 
-  get contextMenuEnabled() {
+  static get contextMenuEnabled() {
     return this.getPref(this.CONTEXT_MENU_ENABLED);
-  },
-  set contextMenuEnabled(value) {
+  }
+
+  static set contextMenuEnabled(value) {
     this.setPref(this.CONTEXT_MENU_ENABLED, value);
-  },
+  }
 
-  get contextMenuAutoSend() {
+  static get contextMenuAutoSend() {
     return this.getPref(this.CONTEXT_MENU_AUTOSEND);
-  },
-  set contextMenuAutoSend(value) {
+  }
+
+  static set contextMenuAutoSend(value) {
     this.setPref(this.CONTEXT_MENU_AUTOSEND, value);
-  },
+  }
 
-  get contextMenuCommandWithSelection() {
+  static get contextMenuCommandWithSelection() {
     return this.getPref(this.CONTEXT_MENU_COMMAND_WITH_SELECTION);
-  },
-  set contextMenuCommandWithSelection(value) {
+  }
+
+  static set contextMenuCommandWithSelection(value) {
     this.setPref(this.CONTEXT_MENU_COMMAND_WITH_SELECTION, value);
-  },
+  }
 
-  get contextMenuCommandNoSelection() {
+  static get contextMenuCommandNoSelection() {
     return this.getPref(this.CONTEXT_MENU_COMMAND_NO_SELECTION);
-  },
-  set contextMenuCommandNoSelection(value) {
+  }
+
+  static set contextMenuCommandNoSelection(value) {
     this.setPref(this.CONTEXT_MENU_COMMAND_NO_SELECTION, value);
-  },
+  }
 
-  get llmProvider() {
+  static get llmProvider() {
     return this.getPref(this.LLM_PROVIDER);
-  },
-  set llmProvider(value) {
+  }
+
+  static set llmProvider(value) {
     this.setPref(this.LLM_PROVIDER, value);
-  },
+  }
 
-  get persistChat() {
+  static get persistChat() {
     return this.getPref(this.PERSIST);
-  },
-  set persistChat(value) {
+  }
+
+  static set persistChat(value) {
     this.setPref(this.PERSIST, value);
-  },
+  }
 
-  get backgroundStyle() {
+  static get backgroundStyle() {
     return this.getPref(this.BACKGROUND_STYLE);
-  },
+  }
 
-  get pseudoBg() {
+  static get pseudoBg() {
     return this.backgroundStyle === "pseudo";
-  },
+  }
 
-  get maxToolCalls() {
+  static get maxToolCalls() {
     return this.getPref(this.MAX_TOOL_CALLS);
-  },
-  set maxToolCalls(value) {
+  }
+
+  static set maxToolCalls(value) {
     this.setPref(this.MAX_TOOL_CALLS, value);
-  },
+  }
 
-  get copyBtnEnabled() {
-    return this.getPref(this.COPY_BTN_ENABLED);
-  },
-  set copyBtnEnabled(value) {
-    this.setPref(this.COPY_BTN_ENABLED, value);
-  },
+  // static get copyBtnEnabled() {
+  //   return this.getPref(this.COPY_BTN_ENABLED);
+  // }
+  //
+  // static set copyBtnEnabled(value) {
+  //   this.setPref(this.COPY_BTN_ENABLED, value);
+  // }
+  //
+  // static get markdownEnabled() {
+  //   return this.getPref(this.MARKDOWN_ENABLED);
+  // }
+  //
+  // static set markdownEnabled(value) {
+  //   this.setPref(this.MARKDOWN_ENABLED, value);
+  // }
 
-  get markdownEnabled() {
-    return this.getPref(this.MARKDOWN_ENABLED);
-  },
-  set markdownEnabled(value) {
-    this.setPref(this.MARKDOWN_ENABLED, value);
-  },
-
-  get conformation() {
+  static get conformation() {
     return this.getPref(this.CONFORMATION);
-  },
-  set conformation(value) {
+  }
+
+  static set conformation(value) {
     this.setPref(this.CONFORMATION, value);
-  },
+  }
 
-  get showToolCall() {
-    return this.getPref(this.SHOW_TOOL_CALL);
-  },
-  set showToolCall(value) {
-    this.setPref(this.SHOW_TOOL_CALL, value);
-  },
+  // static get showToolCall() {
+  //   return this.getPref(this.SHOW_TOOL_CALL);
+  // }
+  //
+  // static set showToolCall(value) {
+  //   this.setPref(this.SHOW_TOOL_CALL, value);
+  // }
 
-  get dndEnabled() {
+  static get dndEnabled() {
     return this.getPref(this.DND_ENABLED);
-  },
-  set dndEnabled(value) {
+  }
+
+  static set dndEnabled(value) {
     this.setPref(this.DND_ENABLED, value);
-  },
+  }
 
-  get position() {
+  static get position() {
     return this.getPref(this.POSITION);
-  },
-  set position(value) {
+  }
+
+  static set position(value) {
     this.setPref(this.POSITION, value);
-  },
+  }
 
-  get rememberDimensions() {
+  static get rememberDimensions() {
     return this.getPref(this.REMEMBER_DIMENSIONS);
-  },
-  set rememberDimensions(value) {
+  }
+
+  static set rememberDimensions(value) {
     this.setPref(this.REMEMBER_DIMENSIONS, value);
-  },
+  }
 
-  get width() {
+  static get width() {
     return this.getPref(this.WIDTH);
-  },
-  set width(value) {
+  }
+
+  static set width(value) {
     this.setPref(this.WIDTH, value);
-  },
+  }
 
-  get ollamaBaseUrl() {
+  static get ollamaBaseUrl() {
     return this.getPref(this.OLLAMA_BASE_URL);
-  },
-  set ollamaBaseUrl(value) {
+  }
+
+  static set ollamaBaseUrl(value) {
     this.setPref(this.OLLAMA_BASE_URL, value);
-  },
+  }
 
-  get llmTemperature() {
+  static get llmTemperature() {
     return this.getPref(this.LLM_TEMPERATURE);
-  },
-  set llmTemperature(value) {
+  }
+
+  static set llmTemperature(value) {
     this.setPref(this.LLM_TEMPERATURE, value);
-  },
+  }
 
-  get llmTopP() {
+  static get llmTopP() {
     return this.getPref(this.LLM_TOP_P);
-  },
-  set llmTopP(value) {
+  }
+
+  static set llmTopP(value) {
     this.setPref(this.LLM_TOP_P, value);
-  },
+  }
 
-  get llmTopK() {
+  static get llmTopK() {
     return this.getPref(this.LLM_TOP_K);
-  },
-  set llmTopK(value) {
+  }
+
+  static set llmTopK(value) {
     this.setPref(this.LLM_TOP_K, value);
-  },
+  }
 
-  get llmFrequencyPenalty() {
+  static get llmFrequencyPenalty() {
     return this.getPref(this.LLM_FREQUENCY_PENALTY);
-  },
-  set llmFrequencyPenalty(value) {
+  }
+
+  static set llmFrequencyPenalty(value) {
     this.setPref(this.LLM_FREQUENCY_PENALTY, value);
-  },
+  }
 
-  get llmPresencePenalty() {
+  static get llmPresencePenalty() {
     return this.getPref(this.LLM_PRESENCE_PENALTY);
-  },
-  set llmPresencePenalty(value) {
+  }
+
+  static set llmPresencePenalty(value) {
     this.setPref(this.LLM_PRESENCE_PENALTY, value);
-  },
+  }
 
-  get llmMaxOutputTokens() {
+  static get llmMaxOutputTokens() {
     return this.getPref(this.LLM_MAX_OUTPUT_TOKENS);
-  },
-  set llmMaxOutputTokens(value) {
+  }
+
+  static set llmMaxOutputTokens(value) {
     this.setPref(this.LLM_MAX_OUTPUT_TOKENS, value);
-  },
+  }
 
-  get shortcutFindbar() {
+  static get shortcutFindbar() {
     return this.getPref(this.SHORTCUT_FINDBAR);
-  },
-  set shortcutFindbar(value) {
+  }
+
+  static set shortcutFindbar(value) {
     this.setPref(this.SHORTCUT_FINDBAR, value);
-  },
+  }
 
-  get shortcutUrlbar() {
+  static get shortcutUrlbar() {
     return this.getPref(this.SHORTCUT_URLBAR);
-  },
-  set shortcutUrlbar(value) {
+  }
+
+  static set shortcutUrlbar(value) {
     this.setPref(this.SHORTCUT_URLBAR, value);
-  },
+  }
 
-  get customSystemPrompt() {
+  static get customSystemPrompt() {
     return this.getPref(this.CUSTOM_SYSTEM_PROMPT);
-  },
-  set customSystemPrompt(value) {
+  }
+
+  static set customSystemPrompt(value) {
     this.setPref(this.CUSTOM_SYSTEM_PROMPT, value);
-  },
-};
-
-const debugLog = (...args) => {
-  if (PREFS.getPref(PREFS.DEBUG_MODE, false)) {
-    console.log("BrowseBot :", ...args);
   }
-};
+}
 
-const debugError = (...args) => {
-  if (PREFS.getPref(PREFS.DEBUG_MODE, false)) {
-    console.error("BrowseBot :", ...args);
-  }
-};
-
-PREFS.defaultValues = {
-  [PREFS.ENABLED]: true,
-  [PREFS.URLBAR_AI_ENABLED]: true,
-  [PREFS.URLBAR_AI_HIDE_SUGGESTIONS]: true,
-  [PREFS.URLBAR_AI_ANIMATIONS_ENABLED]: true,
-  [PREFS.MINIMAL]: true,
-  [PREFS.AGENTIC_MODE]: false,
-  [PREFS.DEBUG_MODE]: false,
-  [PREFS.PERSIST]: false,
-  [PREFS.STREAM_ENABLED]: true,
-  [PREFS.CITATIONS_ENABLED]: false,
-  [PREFS.CONTEXT_MENU_ENABLED]: true,
-  [PREFS.CONTEXT_MENU_AUTOSEND]: true,
-  [PREFS.CONTEXT_MENU_COMMAND_NO_SELECTION]: "Summarize current page",
-  [PREFS.CONTEXT_MENU_COMMAND_WITH_SELECTION]:
-    "Explain this in context of current page:\n\n{selection}",
-  [PREFS.LLM_PROVIDER]: "gemini",
-  [PREFS.MISTRAL_API_KEY]: "",
-  [PREFS.MISTRAL_MODEL]: "mistral-medium-latest",
-  [PREFS.GEMINI_API_KEY]: "",
-  [PREFS.GEMINI_MODEL]: "gemini-2.5-flash",
-  [PREFS.OPENAI_API_KEY]: "",
-  [PREFS.OPENAI_MODEL]: "gpt-5.2",
-  [PREFS.CLAUDE_API_KEY]: "",
-  [PREFS.CLAUDE_MODEL]: "claude-4-opus",
-  [PREFS.GROK_API_KEY]: "",
-  [PREFS.GROK_MODEL]: "grok-4",
-  [PREFS.PERPLEXITY_API_KEY]: "",
-  [PREFS.PERPLEXITY_MODEL]: "sonar",
-  [PREFS.CEREBRAS_API_KEY]: "",
-  [PREFS.CEREBRAS_MODEL]: "llama3.1-8b",
-  [PREFS.OLLAMA_MODEL]: "llama2",
-  [PREFS.OLLAMA_BASE_URL]: "http://localhost:11434/api",
-  [PREFS.DND_ENABLED]: true,
-  [PREFS.POSITION]: "top-right",
-  [PREFS.REMEMBER_DIMENSIONS]: true,
-  [PREFS.WIDTH]: 500,
-  [PREFS.MAX_TOOL_CALLS]: 5,
-  [PREFS.CONFORMATION]: true,
-  [PREFS.CONFORMATION]: true,
-  [PREFS.BACKGROUND_STYLE]: "solid",
-
-  [PREFS.SHORTCUT_FINDBAR]: "ctrl+shift+f",
-  [PREFS.SHORTCUT_URLBAR]: "ctrl+space",
-
-  [PREFS.CUSTOM_SYSTEM_PROMPT]: "",
-  [PREFS.LLM_TEMPERATURE]: 0.7,
-  [PREFS.LLM_TOP_P]: 1.0,
-  [PREFS.LLM_TOP_K]: 40,
-  [PREFS.LLM_FREQUENCY_PENALTY]: 0.0,
-  [PREFS.LLM_PRESENCE_PENALTY]: 0.0,
-  [PREFS.LLM_MAX_OUTPUT_TOKENS]: 2048,
-  // [PREFS.COPY_BTN_ENABLED]: true,
-  // [PREFS.MARKDOWN_ENABLED]: true,
-  // [PREFS.SHOW_TOOL_CALL]: false,
-};
+const PREFS = BrowseBotPREFS;
 
 async function frameScript() {
   const getUrlAndTitle = () => {
@@ -666,7 +760,7 @@ const messageManagerAPI = {
   send(cmd, data = {}) {
     updateMessageManager();
     if (!currentMessageManager) {
-      debugError("No message manager available.");
+      PREFS.debugError("No message manager available.");
       return Promise.reject(new Error("No message manager available."));
     }
 
@@ -695,7 +789,7 @@ const messageManagerAPI = {
 
   async getHTMLContent() {
     return this.send("GetPageHTMLContent").catch((error) => {
-      debugError("Failed to get page HTML content:", error);
+      PREFS.debugError("Failed to get page HTML content:", error);
       return {};
     });
   },
@@ -709,49 +803,49 @@ const messageManagerAPI = {
         return result;
       })
       .catch((error) => {
-        debugError("Failed to get selected text:", error);
+        PREFS.debugError("Failed to get selected text:", error);
         return this.getUrlAndTitle();
       });
   },
 
   async getPageTextContent(trimWhiteSpace = true) {
     return this.send("GetPageTextContent", { trimWhiteSpace }).catch((error) => {
-      debugError("Failed to get page text content:", error);
+      PREFS.debugError("Failed to get page text content:", error);
       return this.getUrlAndTitle();
     });
   },
 
   async clickElement(selector) {
     return this.send("ClickElement", { selector }).catch((error) => {
-      debugError(`Failed to click element with selector "${selector}":`, error);
+      PREFS.debugError(`Failed to click element with selector "${selector}":`, error);
       return { error: `Failed to click element with selector "${selector}".` };
     });
   },
 
   async fillForm(selector, value) {
     return this.send("FillForm", { selector, value }).catch((error) => {
-      debugError(`Failed to fill form with selector "${selector}":`, error);
+      PREFS.debugError(`Failed to fill form with selector "${selector}":`, error);
       return { error: `Failed to fill form with selector "${selector}".` };
     });
   },
 
   async getYoutubeTranscript() {
     return this.send("GetYoutubeTranscript").catch((error) => {
-      debugError("Failed to get youtube transcript:", error);
+      PREFS.debugError("Failed to get youtube transcript:", error);
       return { error: `Failed to get youtube transcript: ${error.message}` };
     });
   },
 
   async getYoutubeDescription() {
     return this.send("GetYoutubeDescription").catch((error) => {
-      debugError("Failed to get youtube description:", error);
+      PREFS.debugError("Failed to get youtube description:", error);
       return { error: `Failed to get youtube description: ${error.message}` };
     });
   },
 
   async getYoutubeComments(count) {
     return this.send("GetYoutubeComments", { count }).catch((error) => {
-      debugError("Failed to get youtube comments:", error);
+      PREFS.debugError("Failed to get youtube comments:", error);
       return { error: `Failed to get youtube comments: ${error.message}` };
     });
   },
@@ -832,7 +926,7 @@ const SettingsModal = {
 
     targetInput.value = shortcutString;
     this._currentPrefValues[prefKey] = shortcutString;
-    debugLog(`Shortcut for ${prefKey} set to: ${shortcutString}`);
+    PREFS.debugLog(`Shortcut for ${prefKey} set to: ${shortcutString}`);
 
     targetInput.classList.remove("recording");
     targetInput.placeholder = "Click to set";
@@ -966,7 +1060,7 @@ const SettingsModal = {
       if (control.tagName.toLowerCase() === "menulist") {
         control.addEventListener("command", (e) => {
           this._currentPrefValues[prefKey] = e.target.value;
-          debugLog(
+          PREFS.debugLog(
             `Settings form value for ${prefKey} changed to: ${this._currentPrefValues[prefKey]}`
           );
           if (prefKey === PREFS.LLM_PROVIDER) {
@@ -989,7 +1083,7 @@ const SettingsModal = {
           } else {
             this._currentPrefValues[prefKey] = e.target.value;
           }
-          debugLog(
+          PREFS.debugLog(
             `Settings form value for ${prefKey} changed to: ${this._currentPrefValues[prefKey]}`
           );
         });
@@ -1074,15 +1168,15 @@ const SettingsModal = {
         if (prefKey.endsWith("api-key")) {
           if (this._currentPrefValues[prefKey]) {
             const maskedKey = "*".repeat(this._currentPrefValues[prefKey].length);
-            debugLog(`Saving pref ${prefKey} to: ${maskedKey}`);
+            PREFS.debugLog(`Saving pref ${prefKey} to: ${maskedKey}`);
           }
         } else {
-          debugLog(`Saving pref ${prefKey} to: ${this._currentPrefValues[prefKey]}`);
+          PREFS.debugLog(`Saving pref ${prefKey} to: ${this._currentPrefValues[prefKey]}`);
         }
         try {
           PREFS.setPref(prefKey, this._currentPrefValues[prefKey]);
         } catch (e) {
-          debugError(`Error Saving pref for ${prefKey} ${e}`);
+          PREFS.debugError(`Error Saving pref for ${prefKey} ${e}`);
         }
       }
     }
@@ -1701,17 +1795,17 @@ async function getSearchURL(engineName, searchTerm) {
   try {
     const engine = await Services.search.getEngineByName(engineName);
     if (!engine) {
-      debugError(`No search engine found with name: ${engineName}`);
+      PREFS.debugError(`No search engine found with name: ${engineName}`);
       return null;
     }
     const submission = engine.getSubmission(searchTerm.trim());
     if (!submission) {
-      debugError(`No submission found for term: ${searchTerm} and engine: ${engineName}`);
+      PREFS.debugError(`No submission found for term: ${searchTerm} and engine: ${engineName}`);
       return null;
     }
     return submission.uri.spec;
   } catch (e) {
-    debugError(`Error getting search URL for engine "${engineName}".`, e);
+    PREFS.debugError(`Error getting search URL for engine "${engineName}".`, e);
     return null;
   }
 }
@@ -1756,13 +1850,8 @@ async function openLink(args) {
         break;
       case "glance":
         if (window.gZenGlanceManager) {
-          const rect = gBrowser.selectedBrowser.getBoundingClientRect();
           window.gZenGlanceManager.openGlance({
             url: link,
-            x: rect.left + rect.width / 2,
-            y: rect.top + rect.height / 2,
-            width: 10,
-            height: 10,
           });
         } else {
           openTrustedLinkIn(link, "tab");
@@ -1787,7 +1876,7 @@ async function openLink(args) {
     }
     return { result: `Successfully opened ${link} in ${where}.` };
   } catch (e) {
-    debugError(`Failed to open link "${link}" in "${where}".`, e);
+    PREFS.debugError(`Failed to open link "${link}" in "${where}".`, e);
     return { error: `Failed to open link.` };
   }
 }
@@ -1822,7 +1911,7 @@ async function newSplit(args) {
       result: `Successfully created split view with ${links.length} tabs.`,
     };
   } catch (e) {
-    debugError("Failed to create split view.", e);
+    PREFS.debugError("Failed to create split view.", e);
     return { error: "Failed to create split view." };
   }
 }
@@ -1836,7 +1925,7 @@ async function getAllTabs() {
     const allTabs = gZenWorkspaces.allStoredTabs.map(mapTabToObject).filter(Boolean);
     return { tabs: allTabs };
   } catch (e) {
-    debugError("Failed to get all tabs:", e);
+    PREFS.debugError("Failed to get all tabs:", e);
     return { error: "Failed to retrieve tabs." };
   }
 }
@@ -1857,7 +1946,7 @@ async function closeTabs(args) {
     gBrowser.removeTabs(tabsToClose);
     return { result: `Successfully closed ${tabsToClose.length} tab(s).` };
   } catch (e) {
-    debugError("Failed to close tabs:", e);
+    PREFS.debugError("Failed to close tabs:", e);
     return { error: "An error occurred while closing tabs." };
   }
 }
@@ -1893,7 +1982,7 @@ async function splitExistingTabs(args) {
     gZenViewSplitter.splitTabs(tabs, gridType);
     return { result: `Successfully created split view with ${tabs.length} tabs.` };
   } catch (e) {
-    debugError("Failed to split existing tabs.", e);
+    PREFS.debugError("Failed to split existing tabs.", e);
     return { error: "Failed to create split view." };
   }
 }
@@ -1922,7 +2011,7 @@ async function searchTabs(args) {
 
     return { tabs: results };
   } catch (e) {
-    debugError(`Error searching tabs for query "${query}":`, e);
+    PREFS.debugError(`Error searching tabs for query "${query}":`, e);
     return { error: `Failed to search tabs.` };
   }
 }
@@ -1954,7 +2043,7 @@ async function addTabsToFolder(args) {
     folder.addTabs(tabs);
     return { result: `Successfully added ${tabs.length} tab(s) to folder "${folder.label}".` };
   } catch (e) {
-    debugError("Failed to add tabs to folder:", e);
+    PREFS.debugError("Failed to add tabs to folder:", e);
     return { error: "Failed to add tabs to folder." };
   }
 }
@@ -1982,7 +2071,7 @@ async function removeTabsFromFolder(args) {
     });
     return { result: `Successfully ungrouped ${ungroupedCount} tab(s).` };
   } catch (e) {
-    debugError("Failed to remove tabs from folder:", e);
+    PREFS.debugError("Failed to remove tabs from folder:", e);
     return { error: "Failed to remove tabs from folder." };
   }
 }
@@ -2006,7 +2095,7 @@ async function createTabFolder(args) {
       },
     };
   } catch (e) {
-    debugError("Failed to create tab folder:", e);
+    PREFS.debugError("Failed to create tab folder:", e);
     return { error: "Failed to create tab folder." };
   }
 }
@@ -2029,7 +2118,7 @@ async function reorderTab(args) {
     gBrowser.moveTabTo(tab, { tabIndex: newIndex });
     return { result: `Successfully moved tab to index ${newIndex}.` };
   } catch (e) {
-    debugError("Failed to reorder tab:", e);
+    PREFS.debugError("Failed to reorder tab:", e);
     return { error: "Failed to reorder tab." };
   }
 }
@@ -2054,7 +2143,7 @@ async function addTabsToEssentials(args) {
       return { error: "Essentials manager is not available." };
     }
   } catch (e) {
-    debugError("Failed to add tabs to essentials:", e);
+    PREFS.debugError("Failed to add tabs to essentials:", e);
     return { error: "An error occurred while adding tabs to essentials." };
   }
 }
@@ -2079,7 +2168,7 @@ async function removeTabsFromEssentials(args) {
       return { error: "Essentials manager is not available." };
     }
   } catch (e) {
-    debugError("Failed to remove tabs from essentials:", e);
+    PREFS.debugError("Failed to remove tabs from essentials:", e);
     return { error: "An error occurred while removing tabs from essentials." };
   }
 }
@@ -2110,10 +2199,10 @@ async function searchBookmarks(args) {
       parentID: bookmark.parentGuid,
     }));
 
-    debugLog(`Found ${results.length} bookmarks for query "${query}":`, results);
+    PREFS.debugLog(`Found ${results.length} bookmarks for query "${query}":`, results);
     return { bookmarks: results };
   } catch (e) {
-    debugError(`Error searching bookmarks for query "${query}":`, e);
+    PREFS.debugError(`Error searching bookmarks for query "${query}":`, e);
     return { error: `Failed to search bookmarks.` };
   }
 }
@@ -2134,10 +2223,10 @@ async function getAllBookmarks() {
       parentID: bookmark.parentGuid,
     }));
 
-    debugLog(`Read ${results.length} total bookmarks.`);
+    PREFS.debugLog(`Read ${results.length} total bookmarks.`);
     return { bookmarks: results };
   } catch (e) {
-    debugError(`Error reading all bookmarks:`, e);
+    PREFS.debugError(`Error reading all bookmarks:`, e);
     return { error: `Failed to read all bookmarks.` };
   }
 }
@@ -2163,10 +2252,10 @@ async function createBookmark(args) {
 
     const bm = await PlacesUtils.bookmarks.insert(bookmarkInfo);
 
-    debugLog(`Bookmark created successfully:`, JSON.stringify(bm));
+    PREFS.debugLog(`Bookmark created successfully:`, JSON.stringify(bm));
     return { result: `Successfully bookmarked "${bm.title}".` };
   } catch (e) {
-    debugError(`Error creating bookmark for URL "${url}":`, e);
+    PREFS.debugError(`Error creating bookmark for URL "${url}":`, e);
     return { error: `Failed to create bookmark.` };
   }
 }
@@ -2191,10 +2280,10 @@ async function addBookmarkFolder(args) {
 
     const folder = await PlacesUtils.bookmarks.insert(folderInfo);
 
-    debugLog(`Bookmark folder created successfully:`, JSON.stringify(folderInfo));
+    PREFS.debugLog(`Bookmark folder created successfully:`, JSON.stringify(folderInfo));
     return { result: `Successfully created folder "${folder.title}".` };
   } catch (e) {
-    debugError(`Error creating bookmark folder "${title}":`, e);
+    PREFS.debugError(`Error creating bookmark folder "${title}":`, e);
     return { error: `Failed to create folder.` };
   }
 }
@@ -2230,10 +2319,10 @@ async function updateBookmark(args) {
       parentGuid: parentID || oldBookmark.parentGuid,
     });
 
-    debugLog(`Bookmark updated successfully:`, JSON.stringify(bm));
+    PREFS.debugLog(`Bookmark updated successfully:`, JSON.stringify(bm));
     return { result: `Successfully updated bookmark to "${bm.title}".` };
   } catch (e) {
-    debugError(`Error updating bookmark with id "${id}":`, e);
+    PREFS.debugError(`Error updating bookmark with id "${id}":`, e);
     return { error: `Failed to update bookmark.` };
   }
 }
@@ -2250,10 +2339,10 @@ async function deleteBookmark(args) {
   if (!id) return { error: "deleteBookmark requires a bookmark id (guid)." };
   try {
     await PlacesUtils.bookmarks.remove(id);
-    debugLog(`Bookmark with id "${id}" deleted successfully.`);
+    PREFS.debugLog(`Bookmark with id "${id}" deleted successfully.`);
     return { result: `Successfully deleted bookmark.` };
   } catch (e) {
-    debugError(`Error deleting bookmark with id "${id}":`, e);
+    PREFS.debugError(`Error deleting bookmark with id "${id}":`, e);
     return { error: `Failed to delete bookmark.` };
   }
 }
@@ -2278,7 +2367,7 @@ async function getAllWorkspaces() {
     }));
     return { workspaces: result };
   } catch (e) {
-    debugError("Failed to get all workspaces:", e);
+    PREFS.debugError("Failed to get all workspaces:", e);
     return { error: "Failed to retrieve workspaces." };
   }
 }
@@ -2300,7 +2389,7 @@ async function createWorkspace(args) {
       workspace: { id: ws.uuid, name: ws.name, icon: ws.icon },
     };
   } catch (e) {
-    debugError("Failed to create workspace:", e);
+    PREFS.debugError("Failed to create workspace:", e);
     return { error: "Failed to create workspace." };
   }
 }
@@ -2325,7 +2414,7 @@ async function updateWorkspace(args) {
     await gZenWorkspaces.saveWorkspace(workspace);
     return { result: `Successfully updated workspace.` };
   } catch (e) {
-    debugError("Failed to update workspace:", e);
+    PREFS.debugError("Failed to update workspace:", e);
     return { error: "Failed to update workspace." };
   }
 }
@@ -2343,7 +2432,7 @@ async function deleteWorkspace(args) {
     await gZenWorkspaces.removeWorkspace(id);
     return { result: "Successfully deleted workspace." };
   } catch (e) {
-    debugError("Failed to delete workspace:", e);
+    PREFS.debugError("Failed to delete workspace:", e);
     return { error: "Failed to delete workspace." };
   }
 }
@@ -2365,7 +2454,7 @@ async function moveTabsToWorkspace(args) {
     gZenWorkspaces.moveTabsToWorkspace(tabs, workspaceId);
     return { result: `Successfully moved ${tabs.length} tab(s) to workspace.` };
   } catch (e) {
-    debugError("Failed to move tabs to workspace:", e);
+    PREFS.debugError("Failed to move tabs to workspace:", e);
     return { error: "Failed to move tabs to workspace." };
   }
 }
@@ -2386,7 +2475,7 @@ async function reorderWorkspace(args) {
     await gZenWorkspaces.reorderWorkspace(id, newPosition);
     return { result: "Successfully reordered workspace." };
   } catch (e) {
-    debugError("Failed to reorder workspace:", e);
+    PREFS.debugError("Failed to reorder workspace:", e);
     return { error: "Failed to reorder workspace." };
   }
 }
@@ -2444,11 +2533,11 @@ async function showToast(args) {
       window.ucAPI.showToast([title, description], 0);
       return { result: "Toast displayed successfully." };
     } else {
-      debugError("ucAPI.showToast is not available.");
+      PREFS.debugError("ucAPI.showToast is not available.");
       return { error: "Toast functionality is not available." };
     }
   } catch (e) {
-    debugError("Failed to show toast:", e);
+    PREFS.debugError("Failed to show toast:", e);
     return { error: "An error occurred while displaying the toast." };
   }
 }
@@ -2932,7 +3021,7 @@ const getTools = (groups, { shouldToolBeCalled, afterToolCall } = {}) => {
     const originalExecute = originalTool.execute;
     newTool.execute = async (args) => {
       if (shouldToolBeCalled && !(await shouldToolBeCalled(toolName))) {
-        debugLog(`Tool execution for '${toolName}' was denied by shouldToolBeCalled.`);
+        PREFS.debugLog(`Tool execution for '${toolName}' was denied by shouldToolBeCalled.`);
         return { error: `Tool execution for '${toolName}' was denied by user.` };
       }
       const result = await originalExecute(args);
@@ -3000,7 +3089,7 @@ ${toolExamples.join("\n\n")}
 
     return systemPrompt;
   } catch (error) {
-    debugError("Error in getToolSystemPrompt:", error);
+    PREFS.debugError("Error in getToolSystemPrompt:", error);
     return "";
   }
 };
@@ -3632,7 +3721,7 @@ const browseBotFindbar = {
           try {
             contentDiv.innerHTML = parseMD(fullText, false);
           } catch (e) {
-            debugError("innerHTML assignment failed:", e.message);
+            PREFS.debugError("innerHTML assignment failed:", e.message);
           }
           setTimeout(() => this._updateFindbarDimensions(), 0);
           if (messagesContainer) {
@@ -3647,11 +3736,11 @@ const browseBotFindbar = {
       }
     } catch (e) {
       if (e.name !== "AbortError") {
-        debugError("Error sending message:", e);
+        PREFS.debugError("Error sending message:", e);
         if (aiMessageDiv) aiMessageDiv.remove();
         this.addChatMessage({ role: "error", content: `**Error**: ${e.message}` });
       } else {
-        debugLog("Streaming aborted by user.");
+        PREFS.debugLog("Streaming aborted by user.");
         if (aiMessageDiv) aiMessageDiv.remove();
       }
     } finally {
@@ -3689,28 +3778,28 @@ const browseBotFindbar = {
   // Source: https://github.com/aminomancer/uc.css.js
   // License: http://creativecommons.org/licenses/by-nc-sa/4.0/
   _overrideFindbarMatchesDisplay(retry = 0) {
-    debugLog(`_overrideFindbarMatchesDisplay called, retry: ${retry}`);
+    PREFS.debugLog(`_overrideFindbarMatchesDisplay called, retry: ${retry}`);
     if (this._originalOnMatchesCountResult) {
-      debugLog("Prototype already overridden.");
+      PREFS.debugLog("Prototype already overridden.");
       return;
     }
 
     const findbarClass = customElements.get("findbar")?.prototype;
 
     if (!findbarClass) {
-      debugLog("findbarClass not found.");
+      PREFS.debugLog("findbarClass not found.");
       if (retry < 10) {
         setTimeout(() => this._overrideFindbarMatchesDisplay(retry + 1), 100);
-        debugLog(`Retrying _overrideFindbarMatchesDisplay in 100ms, retry: ${retry + 1}`);
+        PREFS.debugLog(`Retrying _overrideFindbarMatchesDisplay in 100ms, retry: ${retry + 1}`);
       } else {
-        debugError(
+        PREFS.debugError(
           "Failed to override findbar matches display: findbar custom element not found after multiple retries."
         );
       }
       return;
     }
 
-    debugLog("findbarClass found. Overriding onMatchesCountResult.");
+    PREFS.debugLog("findbarClass found. Overriding onMatchesCountResult.");
     this._originalOnMatchesCountResult = findbarClass.onMatchesCountResult;
 
     findbarClass.onMatchesCountResult = function (result) {
@@ -3747,7 +3836,7 @@ const browseBotFindbar = {
       const newLabel = `${result.current}/${result.total}`;
       foundMatchesElement.setAttribute("value", newLabel);
     };
-    debugLog("onMatchesCountResult successfully overridden.");
+    PREFS.debugLog("onMatchesCountResult successfully overridden.");
   },
 
   _restoreFindbarMatchesDisplay() {
@@ -3878,7 +3967,7 @@ const browseBotFindbar = {
           const citations = JSON.parse(messageEl.dataset.citations);
           const citation = citations.find((c) => c.id == citationId);
           if (citation && citation.source_quote) {
-            debugLog(
+            PREFS.debugLog(
               `Citation [${citationId}] clicked. Requesting highlight for:`,
               citation.source_quote
             );
@@ -4111,10 +4200,12 @@ const browseBotFindbar = {
 
     if (!contextMenu) {
       if (retryCount < 5) {
-        debugLog(`Context menu not found, retrying... (attempt ${retryCount + 1}/5)`);
+        PREFS.debugLog(`Context menu not found, retrying... (attempt ${retryCount + 1}/5)`);
         setTimeout(() => this.addContextMenuItem(retryCount + 1), 200);
       } else {
-        debugError("Failed to add context menu item after 5 attempts: Context menu not found.");
+        PREFS.debugError(
+          "Failed to add context menu item after 5 attempts: Context menu not found."
+        );
       }
       return;
     }
@@ -4402,23 +4493,23 @@ const browseBotFindbar = {
     this._handleFindbarCloseEvent = this.handleFindbarCloseEvent.bind(this);
     window.addEventListener("findbaropen", this._handleFindbarOpenEvent);
     window.addEventListener("findbarclose", this._handleFindbarCloseEvent);
-    this._agenticModeListener = UC_API.Prefs.addListener(PREFS.AGENTIC_MODE, _clearLLMData);
-    this._backgroundStylesListener = UC_API.Prefs.addListener(
+    this._agenticModeListener = addPrefListener(PREFS.AGENTIC_MODE, _clearLLMData);
+    this._backgroundStylesListener = addPrefListener(
       PREFS.BACKGROUND_STYLE,
       _handleBackgroundStyleChange
     );
-    this._citationsListener = UC_API.Prefs.addListener(PREFS.CITATIONS_ENABLED, _clearLLMData);
-    this._minimalListener = UC_API.Prefs.addListener(PREFS.MINIMAL, _handleMinimalPrefChange);
-    this._contextMenuEnabledListener = UC_API.Prefs.addListener(
+    this._citationsListener = addPrefListener(PREFS.CITATIONS_ENABLED, _clearLLMData);
+    this._minimalListener = addPrefListener(PREFS.MINIMAL, _handleMinimalPrefChange);
+    this._contextMenuEnabledListener = addPrefListener(
       PREFS.CONTEXT_MENU_ENABLED,
       _handleContextMenuPrefChange
     );
-    this._persistListener = UC_API.Prefs.addListener(PREFS.PERSIST, (pref) => {
+    this._persistListener = addPrefListener(PREFS.PERSIST, (pref) => {
       if (!this.findbar) return;
       if (pref.value) this.findbar.history = browseBotFindbarLLM.history;
       else this.findbar.history = null;
     });
-    this._dndListener = UC_API.Prefs.addListener(PREFS.DND_ENABLED, (pref) => {
+    this._dndListener = addPrefListener(PREFS.DND_ENABLED, (pref) => {
       if (pref.value) {
         this.enableDND();
         this.enableResize();
@@ -4438,13 +4529,13 @@ const browseBotFindbar = {
     document.removeEventListener("keydown", this._addKeymaps);
     window.removeEventListener("findbaropen", this._handleFindbarOpenEvent);
     window.removeEventListener("findbarclose", this._handleFindbarCloseEvent);
-    UC_API.Prefs.removeListener(this._agenticModeListener);
-    UC_API.Prefs.removeListener(this._backgroundStylesListener);
-    UC_API.Prefs.removeListener(this._citationsListener);
-    UC_API.Prefs.removeListener(this._contextMenuEnabledListener);
-    UC_API.Prefs.removeListener(this._minimalListener);
-    UC_API.Prefs.removeListener(this._persistListener);
-    UC_API.Prefs.removeListener(this._dndListener);
+    removePrefListener(this._agenticModeListener);
+    removePrefListener(this._backgroundStylesListener);
+    removePrefListener(this._citationsListener);
+    removePrefListener(this._contextMenuEnabledListener);
+    removePrefListener(this._minimalListener);
+    removePrefListener(this._persistListener);
+    removePrefListener(this._dndListener);
     this.disableDND();
 
     this._handleInputKeyPress = null;
@@ -4461,7 +4552,7 @@ const browseBotFindbar = {
 
   handleFindbarOpenEvent: function () {
     if (this.enabled) {
-      debugLog("Findbar is being opened");
+      PREFS.debugLog("Findbar is being opened");
       setTimeout(() => (this.findbar._findField.placeholder = "Press Alt + Enter to ask AI"), 100);
       setTimeout(() => this._updateFindbarDimensions(), 1);
     }
@@ -4469,7 +4560,7 @@ const browseBotFindbar = {
 
   handleFindbarCloseEvent: function () {
     if (this.enabled) {
-      debugLog("Findbar is being closed");
+      PREFS.debugLog("Findbar is being closed");
       if (this._isStreaming) {
         this._abortController?.abort();
       }
@@ -4891,9 +4982,9 @@ class LLM {
   setProvider(providerName) {
     if (this.AVAILABLE_PROVIDERS[providerName]) {
       PREFS.llmProvider = providerName;
-      debugLog(`Switched LLM provider to: ${providerName}`);
+      PREFS.debugLog(`Switched LLM provider to: ${providerName}`);
     } else {
-      debugError(`Provider "${providerName}" not found.`);
+      PREFS.debugError(`Provider "${providerName}" not found.`);
     }
   }
 
@@ -4993,7 +5084,7 @@ class LLM {
   }
 
   clearData() {
-    debugLog("Clearing LLM history and system prompt.");
+    PREFS.debugLog("Clearing LLM history and system prompt.");
     this.history = [];
   }
 
@@ -5027,7 +5118,7 @@ class BrowseBotLLM extends LLM {
   }
 
   async updateSystemPrompt() {
-    debugLog("Updating system prompt...");
+    PREFS.debugLog("Updating system prompt...");
     this.systemInstruction = await this.getSystemPrompt();
   }
 
@@ -5168,18 +5259,23 @@ Here are some examples demonstrating the correct JSON output format.
           }
         } else {
           // Parsed JSON but 'answer' field is missing or not a string.
-          debugLog("AI response JSON missing 'answer' field or not a string:", parsedContent);
+          PREFS.debugLog("AI response JSON missing 'answer' field or not a string:", parsedContent);
         }
       } catch (e) {
         // JSON parsing failed, keep rawText as answer.
-        debugError("Failed to parse AI message content as JSON:", e, "Raw Text:", responseText);
+        PREFS.debugError(
+          "Failed to parse AI message content as JSON:",
+          e,
+          "Raw Text:",
+          responseText
+        );
       }
     }
     return { answer, citations };
   }
 
   async sendMessage(prompt, abortSignal) {
-    debugLog("Current history before sending:", this.history);
+    PREFS.debugLog("Current history before sending:", this.history);
 
     if (this.citationsEnabled) {
       const object = await super.generateTextWithCitations({
@@ -5231,7 +5327,7 @@ Here are some examples demonstrating the correct JSON output format.
         const friendlyName = toolNameMapping[toolName] || toolName;
         const confirmed = await browseBotFindbar.createToolConfirmationDialog([friendlyName]);
         if (!confirmed) {
-          debugLog(`Tool execution for '${toolName}' cancelled by user.`);
+          PREFS.debugLog(`Tool execution for '${toolName}' cancelled by user.`);
           browseBotFindbar._createOrUpdateToolCallUI(toolName, "declined");
           return false;
         }
@@ -5317,7 +5413,7 @@ Your goal is to ensure a seamless and user-friendly browsing experience.`;
   }
 
   async sendMessage(prompt) {
-    debugLog(`urlBarLLM: Sending prompt: "${prompt}"`);
+    PREFS.debugLog(`urlBarLLM: Sending prompt: "${prompt}"`);
 
     const shouldToolBeCalled = async (toolName) => {
       const friendlyName = toolNameMapping[toolName] || toolName;
@@ -5365,23 +5461,23 @@ const urlbarAI = {
 
   init() {
     if (!this.enabled) {
-      debugLog("urlbarAI: Disabled by preference.");
+      PREFS.debugLog("urlbarAI: Disabled by preference.");
       return;
     }
-    debugLog("urlbarAI: Initializing");
+    PREFS.debugLog("urlbarAI: Initializing");
     if (this._initialized) {
-      debugLog("urlbarAI: Already initialized.");
+      PREFS.debugLog("urlbarAI: Already initialized.");
       return;
     }
     this._originalPlaceholder = gURLBar.inputField.getAttribute("placeholder");
     this.addAskButton();
     this.addListeners();
     this._initialized = true;
-    debugLog("urlbarAI: Initialization complete");
+    PREFS.debugLog("urlbarAI: Initialization complete");
   },
 
   destroy() {
-    debugLog("urlbarAI: Destroying");
+    PREFS.debugLog("urlbarAI: Destroying");
     this.removeAskButton();
     this.removeListeners();
     if (this._isAIMode) {
@@ -5391,7 +5487,7 @@ const urlbarAI = {
     gURLBar.removeAttribute("is-ai-thinking");
     gURLBar.inputField.setAttribute("placeholder", this._originalPlaceholder);
     this._initialized = false;
-    debugLog("urlbarAI: Destruction complete");
+    PREFS.debugLog("urlbarAI: Destruction complete");
   },
 
   _closeUrlBar() {
@@ -5409,7 +5505,7 @@ const urlbarAI = {
         gURLBar.view.close();
       }
     } catch (e) {
-      debugError("urlbarAI: Error in _closeUrlBar", e);
+      PREFS.debugError("urlbarAI: Error in _closeUrlBar", e);
     }
   },
 
@@ -5439,7 +5535,7 @@ const urlbarAI = {
       setTimeout(() => textbox.style.setProperty("height", inputHeight + "px", "important"), 1);
       setTimeout(() => this._hideSuggestions(), 151);
     } catch (e) {
-      debugError("Error while animating", e);
+      PREFS.debugError("Error while animating", e);
       return false;
     }
     return true;
@@ -5475,7 +5571,7 @@ const urlbarAI = {
         this._resetHideSuggestions();
       }, 151);
     } catch (e) {
-      debugError("Error while animating", e);
+      PREFS.debugError("Error while animating", e);
       return false;
     }
     return true;
@@ -5497,7 +5593,7 @@ const urlbarAI = {
     const newState = typeof forceState === "boolean" ? forceState : !this._isAIMode;
     if (newState === this._isAIMode) return;
 
-    debugLog(`urlbarAI: Toggling AI mode. Current: ${this._isAIMode}, New: ${newState}`);
+    PREFS.debugLog(`urlbarAI: Toggling AI mode. Current: ${this._isAIMode}, New: ${newState}`);
     this._isAIMode = newState;
 
     if (this._isAIMode) {
@@ -5514,7 +5610,7 @@ const urlbarAI = {
       gURLBar.inputField.setAttribute("placeholder", this._originalPlaceholder);
       gURLBar.value = "";
     }
-    debugLog(`urlbarAI: AI mode is now ${this._isAIMode ? "ON" : "OFF"}`);
+    PREFS.debugLog(`urlbarAI: AI mode is now ${this._isAIMode ? "ON" : "OFF"}`);
   },
 
   handleGlobalKeyDown(e) {
@@ -5522,7 +5618,7 @@ const urlbarAI = {
     const eventSignature = eventToShortcutSignature(e);
 
     if (eventSignature === currentShortcut) {
-      debugLog("urlbarAI: Custom shortcut detected");
+      PREFS.debugLog("urlbarAI: Custom shortcut detected");
       e.preventDefault();
       e.stopPropagation();
       gURLBar.focus();
@@ -5541,7 +5637,7 @@ const urlbarAI = {
         return;
       }
       if (e.key === "Enter") {
-        debugLog("urlbarAI: Enter key pressed in AI mode");
+        PREFS.debugLog("urlbarAI: Enter key pressed in AI mode");
         e.preventDefault();
         e.stopPropagation();
         this.send();
@@ -5550,13 +5646,13 @@ const urlbarAI = {
   },
 
   addListeners() {
-    debugLog("urlbarAI: Adding event listeners");
+    PREFS.debugLog("urlbarAI: Adding event listeners");
     this._boundHandleGlobalKeyDown = this.handleGlobalKeyDown.bind(this);
     this._boundHandleUrlbarKeyDown = this.handleUrlbarKeyDown.bind(this);
     this._boundDisableAIMode = () => {
       gURLBar.inputField.setAttribute("placeholder", this._originalPlaceholder);
       if (this._isAIMode) {
-        debugLog("urlbarAI: Disabling AI mode due to blur or popup hide");
+        PREFS.debugLog("urlbarAI: Disabling AI mode due to blur or popup hide");
         this.toggleAIMode(false);
         this.clearAnimationPropertiesInUrlBar();
         this._resetHideSuggestions();
@@ -5570,7 +5666,7 @@ const urlbarAI = {
   },
 
   removeListeners() {
-    debugLog("urlbarAI: Removing event listeners");
+    PREFS.debugLog("urlbarAI: Removing event listeners");
     if (this._boundHandleGlobalKeyDown) {
       document.removeEventListener("keydown", this._boundHandleGlobalKeyDown, true);
       this._boundHandleGlobalKeyDown = null;
@@ -5589,7 +5685,7 @@ const urlbarAI = {
   send() {
     const prompt = gURLBar.value.trim();
     if (prompt) {
-      debugLog(`URLbar: Sending prompt: "${prompt}"`);
+      PREFS.debugLog(`URLbar: Sending prompt: "${prompt}"`);
       gURLBar.value = "";
       gURLBar.setAttribute("is-ai-thinking", "true");
       gURLBar.inputField.setAttribute("placeholder", "AI thinking...");
@@ -5607,9 +5703,9 @@ const urlbarAI = {
   },
 
   addAskButton() {
-    debugLog("urlbarAI: Adding 'Ask' button");
+    PREFS.debugLog("urlbarAI: Adding 'Ask' button");
     if (document.getElementById("urlbar-ask-ai-button")) {
-      debugLog("urlbarAI: 'Ask' button already exists.");
+      PREFS.debugLog("urlbarAI: 'Ask' button already exists.");
       return;
     }
 
@@ -5625,16 +5721,16 @@ const urlbarAI = {
       const inputContainer = document.querySelector("#urlbar .urlbar-input-container");
       if (inputContainer) {
         inputContainer.appendChild(button);
-        debugLog("urlbarAI: 'Ask' button added successfully to .urlbar-input-container");
+        PREFS.debugLog("urlbarAI: 'Ask' button added successfully to .urlbar-input-container");
       } else if (retryCount < 10) {
-        debugError(
+        PREFS.debugError(
           `Could not find #urlbar .urlbar-input-container to add the 'Ask' button. Retrying in 500ms... (attempt ${
             retryCount + 1
           })`
         );
         setTimeout(() => insertButton(retryCount + 1), 500);
       } else {
-        debugError(
+        PREFS.debugError(
           "Could not find #urlbar .urlbar-input-container after multiple attempts. Giving up."
         );
       }
@@ -5644,11 +5740,11 @@ const urlbarAI = {
   },
 
   removeAskButton() {
-    debugLog("urlbarAI: Removing 'Ask' button");
+    PREFS.debugLog("urlbarAI: Removing 'Ask' button");
     const button = document.getElementById("urlbar-ask-ai-button");
     if (button) {
       button.remove();
-      debugLog("urlbarAI: 'Ask' button removed.");
+      PREFS.debugLog("urlbarAI: 'Ask' button removed.");
     }
   },
 
@@ -5659,13 +5755,13 @@ const urlbarAI = {
 };
 
 function startupFinish(callback) {
-  if (typeof UC_API === "undefined") return;
-  UC_API.Runtime.startupFinished().then(() => callback());
+  if (document.readyState === "complete") callback();
+  else window.addEventListener("load", callback, { once: true });
 }
 
 function setupCommandPaletteIntegration(retryCount = 0) {
   if (window.ZenCommandPalette) {
-    debugLog("Integrating with Zen Command Palette...");
+    PREFS.debugLog("Integrating with Zen Command Palette...");
 
     window.ZenCommandPalette.addCommands([
       {
@@ -5705,13 +5801,13 @@ function setupCommandPaletteIntegration(retryCount = 0) {
       },
     ]);
 
-    debugLog("Zen Command Palette integration successful.");
+    PREFS.debugLog("Zen Command Palette integration successful.");
   } else {
-    debugLog("Zen Command Palette not found, retrying in 1000ms");
+    PREFS.debugLog("Zen Command Palette not found, retrying in 1000ms");
     if (retryCount < 10) {
       setTimeout(() => setupCommandPaletteIntegration(retryCount + 1), 1000);
     } else {
-      debugError("Could not integrate with Zen Command Palette after 10 retries.");
+      PREFS.debugError("Could not integrate with Zen Command Palette after 10 retries.");
     }
   }
 }
@@ -5719,15 +5815,12 @@ function setupCommandPaletteIntegration(retryCount = 0) {
 function init() {
   // Init findbar-AI
   browseBotFindbar.init();
-  UC_API.Prefs.addListener(
-    PREFS.ENABLED,
-    browseBotFindbar.handleEnabledChange.bind(browseBotFindbar)
-  );
+  addPrefListener(PREFS.ENABLED, browseBotFindbar.handleEnabledChange.bind(browseBotFindbar));
   window.browseBotFindbar = browseBotFindbar;
 
   // Init URL bar-AI
   urlbarAI.init();
-  urlbarAI._prefListener = UC_API.Prefs.addListener(
+  urlbarAI._prefListener = addPrefListener(
     PREFS.URLBAR_AI_ENABLED,
     urlbarAI.handlePrefChange.bind(urlbarAI)
   );
