@@ -3,7 +3,7 @@
 // @description     Transforms the standard Zen Browser findbar into a modern, floating, AI-powered chat interface. Inspired by Arc Browser.
 // @author          Bibek Bhusal
 // @version         2.5.2b
-// @lastUpdated     2026-01-09
+// @lastUpdated     2026-01-15
 // @ignorecache
 // @homepage        https://github.com/Vertex-Mods/Browse-Bot
 // ==/UserScript==
@@ -1491,7 +1491,7 @@ Error message: ${getErrorMessage$1(cause)}`,
   const version = {
       major: 4,
       minor: 3,
-      patch: 4,
+      patch: 5,
   };
 
   const $ZodType = /*@__PURE__*/ $constructor("$ZodType", (inst, def) => {
@@ -6259,7 +6259,7 @@ Error message: ${getErrorMessage$1(cause)}`,
   }
 
   // src/version.ts
-  var VERSION$a = "4.0.2" ;
+  var VERSION$a = "4.0.5" ;
 
   // src/get-from-api.ts
   var getOriginalFetch = () => globalThis.fetch;
@@ -6503,29 +6503,38 @@ Error message: ${getErrorMessage$1(cause)}`,
 
   // src/add-additional-properties-to-json-schema.ts
   function addAdditionalPropertiesToJsonSchema(jsonSchema2) {
-    if (jsonSchema2.type === "object") {
+    if (jsonSchema2.type === "object" || Array.isArray(jsonSchema2.type) && jsonSchema2.type.includes("object")) {
       jsonSchema2.additionalProperties = false;
-      const properties = jsonSchema2.properties;
+      const { properties } = jsonSchema2;
       if (properties != null) {
-        for (const property in properties) {
-          properties[property] = addAdditionalPropertiesToJsonSchema(
-            properties[property]
-          );
+        for (const key of Object.keys(properties)) {
+          properties[key] = visit(properties[key]);
         }
       }
     }
-    if (jsonSchema2.type === "array" && jsonSchema2.items != null) {
-      if (Array.isArray(jsonSchema2.items)) {
-        jsonSchema2.items = jsonSchema2.items.map(
-          (item) => addAdditionalPropertiesToJsonSchema(item)
-        );
-      } else {
-        jsonSchema2.items = addAdditionalPropertiesToJsonSchema(
-          jsonSchema2.items
-        );
+    if (jsonSchema2.items != null) {
+      jsonSchema2.items = Array.isArray(jsonSchema2.items) ? jsonSchema2.items.map(visit) : visit(jsonSchema2.items);
+    }
+    if (jsonSchema2.anyOf != null) {
+      jsonSchema2.anyOf = jsonSchema2.anyOf.map(visit);
+    }
+    if (jsonSchema2.allOf != null) {
+      jsonSchema2.allOf = jsonSchema2.allOf.map(visit);
+    }
+    if (jsonSchema2.oneOf != null) {
+      jsonSchema2.oneOf = jsonSchema2.oneOf.map(visit);
+    }
+    const { definitions } = jsonSchema2;
+    if (definitions != null) {
+      for (const key of Object.keys(definitions)) {
+        definitions[key] = visit(definitions[key]);
       }
     }
     return jsonSchema2;
+  }
+  function visit(def) {
+    if (typeof def === "boolean") return def;
+    return addAdditionalPropertiesToJsonSchema(def);
   }
 
   // src/to-json-schema/zod3-to-json-schema/options.ts
@@ -7725,9 +7734,11 @@ Error message: ${getErrorMessage$1(cause)}`,
   }
   function standardSchema(standardSchema2) {
     return jsonSchema(
-      () => standardSchema2["~standard"].jsonSchema.input({
-        target: "draft-07"
-      }),
+      () => addAdditionalPropertiesToJsonSchema(
+        standardSchema2["~standard"].jsonSchema.input({
+          target: "draft-07"
+        })
+      ),
       {
         validate: async (value) => {
           const result = await standardSchema2["~standard"].validate(value);
@@ -8972,6 +8983,8 @@ Run 'npx vercel link' to link your project, then 'vc env pull' to fetch the toke
       size,
       aspectRatio,
       seed,
+      files,
+      mask,
       providerOptions,
       headers,
       abortSignal
@@ -8997,7 +9010,11 @@ Run 'npx vercel link' to link your project, then 'vc env pull' to fetch the toke
             ...size && { size },
             ...aspectRatio && { aspectRatio },
             ...seed && { seed },
-            ...providerOptions && { providerOptions }
+            ...providerOptions && { providerOptions },
+            ...files && {
+              files: files.map((file) => maybeEncodeImageFile(file))
+            },
+            ...mask && { mask: maybeEncodeImageFile(mask) }
           },
           successfulResponseHandler: createJsonResponseHandler(
             gatewayImageResponseSchema
@@ -9034,6 +9051,15 @@ Run 'npx vercel link' to link your project, then 'vc env pull' to fetch the toke
       };
     }
   };
+  function maybeEncodeImageFile(file) {
+    if (file.type === "file" && file.data instanceof Uint8Array) {
+      return {
+        ...file,
+        data: convertUint8ArrayToBase64(file.data)
+      };
+    }
+    return file;
+  }
   var providerMetadataEntrySchema = object$1({
     images: array$1(unknown()).optional()
   }).catchall(unknown());
@@ -9048,13 +9074,104 @@ Run 'npx vercel link' to link your project, then 'vc env pull' to fetch the toke
     ).optional(),
     providerMetadata: record(string(), providerMetadataEntrySchema).optional()
   });
+  var perplexitySearchInputSchema = lazySchema(
+    () => zodSchema(
+      object$1({
+        query: union([string(), array$1(string())]).describe(
+          "Search query (string) or multiple queries (array of up to 5 strings). Multi-query searches return combined results from all queries."
+        ),
+        max_results: number$1().optional().describe(
+          "Maximum number of search results to return (1-20, default: 10)"
+        ),
+        max_tokens_per_page: number$1().optional().describe(
+          "Maximum number of tokens to extract per search result page (256-2048, default: 2048)"
+        ),
+        max_tokens: number$1().optional().describe(
+          "Maximum total tokens across all search results (default: 25000, max: 1000000)"
+        ),
+        country: string().optional().describe(
+          "Two-letter ISO 3166-1 alpha-2 country code for regional search results (e.g., 'US', 'GB', 'FR')"
+        ),
+        search_domain_filter: array$1(string()).optional().describe(
+          "List of domains to include or exclude from search results (max 20). To include: ['nature.com', 'science.org']. To exclude: ['-example.com', '-spam.net']"
+        ),
+        search_language_filter: array$1(string()).optional().describe(
+          "List of ISO 639-1 language codes to filter results (max 10, lowercase). Examples: ['en', 'fr', 'de']"
+        ),
+        search_after_date: string().optional().describe(
+          "Include only results published after this date. Format: 'MM/DD/YYYY' (e.g., '3/1/2025'). Cannot be used with search_recency_filter."
+        ),
+        search_before_date: string().optional().describe(
+          "Include only results published before this date. Format: 'MM/DD/YYYY' (e.g., '3/15/2025'). Cannot be used with search_recency_filter."
+        ),
+        last_updated_after_filter: string().optional().describe(
+          "Include only results last updated after this date. Format: 'MM/DD/YYYY' (e.g., '3/1/2025'). Cannot be used with search_recency_filter."
+        ),
+        last_updated_before_filter: string().optional().describe(
+          "Include only results last updated before this date. Format: 'MM/DD/YYYY' (e.g., '3/15/2025'). Cannot be used with search_recency_filter."
+        ),
+        search_recency_filter: _enum(["day", "week", "month", "year"]).optional().describe(
+          "Filter results by relative time period. Cannot be used with search_after_date or search_before_date."
+        )
+      })
+    )
+  );
+  var perplexitySearchOutputSchema = lazySchema(
+    () => zodSchema(
+      union([
+        // Success response
+        object$1({
+          results: array$1(
+            object$1({
+              title: string(),
+              url: string(),
+              snippet: string(),
+              date: string().optional(),
+              lastUpdated: string().optional()
+            })
+          ),
+          id: string()
+        }),
+        // Error response
+        object$1({
+          error: _enum([
+            "api_error",
+            "rate_limit",
+            "timeout",
+            "invalid_input",
+            "unknown"
+          ]),
+          statusCode: number$1().optional(),
+          message: string()
+        })
+      ])
+    )
+  );
+  var perplexitySearchToolFactory = createProviderToolFactoryWithOutputSchema({
+    id: "gateway.perplexity_search",
+    inputSchema: perplexitySearchInputSchema,
+    outputSchema: perplexitySearchOutputSchema
+  });
+  var perplexitySearch = (config = {}) => perplexitySearchToolFactory(config);
+
+  // src/gateway-tools.ts
+  var gatewayTools = {
+    /**
+     * Search the web using Perplexity's Search API for real-time information,
+     * news, research papers, and articles.
+     *
+     * Provides ranked search results with advanced filtering options including
+     * domain, language, date range, and recency filters.
+     */
+    perplexitySearch
+  };
   async function getVercelRequestId() {
     var _a8;
     return (_a8 = indexBrowserExports.getContext().headers) == null ? void 0 : _a8["x-vercel-id"];
   }
 
   // src/version.ts
-  var VERSION$9 = "3.0.5" ;
+  var VERSION$9 = "3.0.13" ;
 
   // src/gateway-provider.ts
   var AI_GATEWAY_PROTOCOL_VERSION = "0.0.1";
@@ -9183,6 +9300,7 @@ Run 'npx vercel link' to link your project, then 'vc env pull' to fetch the toke
     };
     provider.embeddingModel = createEmbeddingModel;
     provider.textEmbeddingModel = createEmbeddingModel;
+    provider.tools = gatewayTools;
     return provider;
   }
   var gateway = createGatewayProvider();
@@ -11548,6 +11666,29 @@ Run 'npx vercel link' to link your project, then 'vc env pull' to fetch the toke
     var _a16;
     return (_a16 = globalThis.AI_SDK_DEFAULT_PROVIDER) != null ? _a16 : gateway;
   }
+
+  // src/prompt/call-settings.ts
+  function getTotalTimeoutMs(timeout) {
+    if (timeout == null) {
+      return void 0;
+    }
+    if (typeof timeout === "number") {
+      return timeout;
+    }
+    return timeout.totalMs;
+  }
+  function getStepTimeoutMs(timeout) {
+    if (timeout == null || typeof timeout === "number") {
+      return void 0;
+    }
+    return timeout.stepMs;
+  }
+  function getChunkTimeoutMs(timeout) {
+    if (timeout == null || typeof timeout === "number") {
+      return void 0;
+    }
+    return timeout.chunkMs;
+  }
   var imageMediaTypeSignatures = [
     {
       mediaType: "image/gif",
@@ -11661,7 +11802,7 @@ Run 'npx vercel link' to link your project, then 'vc env pull' to fetch the toke
   }
 
   // src/version.ts
-  var VERSION$7 = "6.0.6" ;
+  var VERSION$7 = "6.0.31" ;
 
   // src/util/download/download.ts
   var download = async ({ url }) => {
@@ -12535,7 +12676,16 @@ Learn more: \x1B[34m${moreInfoURL}\x1B[0m
       "ai.model.id": model.modelId,
       // settings:
       ...Object.entries(settings).reduce((attributes, [key, value]) => {
-        attributes[`ai.settings.${key}`] = value;
+        if (key === "timeout") {
+          const totalTimeoutMs = getTotalTimeoutMs(
+            value
+          );
+          if (totalTimeoutMs != null) {
+            attributes[`ai.settings.${key}`] = totalTimeoutMs;
+          }
+        } else {
+          attributes[`ai.settings.${key}`] = value;
+        }
         return attributes;
       }, {}),
       // add metadata as attributes:
@@ -13543,12 +13693,16 @@ Learn more: \x1B[34m${moreInfoURL}\x1B[0m
 
   // src/generate-text/output.ts
   var text = () => ({
+    name: "text",
     responseFormat: Promise.resolve({ type: "text" }),
     async parseCompleteOutput({ text: text2 }) {
       return text2;
     },
     async parsePartialOutput({ text: text2 }) {
       return { partial: text2 };
+    },
+    createElementStreamTransform() {
+      return void 0;
     }
   });
   var object = ({
@@ -13558,6 +13712,7 @@ Learn more: \x1B[34m${moreInfoURL}\x1B[0m
   }) => {
     const schema = asSchema(inputSchema);
     return {
+      name: "object",
       responseFormat: resolve(schema.jsonSchema).then((jsonSchema2) => ({
         type: "json",
         schema: jsonSchema2,
@@ -13607,6 +13762,9 @@ Learn more: \x1B[34m${moreInfoURL}\x1B[0m
             };
           }
         }
+      },
+      createElementStreamTransform() {
+        return void 0;
       }
     };
   };
@@ -13617,6 +13775,7 @@ Learn more: \x1B[34m${moreInfoURL}\x1B[0m
   }) => {
     const elementSchema = asSchema(inputElementSchema);
     return {
+      name: "array",
       // JSON schema that describes an array of elements:
       responseFormat: resolve(elementSchema.jsonSchema).then((jsonSchema2) => {
         const { $schema, ...itemSchema } = jsonSchema2;
@@ -13706,6 +13865,18 @@ Learn more: \x1B[34m${moreInfoURL}\x1B[0m
             return { partial: parsedElements };
           }
         }
+      },
+      createElementStreamTransform() {
+        let publishedElements = 0;
+        return new TransformStream({
+          transform({ partialOutput }, controller) {
+            if (partialOutput != null) {
+              for (; publishedElements < partialOutput.length; publishedElements++) {
+                controller.enqueue(partialOutput[publishedElements]);
+              }
+            }
+          }
+        });
       }
     };
   };
@@ -13715,6 +13886,7 @@ Learn more: \x1B[34m${moreInfoURL}\x1B[0m
     description
   }) => {
     return {
+      name: "choice",
       // JSON schema that describes an enumeration:
       responseFormat: Promise.resolve({
         type: "json",
@@ -13781,6 +13953,9 @@ Learn more: \x1B[34m${moreInfoURL}\x1B[0m
             }
           }
         }
+      },
+      createElementStreamTransform() {
+        return void 0;
       }
     };
   };
@@ -13789,6 +13964,7 @@ Learn more: \x1B[34m${moreInfoURL}\x1B[0m
     description
   } = {}) => {
     return {
+      name: "json",
       responseFormat: Promise.resolve({
         type: "json",
         ...name16 != null && { name: name16 },
@@ -13820,6 +13996,9 @@ Learn more: \x1B[34m${moreInfoURL}\x1B[0m
             return result.value === void 0 ? void 0 : { partial: result.value };
           }
         }
+      },
+      createElementStreamTransform() {
+        return void 0;
       }
     };
   };
@@ -14151,6 +14330,34 @@ Learn more: \x1B[34m${moreInfoURL}\x1B[0m
     return responseMessages;
   }
 
+  // src/util/merge-abort-signals.ts
+  function mergeAbortSignals(...signals) {
+    const validSignals = signals.filter(
+      (signal) => signal != null
+    );
+    if (validSignals.length === 0) {
+      return void 0;
+    }
+    if (validSignals.length === 1) {
+      return validSignals[0];
+    }
+    const controller = new AbortController();
+    for (const signal of validSignals) {
+      if (signal.aborted) {
+        controller.abort(signal.reason);
+        return controller.signal;
+      }
+      signal.addEventListener(
+        "abort",
+        () => {
+          controller.abort(signal.reason);
+        },
+        { once: true }
+      );
+    }
+    return controller.signal;
+  }
+
   // src/generate-text/generate-text.ts
   var originalGenerateId = createIdGenerator({
     prefix: "aitxt",
@@ -14165,6 +14372,7 @@ Learn more: \x1B[34m${moreInfoURL}\x1B[0m
     messages,
     maxRetries: maxRetriesArg,
     abortSignal,
+    timeout,
     headers,
     stopWhen = stepCountIs(1),
     experimental_output,
@@ -14178,19 +14386,24 @@ Learn more: \x1B[34m${moreInfoURL}\x1B[0m
     experimental_repairToolCall: repairToolCall,
     experimental_download: download2,
     experimental_context,
-    _internal: {
-      generateId: generateId2 = originalGenerateId,
-      currentDate = () => /* @__PURE__ */ new Date()
-    } = {},
+    _internal: { generateId: generateId2 = originalGenerateId } = {},
     onStepFinish,
     onFinish,
     ...settings
   }) {
     const model = resolveLanguageModel(modelArg);
     const stopConditions = asArray(stopWhen);
+    const totalTimeoutMs = getTotalTimeoutMs(timeout);
+    const stepTimeoutMs = getStepTimeoutMs(timeout);
+    const stepAbortController = stepTimeoutMs != null ? new AbortController() : void 0;
+    const mergedAbortSignal = mergeAbortSignals(
+      abortSignal,
+      totalTimeoutMs != null ? AbortSignal.timeout(totalTimeoutMs) : void 0,
+      stepAbortController == null ? void 0 : stepAbortController.signal
+    );
     const { maxRetries, retry } = prepareRetries({
       maxRetries: maxRetriesArg,
-      abortSignal
+      abortSignal: mergedAbortSignal
     });
     const callSettings = prepareCallSettings(settings);
     const headersWithUserAgent = withUserAgentSuffix(
@@ -14247,7 +14460,7 @@ Learn more: \x1B[34m${moreInfoURL}\x1B[0m
               tracer,
               telemetry,
               messages: initialMessages,
-              abortSignal,
+              abortSignal: mergedAbortSignal,
               experimental_context
             });
             const toolContent = [];
@@ -14315,263 +14528,270 @@ Learn more: \x1B[34m${moreInfoURL}\x1B[0m
           const steps = [];
           const pendingDeferredToolCalls = /* @__PURE__ */ new Map();
           do {
-            const stepInputMessages = [...initialMessages, ...responseMessages];
-            const prepareStepResult = await (prepareStep == null ? void 0 : prepareStep({
-              model,
-              steps,
-              stepNumber: steps.length,
-              messages: stepInputMessages,
-              experimental_context
-            }));
-            const stepModel = resolveLanguageModel(
-              (_a16 = prepareStepResult == null ? void 0 : prepareStepResult.model) != null ? _a16 : model
-            );
-            const promptMessages = await convertToLanguageModelPrompt({
-              prompt: {
-                system: (_b = prepareStepResult == null ? void 0 : prepareStepResult.system) != null ? _b : initialPrompt.system,
-                messages: (_c = prepareStepResult == null ? void 0 : prepareStepResult.messages) != null ? _c : stepInputMessages
-              },
-              supportedUrls: await stepModel.supportedUrls,
-              download: download2
-            });
-            experimental_context = (_d = prepareStepResult == null ? void 0 : prepareStepResult.experimental_context) != null ? _d : experimental_context;
-            const { toolChoice: stepToolChoice, tools: stepTools } = await prepareToolsAndToolChoice({
-              tools,
-              toolChoice: (_e = prepareStepResult == null ? void 0 : prepareStepResult.toolChoice) != null ? _e : toolChoice,
-              activeTools: (_f = prepareStepResult == null ? void 0 : prepareStepResult.activeTools) != null ? _f : activeTools
-            });
-            currentModelResponse = await retry(
-              () => {
-                var _a17;
-                return recordSpan({
-                  name: "ai.generateText.doGenerate",
-                  attributes: selectTelemetryAttributes({
-                    telemetry,
-                    attributes: {
-                      ...assembleOperationName({
-                        operationId: "ai.generateText.doGenerate",
-                        telemetry
-                      }),
-                      ...baseTelemetryAttributes,
-                      // model:
-                      "ai.model.provider": stepModel.provider,
-                      "ai.model.id": stepModel.modelId,
-                      // prompt:
-                      "ai.prompt.messages": {
-                        input: () => stringifyForTelemetry(promptMessages)
-                      },
-                      "ai.prompt.tools": {
-                        // convert the language model level tools:
-                        input: () => stepTools == null ? void 0 : stepTools.map((tool2) => JSON.stringify(tool2))
-                      },
-                      "ai.prompt.toolChoice": {
-                        input: () => stepToolChoice != null ? JSON.stringify(stepToolChoice) : void 0
-                      },
-                      // standardized gen-ai llm span attributes:
-                      "gen_ai.system": stepModel.provider,
-                      "gen_ai.request.model": stepModel.modelId,
-                      "gen_ai.request.frequency_penalty": settings.frequencyPenalty,
-                      "gen_ai.request.max_tokens": settings.maxOutputTokens,
-                      "gen_ai.request.presence_penalty": settings.presencePenalty,
-                      "gen_ai.request.stop_sequences": settings.stopSequences,
-                      "gen_ai.request.temperature": (_a17 = settings.temperature) != null ? _a17 : void 0,
-                      "gen_ai.request.top_k": settings.topK,
-                      "gen_ai.request.top_p": settings.topP
-                    }
-                  }),
-                  tracer,
-                  fn: async (span2) => {
-                    var _a18, _b2, _c2, _d2, _e2, _f2, _g2, _h2;
-                    const stepProviderOptions = mergeObjects(
-                      providerOptions,
-                      prepareStepResult == null ? void 0 : prepareStepResult.providerOptions
-                    );
-                    const result = await stepModel.doGenerate({
-                      ...callSettings2,
-                      tools: stepTools,
-                      toolChoice: stepToolChoice,
-                      responseFormat: await (output == null ? void 0 : output.responseFormat),
-                      prompt: promptMessages,
-                      providerOptions: stepProviderOptions,
-                      abortSignal,
-                      headers: headersWithUserAgent
-                    });
-                    const responseData = {
-                      id: (_b2 = (_a18 = result.response) == null ? void 0 : _a18.id) != null ? _b2 : generateId2(),
-                      timestamp: (_d2 = (_c2 = result.response) == null ? void 0 : _c2.timestamp) != null ? _d2 : currentDate(),
-                      modelId: (_f2 = (_e2 = result.response) == null ? void 0 : _e2.modelId) != null ? _f2 : stepModel.modelId,
-                      headers: (_g2 = result.response) == null ? void 0 : _g2.headers,
-                      body: (_h2 = result.response) == null ? void 0 : _h2.body
-                    };
-                    span2.setAttributes(
-                      await selectTelemetryAttributes({
-                        telemetry,
-                        attributes: {
-                          "ai.response.finishReason": result.finishReason.unified,
-                          "ai.response.text": {
-                            output: () => extractTextContent$1(result.content)
-                          },
-                          "ai.response.toolCalls": {
-                            output: () => {
-                              const toolCalls = asToolCalls(result.content);
-                              return toolCalls == null ? void 0 : JSON.stringify(toolCalls);
-                            }
-                          },
-                          "ai.response.id": responseData.id,
-                          "ai.response.model": responseData.modelId,
-                          "ai.response.timestamp": responseData.timestamp.toISOString(),
-                          "ai.response.providerMetadata": JSON.stringify(
-                            result.providerMetadata
-                          ),
-                          // TODO rename telemetry attributes to inputTokens and outputTokens
-                          "ai.usage.promptTokens": result.usage.inputTokens.total,
-                          "ai.usage.completionTokens": result.usage.outputTokens.total,
-                          // standardized gen-ai llm span attributes:
-                          "gen_ai.response.finish_reasons": [
-                            result.finishReason.unified
-                          ],
-                          "gen_ai.response.id": responseData.id,
-                          "gen_ai.response.model": responseData.modelId,
-                          "gen_ai.usage.input_tokens": result.usage.inputTokens.total,
-                          "gen_ai.usage.output_tokens": result.usage.outputTokens.total
-                        }
-                      })
-                    );
-                    return { ...result, response: responseData };
-                  }
-                });
-              }
-            );
-            const stepToolCalls = await Promise.all(
-              currentModelResponse.content.filter(
-                (part) => part.type === "tool-call"
-              ).map(
-                (toolCall) => parseToolCall({
-                  toolCall,
-                  tools,
-                  repairToolCall,
-                  system,
-                  messages: stepInputMessages
-                })
-              )
-            );
-            const toolApprovalRequests = {};
-            for (const toolCall of stepToolCalls) {
-              if (toolCall.invalid) {
-                continue;
-              }
-              const tool2 = tools == null ? void 0 : tools[toolCall.toolName];
-              if (tool2 == null) {
-                continue;
-              }
-              if ((tool2 == null ? void 0 : tool2.onInputAvailable) != null) {
-                await tool2.onInputAvailable({
-                  input: toolCall.input,
-                  toolCallId: toolCall.toolCallId,
-                  messages: stepInputMessages,
-                  abortSignal,
-                  experimental_context
-                });
-              }
-              if (await isApprovalNeeded({
-                tool: tool2,
-                toolCall,
+            const stepTimeoutId = stepTimeoutMs != null ? setTimeout(() => stepAbortController.abort(), stepTimeoutMs) : void 0;
+            try {
+              const stepInputMessages = [...initialMessages, ...responseMessages];
+              const prepareStepResult = await (prepareStep == null ? void 0 : prepareStep({
+                model,
+                steps,
+                stepNumber: steps.length,
                 messages: stepInputMessages,
                 experimental_context
-              })) {
-                toolApprovalRequests[toolCall.toolCallId] = {
-                  type: "tool-approval-request",
-                  approvalId: generateId2(),
-                  toolCall
-                };
-              }
-            }
-            const invalidToolCalls = stepToolCalls.filter(
-              (toolCall) => toolCall.invalid && toolCall.dynamic
-            );
-            clientToolOutputs = [];
-            for (const toolCall of invalidToolCalls) {
-              clientToolOutputs.push({
-                type: "tool-error",
-                toolCallId: toolCall.toolCallId,
-                toolName: toolCall.toolName,
-                input: toolCall.input,
-                error: getErrorMessage(toolCall.error),
-                dynamic: true
-              });
-            }
-            clientToolCalls = stepToolCalls.filter(
-              (toolCall) => !toolCall.providerExecuted
-            );
-            if (tools != null) {
-              clientToolOutputs.push(
-                ...await executeTools({
-                  toolCalls: clientToolCalls.filter(
-                    (toolCall) => !toolCall.invalid && toolApprovalRequests[toolCall.toolCallId] == null
-                  ),
-                  tools,
-                  tracer,
-                  telemetry,
-                  messages: stepInputMessages,
-                  abortSignal,
-                  experimental_context
-                })
+              }));
+              const stepModel = resolveLanguageModel(
+                (_a16 = prepareStepResult == null ? void 0 : prepareStepResult.model) != null ? _a16 : model
               );
-            }
-            for (const toolCall of stepToolCalls) {
-              if (!toolCall.providerExecuted)
-                continue;
-              const tool2 = tools == null ? void 0 : tools[toolCall.toolName];
-              if ((tool2 == null ? void 0 : tool2.type) === "provider" && tool2.supportsDeferredResults) {
-                const hasResultInResponse = currentModelResponse.content.some(
-                  (part) => part.type === "tool-result" && part.toolCallId === toolCall.toolCallId
-                );
-                if (!hasResultInResponse) {
-                  pendingDeferredToolCalls.set(toolCall.toolCallId, {
-                    toolName: toolCall.toolName
+              const promptMessages = await convertToLanguageModelPrompt({
+                prompt: {
+                  system: (_b = prepareStepResult == null ? void 0 : prepareStepResult.system) != null ? _b : initialPrompt.system,
+                  messages: (_c = prepareStepResult == null ? void 0 : prepareStepResult.messages) != null ? _c : stepInputMessages
+                },
+                supportedUrls: await stepModel.supportedUrls,
+                download: download2
+              });
+              experimental_context = (_d = prepareStepResult == null ? void 0 : prepareStepResult.experimental_context) != null ? _d : experimental_context;
+              const { toolChoice: stepToolChoice, tools: stepTools } = await prepareToolsAndToolChoice({
+                tools,
+                toolChoice: (_e = prepareStepResult == null ? void 0 : prepareStepResult.toolChoice) != null ? _e : toolChoice,
+                activeTools: (_f = prepareStepResult == null ? void 0 : prepareStepResult.activeTools) != null ? _f : activeTools
+              });
+              currentModelResponse = await retry(
+                () => {
+                  var _a17;
+                  return recordSpan({
+                    name: "ai.generateText.doGenerate",
+                    attributes: selectTelemetryAttributes({
+                      telemetry,
+                      attributes: {
+                        ...assembleOperationName({
+                          operationId: "ai.generateText.doGenerate",
+                          telemetry
+                        }),
+                        ...baseTelemetryAttributes,
+                        // model:
+                        "ai.model.provider": stepModel.provider,
+                        "ai.model.id": stepModel.modelId,
+                        // prompt:
+                        "ai.prompt.messages": {
+                          input: () => stringifyForTelemetry(promptMessages)
+                        },
+                        "ai.prompt.tools": {
+                          // convert the language model level tools:
+                          input: () => stepTools == null ? void 0 : stepTools.map((tool2) => JSON.stringify(tool2))
+                        },
+                        "ai.prompt.toolChoice": {
+                          input: () => stepToolChoice != null ? JSON.stringify(stepToolChoice) : void 0
+                        },
+                        // standardized gen-ai llm span attributes:
+                        "gen_ai.system": stepModel.provider,
+                        "gen_ai.request.model": stepModel.modelId,
+                        "gen_ai.request.frequency_penalty": settings.frequencyPenalty,
+                        "gen_ai.request.max_tokens": settings.maxOutputTokens,
+                        "gen_ai.request.presence_penalty": settings.presencePenalty,
+                        "gen_ai.request.stop_sequences": settings.stopSequences,
+                        "gen_ai.request.temperature": (_a17 = settings.temperature) != null ? _a17 : void 0,
+                        "gen_ai.request.top_k": settings.topK,
+                        "gen_ai.request.top_p": settings.topP
+                      }
+                    }),
+                    tracer,
+                    fn: async (span2) => {
+                      var _a18, _b2, _c2, _d2, _e2, _f2, _g2, _h2;
+                      const stepProviderOptions = mergeObjects(
+                        providerOptions,
+                        prepareStepResult == null ? void 0 : prepareStepResult.providerOptions
+                      );
+                      const result = await stepModel.doGenerate({
+                        ...callSettings2,
+                        tools: stepTools,
+                        toolChoice: stepToolChoice,
+                        responseFormat: await (output == null ? void 0 : output.responseFormat),
+                        prompt: promptMessages,
+                        providerOptions: stepProviderOptions,
+                        abortSignal: mergedAbortSignal,
+                        headers: headersWithUserAgent
+                      });
+                      const responseData = {
+                        id: (_b2 = (_a18 = result.response) == null ? void 0 : _a18.id) != null ? _b2 : generateId2(),
+                        timestamp: (_d2 = (_c2 = result.response) == null ? void 0 : _c2.timestamp) != null ? _d2 : /* @__PURE__ */ new Date(),
+                        modelId: (_f2 = (_e2 = result.response) == null ? void 0 : _e2.modelId) != null ? _f2 : stepModel.modelId,
+                        headers: (_g2 = result.response) == null ? void 0 : _g2.headers,
+                        body: (_h2 = result.response) == null ? void 0 : _h2.body
+                      };
+                      span2.setAttributes(
+                        await selectTelemetryAttributes({
+                          telemetry,
+                          attributes: {
+                            "ai.response.finishReason": result.finishReason.unified,
+                            "ai.response.text": {
+                              output: () => extractTextContent$1(result.content)
+                            },
+                            "ai.response.toolCalls": {
+                              output: () => {
+                                const toolCalls = asToolCalls(result.content);
+                                return toolCalls == null ? void 0 : JSON.stringify(toolCalls);
+                              }
+                            },
+                            "ai.response.id": responseData.id,
+                            "ai.response.model": responseData.modelId,
+                            "ai.response.timestamp": responseData.timestamp.toISOString(),
+                            "ai.response.providerMetadata": JSON.stringify(
+                              result.providerMetadata
+                            ),
+                            // TODO rename telemetry attributes to inputTokens and outputTokens
+                            "ai.usage.promptTokens": result.usage.inputTokens.total,
+                            "ai.usage.completionTokens": result.usage.outputTokens.total,
+                            // standardized gen-ai llm span attributes:
+                            "gen_ai.response.finish_reasons": [
+                              result.finishReason.unified
+                            ],
+                            "gen_ai.response.id": responseData.id,
+                            "gen_ai.response.model": responseData.modelId,
+                            "gen_ai.usage.input_tokens": result.usage.inputTokens.total,
+                            "gen_ai.usage.output_tokens": result.usage.outputTokens.total
+                          }
+                        })
+                      );
+                      return { ...result, response: responseData };
+                    }
                   });
                 }
+              );
+              const stepToolCalls = await Promise.all(
+                currentModelResponse.content.filter(
+                  (part) => part.type === "tool-call"
+                ).map(
+                  (toolCall) => parseToolCall({
+                    toolCall,
+                    tools,
+                    repairToolCall,
+                    system,
+                    messages: stepInputMessages
+                  })
+                )
+              );
+              const toolApprovalRequests = {};
+              for (const toolCall of stepToolCalls) {
+                if (toolCall.invalid) {
+                  continue;
+                }
+                const tool2 = tools == null ? void 0 : tools[toolCall.toolName];
+                if (tool2 == null) {
+                  continue;
+                }
+                if ((tool2 == null ? void 0 : tool2.onInputAvailable) != null) {
+                  await tool2.onInputAvailable({
+                    input: toolCall.input,
+                    toolCallId: toolCall.toolCallId,
+                    messages: stepInputMessages,
+                    abortSignal: mergedAbortSignal,
+                    experimental_context
+                  });
+                }
+                if (await isApprovalNeeded({
+                  tool: tool2,
+                  toolCall,
+                  messages: stepInputMessages,
+                  experimental_context
+                })) {
+                  toolApprovalRequests[toolCall.toolCallId] = {
+                    type: "tool-approval-request",
+                    approvalId: generateId2(),
+                    toolCall
+                  };
+                }
               }
-            }
-            for (const part of currentModelResponse.content) {
-              if (part.type === "tool-result") {
-                pendingDeferredToolCalls.delete(part.toolCallId);
+              const invalidToolCalls = stepToolCalls.filter(
+                (toolCall) => toolCall.invalid && toolCall.dynamic
+              );
+              clientToolOutputs = [];
+              for (const toolCall of invalidToolCalls) {
+                clientToolOutputs.push({
+                  type: "tool-error",
+                  toolCallId: toolCall.toolCallId,
+                  toolName: toolCall.toolName,
+                  input: toolCall.input,
+                  error: getErrorMessage(toolCall.error),
+                  dynamic: true
+                });
               }
-            }
-            const stepContent = asContent({
-              content: currentModelResponse.content,
-              toolCalls: stepToolCalls,
-              toolOutputs: clientToolOutputs,
-              toolApprovalRequests: Object.values(toolApprovalRequests),
-              tools
-            });
-            responseMessages.push(
-              ...await toResponseMessages({
-                content: stepContent,
+              clientToolCalls = stepToolCalls.filter(
+                (toolCall) => !toolCall.providerExecuted
+              );
+              if (tools != null) {
+                clientToolOutputs.push(
+                  ...await executeTools({
+                    toolCalls: clientToolCalls.filter(
+                      (toolCall) => !toolCall.invalid && toolApprovalRequests[toolCall.toolCallId] == null
+                    ),
+                    tools,
+                    tracer,
+                    telemetry,
+                    messages: stepInputMessages,
+                    abortSignal: mergedAbortSignal,
+                    experimental_context
+                  })
+                );
+              }
+              for (const toolCall of stepToolCalls) {
+                if (!toolCall.providerExecuted)
+                  continue;
+                const tool2 = tools == null ? void 0 : tools[toolCall.toolName];
+                if ((tool2 == null ? void 0 : tool2.type) === "provider" && tool2.supportsDeferredResults) {
+                  const hasResultInResponse = currentModelResponse.content.some(
+                    (part) => part.type === "tool-result" && part.toolCallId === toolCall.toolCallId
+                  );
+                  if (!hasResultInResponse) {
+                    pendingDeferredToolCalls.set(toolCall.toolCallId, {
+                      toolName: toolCall.toolName
+                    });
+                  }
+                }
+              }
+              for (const part of currentModelResponse.content) {
+                if (part.type === "tool-result") {
+                  pendingDeferredToolCalls.delete(part.toolCallId);
+                }
+              }
+              const stepContent = asContent({
+                content: currentModelResponse.content,
+                toolCalls: stepToolCalls,
+                toolOutputs: clientToolOutputs,
+                toolApprovalRequests: Object.values(toolApprovalRequests),
                 tools
-              })
-            );
-            const currentStepResult = new DefaultStepResult({
-              content: stepContent,
-              finishReason: currentModelResponse.finishReason.unified,
-              rawFinishReason: currentModelResponse.finishReason.raw,
-              usage: asLanguageModelUsage(currentModelResponse.usage),
-              warnings: currentModelResponse.warnings,
-              providerMetadata: currentModelResponse.providerMetadata,
-              request: (_g = currentModelResponse.request) != null ? _g : {},
-              response: {
-                ...currentModelResponse.response,
-                // deep clone msgs to avoid mutating past messages in multi-step:
-                messages: structuredClone(responseMessages)
+              });
+              responseMessages.push(
+                ...await toResponseMessages({
+                  content: stepContent,
+                  tools
+                })
+              );
+              const currentStepResult = new DefaultStepResult({
+                content: stepContent,
+                finishReason: currentModelResponse.finishReason.unified,
+                rawFinishReason: currentModelResponse.finishReason.raw,
+                usage: asLanguageModelUsage(currentModelResponse.usage),
+                warnings: currentModelResponse.warnings,
+                providerMetadata: currentModelResponse.providerMetadata,
+                request: (_g = currentModelResponse.request) != null ? _g : {},
+                response: {
+                  ...currentModelResponse.response,
+                  // deep clone msgs to avoid mutating past messages in multi-step:
+                  messages: structuredClone(responseMessages)
+                }
+              });
+              logWarnings({
+                warnings: (_h = currentModelResponse.warnings) != null ? _h : [],
+                provider: stepModel.provider,
+                model: stepModel.modelId
+              });
+              steps.push(currentStepResult);
+              await (onStepFinish == null ? void 0 : onStepFinish(currentStepResult));
+            } finally {
+              if (stepTimeoutId != null) {
+                clearTimeout(stepTimeoutId);
               }
-            });
-            logWarnings({
-              warnings: (_h = currentModelResponse.warnings) != null ? _h : [],
-              provider: stepModel.provider,
-              model: stepModel.modelId
-            });
-            steps.push(currentStepResult);
-            await (onStepFinish == null ? void 0 : onStepFinish(currentStepResult));
+            }
           } while (
             // Continue if:
             // 1. There are client tool calls that have all been executed, OR
@@ -15629,6 +15849,8 @@ Learn more: \x1B[34m${moreInfoURL}\x1B[0m
       let finished = false;
       async function cleanup(cancelStream) {
         var _a16;
+        if (finished)
+          return;
         finished = true;
         try {
           if (cancelStream) {
@@ -15658,7 +15880,7 @@ Learn more: \x1B[34m${moreInfoURL}\x1B[0m
           return { done: false, value };
         },
         /**
-         * Called on early exit (e.g., break from for-await).
+         * May be called on early exit (e.g., break from for-await) or after completion.
          * Ensures the stream is cancelled and resources are released.
          * @returns A promise resolving to a completed IteratorResult.
          */
@@ -15958,6 +16180,12 @@ Learn more: \x1B[34m${moreInfoURL}\x1B[0m
                   }
                 }).then((result) => {
                   toolResultsStreamController.enqueue(result);
+                }).catch((error) => {
+                  toolResultsStreamController.enqueue({
+                    type: "error",
+                    error
+                  });
+                }).finally(() => {
                   outstandingToolResults.delete(toolExecutionId);
                   attemptClose();
                 });
@@ -16044,6 +16272,7 @@ Learn more: \x1B[34m${moreInfoURL}\x1B[0m
     messages,
     maxRetries,
     abortSignal,
+    timeout,
     headers,
     stopWhen = stepCountIs(1),
     experimental_output,
@@ -16065,20 +16294,30 @@ Learn more: \x1B[34m${moreInfoURL}\x1B[0m
     onAbort,
     onStepFinish,
     experimental_context,
-    _internal: {
-      now: now2 = now,
-      generateId: generateId2 = originalGenerateId2,
-      currentDate = () => /* @__PURE__ */ new Date()
-    } = {},
+    _internal: { now: now2 = now, generateId: generateId2 = originalGenerateId2 } = {},
     ...settings
   }) {
+    const totalTimeoutMs = getTotalTimeoutMs(timeout);
+    const stepTimeoutMs = getStepTimeoutMs(timeout);
+    const chunkTimeoutMs = getChunkTimeoutMs(timeout);
+    const stepAbortController = stepTimeoutMs != null ? new AbortController() : void 0;
+    const chunkAbortController = chunkTimeoutMs != null ? new AbortController() : void 0;
     return new DefaultStreamTextResult({
       model: resolveLanguageModel(model),
       telemetry,
       headers,
       settings,
       maxRetries,
-      abortSignal,
+      abortSignal: mergeAbortSignals(
+        abortSignal,
+        totalTimeoutMs != null ? AbortSignal.timeout(totalTimeoutMs) : void 0,
+        stepAbortController == null ? void 0 : stepAbortController.signal,
+        chunkAbortController == null ? void 0 : chunkAbortController.signal
+      ),
+      stepTimeoutMs,
+      stepAbortController,
+      chunkTimeoutMs,
+      chunkAbortController,
       system,
       prompt,
       messages,
@@ -16098,7 +16337,6 @@ Learn more: \x1B[34m${moreInfoURL}\x1B[0m
       onAbort,
       onStepFinish,
       now: now2,
-      currentDate,
       generateId: generateId2,
       experimental_context,
       download: download2
@@ -16174,6 +16412,10 @@ Learn more: \x1B[34m${moreInfoURL}\x1B[0m
       settings,
       maxRetries: maxRetriesArg,
       abortSignal,
+      stepTimeoutMs,
+      stepAbortController,
+      chunkTimeoutMs,
+      chunkAbortController,
       system,
       prompt,
       messages,
@@ -16188,7 +16430,6 @@ Learn more: \x1B[34m${moreInfoURL}\x1B[0m
       prepareStep,
       includeRawChunks,
       now: now2,
-      currentDate,
       generateId: generateId2,
       onChunk,
       onError,
@@ -16367,7 +16608,7 @@ Learn more: \x1B[34m${moreInfoURL}\x1B[0m
         async flush(controller) {
           try {
             if (recordedSteps.length === 0) {
-              const error = new NoOutputGeneratedError({
+              const error = (abortSignal == null ? void 0 : abortSignal.aborted) ? abortSignal.reason : new NoOutputGeneratedError({
                 message: "No output generated. Check the stream for errors."
               });
               self._finishReason.reject(error);
@@ -16448,7 +16689,13 @@ Learn more: \x1B[34m${moreInfoURL}\x1B[0m
         async pull(controller) {
           function abort() {
             onAbort == null ? void 0 : onAbort({ steps: recordedSteps });
-            controller.enqueue({ type: "abort" });
+            controller.enqueue({
+              type: "abort",
+              // The `reason` is usually of type DOMException, but it can also be of any type,
+              // so we use getErrorMessage for serialization because it is already designed to accept values of the unknown type.
+              // See: https://developer.mozilla.org/en-US/docs/Web/API/AbortSignal/reason
+              ...(abortSignal == null ? void 0 : abortSignal.reason) !== void 0 ? { reason: getErrorMessage$1(abortSignal.reason) } : {}
+            });
             controller.close();
           }
           try {
@@ -16634,6 +16881,30 @@ Learn more: \x1B[34m${moreInfoURL}\x1B[0m
           }) {
             var _a16, _b, _c, _d, _e, _f;
             const includeRawChunks2 = self.includeRawChunks;
+            const stepTimeoutId = stepTimeoutMs != null ? setTimeout(() => stepAbortController.abort(), stepTimeoutMs) : void 0;
+            let chunkTimeoutId = void 0;
+            function resetChunkTimeout() {
+              if (chunkTimeoutMs != null) {
+                if (chunkTimeoutId != null) {
+                  clearTimeout(chunkTimeoutId);
+                }
+                chunkTimeoutId = setTimeout(
+                  () => chunkAbortController.abort(),
+                  chunkTimeoutMs
+                );
+              }
+            }
+            function clearChunkTimeout() {
+              if (chunkTimeoutId != null) {
+                clearTimeout(chunkTimeoutId);
+                chunkTimeoutId = void 0;
+              }
+            }
+            function clearStepTimeout() {
+              if (stepTimeoutId != null) {
+                clearTimeout(stepTimeoutId);
+              }
+            }
             stepFinish = new DelayedPromise();
             const stepInputMessages = [...initialMessages, ...responseMessages];
             const prepareStepResult = await (prepareStep == null ? void 0 : prepareStep({
@@ -16749,7 +17020,7 @@ Learn more: \x1B[34m${moreInfoURL}\x1B[0m
             let stepFirstChunk = true;
             let stepResponse = {
               id: generateId2(),
-              timestamp: currentDate(),
+              timestamp: /* @__PURE__ */ new Date(),
               modelId: model.modelId
             };
             let activeText = "";
@@ -16758,6 +17029,7 @@ Learn more: \x1B[34m${moreInfoURL}\x1B[0m
                 new TransformStream({
                   async transform(chunk, controller) {
                     var _a17, _b2, _c2, _d2, _e2;
+                    resetChunkTimeout();
                     if (chunk.type === "stream-start") {
                       warnings = chunk.warnings;
                       return;
@@ -16988,6 +17260,8 @@ Learn more: \x1B[34m${moreInfoURL}\x1B[0m
                         pendingDeferredToolCalls.delete(output2.toolCallId);
                       }
                     }
+                    clearStepTimeout();
+                    clearChunkTimeout();
                     if (
                       // Continue if:
                       // 1. There are client tool calls that have all been executed, OR
@@ -17185,6 +17459,16 @@ Learn more: \x1B[34m${moreInfoURL}\x1B[0m
           })
         )
       );
+    }
+    get elementStream() {
+      var _a16, _b, _c;
+      const transform = (_a16 = this.outputSpecification) == null ? void 0 : _a16.createElementStreamTransform();
+      if (transform == null) {
+        throw new UnsupportedFunctionalityError({
+          functionality: `element streams in ${(_c = (_b = this.outputSpecification) == null ? void 0 : _b.name) != null ? _c : "text"} mode`
+        });
+      }
+      return createAsyncIterableStream(this.teeStream().pipeThrough(transform));
     }
     get output() {
       return this.finalStep.then((step) => {
@@ -22751,7 +23035,7 @@ ${toolExamples.join("\n\n")}
         }),
         object$1({
           type: literal("reference"),
-          reference_ids: array$1(number$1())
+          reference_ids: array$1(union([string(), number$1()]))
         }),
         object$1({
           type: literal("thinking"),
@@ -22872,7 +23156,7 @@ ${toolExamples.join("\n\n")}
   });
 
   // src/version.ts
-  var VERSION$6 = "3.0.2" ;
+  var VERSION$6 = "3.0.6" ;
 
   // src/mistral-provider.ts
   function createMistral(options = {}) {
@@ -22927,7 +23211,7 @@ ${toolExamples.join("\n\n")}
   // src/google-provider.ts
 
   // src/version.ts
-  var VERSION$5 = "3.0.2" ;
+  var VERSION$5 = "3.0.7" ;
   var googleErrorDataSchema = lazySchema(
     () => zodSchema(
       object$1({
@@ -23543,7 +23827,7 @@ ${toolExamples.join("\n\n")}
     ].some((id) => id === modelId);
     const isGemini2orNewer = modelId.includes("gemini-2") || modelId.includes("gemini-3") || isLatest;
     const supportsDynamicRetrieval = modelId.includes("gemini-1.5-flash") && !modelId.includes("-8b");
-    const supportsFileSearch = modelId.includes("gemini-2.5");
+    const supportsFileSearch = modelId.includes("gemini-2.5") || modelId.includes("gemini-3");
     if (tools == null) {
       return { tools: void 0, toolConfig: void 0, toolWarnings };
     }
@@ -23616,7 +23900,7 @@ ${toolExamples.join("\n\n")}
               toolWarnings.push({
                 type: "unsupported",
                 feature: `provider-defined tool ${tool.id}`,
-                details: "The file search tool is only supported with Gemini 2.5 models."
+                details: "The file search tool is only supported with Gemini 2.5 models and Gemini 3 models."
               });
             }
             break;
@@ -23967,7 +24251,10 @@ ${toolExamples.join("\n\n")}
         finishReason: {
           unified: mapGoogleGenerativeAIFinishReason({
             finishReason: candidate.finishReason,
-            hasToolCalls: content.some((part) => part.type === "tool-call")
+            // Only count client-executed tool calls for finish reason determination.
+            hasToolCalls: content.some(
+              (part) => part.type === "tool-call" && !part.providerExecuted
+            )
           }),
           raw: (_e = candidate.finishReason) != null ? _e : void 0
         },
@@ -24070,7 +24357,6 @@ ${toolExamples.join("\n\n")}
                       input: JSON.stringify(part.executableCode),
                       providerExecuted: true
                     });
-                    hasToolCalls = true;
                   } else if ("codeExecutionResult" in part && part.codeExecutionResult) {
                     const toolCallId = lastCodeExecutionToolCallId;
                     if (toolCallId) {
@@ -26467,11 +26753,16 @@ ${user}:`]
     "gpt-image-1-mini": 10,
     "gpt-image-1.5": 10
   };
-  var hasDefaultResponseFormat = /* @__PURE__ */ new Set([
-    "gpt-image-1",
+  var defaultResponseFormatPrefixes = [
     "gpt-image-1-mini",
-    "gpt-image-1.5"
-  ]);
+    "gpt-image-1.5",
+    "gpt-image-1"
+  ];
+  function hasDefaultResponseFormat(modelId) {
+    return defaultResponseFormatPrefixes.some(
+      (prefix) => modelId.startsWith(prefix)
+    );
+  }
 
   // src/image/openai-image-model.ts
   var OpenAIImageModel = class {
@@ -26590,7 +26881,7 @@ ${user}:`]
           n,
           size,
           ...(_h = providerOptions.openai) != null ? _h : {},
-          ...!hasDefaultResponseFormat.has(this.modelId) ? { response_format: "b64_json" } : {}
+          ...!hasDefaultResponseFormat(this.modelId) ? { response_format: "b64_json" } : {}
         },
         failedResponseHandler: openaiFailedResponseHandler,
         successfulResponseHandler: createJsonResponseHandler(
@@ -27142,6 +27433,7 @@ ${user}:`]
     prompt,
     toolNameMapping,
     systemMessageMode,
+    providerOptionsName,
     fileIdPrefixes,
     store,
     hasLocalShellTool = false,
@@ -27197,7 +27489,7 @@ ${user}:`]
                       ...part.data instanceof URL ? { image_url: part.data.toString() } : typeof part.data === "string" && isFileId(part.data, fileIdPrefixes) ? { file_id: part.data } : {
                         image_url: `data:${mediaType};base64,${convertToBase64(part.data)}`
                       },
-                      detail: (_b2 = (_a2 = part.providerOptions) == null ? void 0 : _a2.openai) == null ? void 0 : _b2.imageDetail
+                      detail: (_b2 = (_a2 = part.providerOptions) == null ? void 0 : _a2[providerOptionsName]) == null ? void 0 : _b2.imageDetail
                     };
                   } else if (part.mediaType === "application/pdf") {
                     if (part.data instanceof URL) {
@@ -27229,7 +27521,7 @@ ${user}:`]
           for (const part of content) {
             switch (part.type) {
               case "text": {
-                const id = (_b = (_a = part.providerOptions) == null ? void 0 : _a.openai) == null ? void 0 : _b.itemId;
+                const id = (_b = (_a = part.providerOptions) == null ? void 0 : _a[providerOptionsName]) == null ? void 0 : _b.itemId;
                 if (store && id != null) {
                   input.push({ type: "item_reference", id });
                   break;
@@ -27242,7 +27534,7 @@ ${user}:`]
                 break;
               }
               case "tool-call": {
-                const id = (_g = (_d = (_c = part.providerOptions) == null ? void 0 : _c.openai) == null ? void 0 : _d.itemId) != null ? _g : (_f = (_e = part.providerMetadata) == null ? void 0 : _e.openai) == null ? void 0 : _f.itemId;
+                const id = (_g = (_d = (_c = part.providerOptions) == null ? void 0 : _c[providerOptionsName]) == null ? void 0 : _d.itemId) != null ? _g : (_f = (_e = part.providerMetadata) == null ? void 0 : _e[providerOptionsName]) == null ? void 0 : _f.itemId;
                 if (part.providerExecuted) {
                   if (store && id != null) {
                     input.push({ type: "item_reference", id });
@@ -27309,7 +27601,7 @@ ${user}:`]
                   break;
                 }
                 if (store) {
-                  const itemId = (_j = (_i = (_h = part.providerMetadata) == null ? void 0 : _h.openai) == null ? void 0 : _i.itemId) != null ? _j : part.toolCallId;
+                  const itemId = (_j = (_i = (_h = part.providerMetadata) == null ? void 0 : _h[providerOptionsName]) == null ? void 0 : _i.itemId) != null ? _j : part.toolCallId;
                   input.push({ type: "item_reference", id: itemId });
                 } else {
                   warnings.push({
@@ -27321,7 +27613,7 @@ ${user}:`]
               }
               case "reasoning": {
                 const providerOptions = await parseProviderOptions({
-                  provider: "openai",
+                  provider: providerOptionsName,
                   providerOptions: part.providerOptions,
                   schema: openaiResponsesReasoningProviderOptionsSchema
                 });
@@ -27476,6 +27768,12 @@ ${user}:`]
                       return {
                         type: "input_image",
                         image_url: `data:${item.mediaType};base64,${item.data}`
+                      };
+                    }
+                    case "image-url": {
+                      return {
+                        type: "input_image",
+                        image_url: item.url
                       };
                     }
                     case "file-data": {
@@ -27890,25 +28188,21 @@ ${user}:`]
             object$1({
               type: literal("file_citation"),
               file_id: string(),
-              filename: string().nullish(),
-              index: number$1().nullish(),
-              start_index: number$1().nullish(),
-              end_index: number$1().nullish(),
-              quote: string().nullish()
+              filename: string(),
+              index: number$1()
             }),
             object$1({
               type: literal("container_file_citation"),
               container_id: string(),
               file_id: string(),
-              filename: string().nullish(),
-              start_index: number$1().nullish(),
-              end_index: number$1().nullish(),
-              index: number$1().nullish()
+              filename: string(),
+              start_index: number$1(),
+              end_index: number$1()
             }),
             object$1({
               type: literal("file_path"),
               file_id: string(),
-              index: number$1().nullish()
+              index: number$1()
             })
           ])
         }),
@@ -28005,25 +28299,21 @@ ${user}:`]
                       object$1({
                         type: literal("file_citation"),
                         file_id: string(),
-                        filename: string().nullish(),
-                        index: number$1().nullish(),
-                        start_index: number$1().nullish(),
-                        end_index: number$1().nullish(),
-                        quote: string().nullish()
+                        filename: string(),
+                        index: number$1()
                       }),
                       object$1({
                         type: literal("container_file_citation"),
                         container_id: string(),
                         file_id: string(),
-                        filename: string().nullish(),
-                        start_index: number$1().nullish(),
-                        end_index: number$1().nullish(),
-                        index: number$1().nullish()
+                        filename: string(),
+                        start_index: number$1(),
+                        end_index: number$1()
                       }),
                       object$1({
                         type: literal("file_path"),
                         file_id: string(),
-                        index: number$1().nullish()
+                        index: number$1()
                       })
                     ])
                   )
@@ -28613,11 +28903,19 @@ ${user}:`]
       if (stopSequences != null) {
         warnings.push({ type: "unsupported", feature: "stopSequences" });
       }
-      const openaiOptions = await parseProviderOptions({
-        provider: "openai",
+      const providerOptionsName = this.config.provider.includes("azure") ? "azure" : "openai";
+      let openaiOptions = await parseProviderOptions({
+        provider: providerOptionsName,
         providerOptions,
         schema: openaiResponsesProviderOptionsSchema
       });
+      if (openaiOptions == null && providerOptionsName !== "openai") {
+        openaiOptions = await parseProviderOptions({
+          provider: "openai",
+          providerOptions,
+          schema: openaiResponsesProviderOptionsSchema
+        });
+      }
       const isReasoningModel = (_a = openaiOptions == null ? void 0 : openaiOptions.forceReasoning) != null ? _a : modelCapabilities.isReasoningModel;
       if ((openaiOptions == null ? void 0 : openaiOptions.conversation) && (openaiOptions == null ? void 0 : openaiOptions.previousResponseId)) {
         warnings.push({
@@ -28644,6 +28942,7 @@ ${user}:`]
         prompt,
         toolNameMapping,
         systemMessageMode: (_b = openaiOptions == null ? void 0 : openaiOptions.systemMessageMode) != null ? _b : isReasoningModel ? "developer" : modelCapabilities.systemMessageMode,
+        providerOptionsName,
         fileIdPrefixes: this.config.fileIdPrefixes,
         store: (_c = openaiOptions == null ? void 0 : openaiOptions.store) != null ? _c : true,
         hasLocalShellTool: hasOpenAITool("openai.local_shell"),
@@ -28798,22 +29097,23 @@ ${user}:`]
         },
         warnings: [...warnings, ...toolWarnings],
         store,
-        toolNameMapping
+        toolNameMapping,
+        providerOptionsName
       };
     }
     async doGenerate(options) {
-      var _a, _b, _c, _d, _e, _f, _g, _h, _i, _j, _k, _l, _m, _n, _o, _p, _q, _r, _s, _t, _u, _v, _w, _x, _y, _z, _A, _B, _C, _D, _E;
+      var _a, _b, _c, _d, _e, _f, _g, _h, _i, _j, _k, _l, _m, _n, _o, _p, _q, _r, _s, _t, _u, _v, _w, _x, _y;
       const {
         args: body,
         warnings,
         webSearchToolName,
-        toolNameMapping
+        toolNameMapping,
+        providerOptionsName
       } = await this.getArgs(options);
       const url = this.config.url({
         path: "/responses",
         modelId: this.modelId
       });
-      const providerKey = this.config.provider.replace(".responses", "");
       const approvalRequestIdToDummyToolCallIdFromPrompt = extractApprovalRequestIdToToolCallIdMapping(options.prompt);
       const {
         responseHeaders,
@@ -28855,7 +29155,7 @@ ${user}:`]
                 type: "reasoning",
                 text: summary.text,
                 providerMetadata: {
-                  [providerKey]: {
+                  [providerOptionsName]: {
                     itemId: part.id,
                     reasoningEncryptedContent: (_a = part.encrypted_content) != null ? _a : null
                   }
@@ -28891,7 +29191,7 @@ ${user}:`]
                 action: part.action
               }),
               providerMetadata: {
-                [providerKey]: {
+                [providerOptionsName]: {
                   itemId: part.id
                 }
               }
@@ -28909,7 +29209,7 @@ ${user}:`]
                 }
               }),
               providerMetadata: {
-                [providerKey]: {
+                [providerOptionsName]: {
                   itemId: part.id
                 }
               }
@@ -28918,7 +29218,7 @@ ${user}:`]
           }
           case "message": {
             for (const contentPart of part.content) {
-              if (((_c = (_b = options.providerOptions) == null ? void 0 : _b.openai) == null ? void 0 : _c.logprobs) && contentPart.logprobs) {
+              if (((_c = (_b = options.providerOptions) == null ? void 0 : _b[providerOptionsName]) == null ? void 0 : _c.logprobs) && contentPart.logprobs) {
                 logprobs.push(contentPart.logprobs);
               }
               const providerMetadata2 = {
@@ -28931,7 +29231,7 @@ ${user}:`]
                 type: "text",
                 text: contentPart.text,
                 providerMetadata: {
-                  [providerKey]: providerMetadata2
+                  [providerOptionsName]: providerMetadata2
                 }
               });
               for (const annotation of contentPart.annotations) {
@@ -28949,29 +29249,29 @@ ${user}:`]
                     sourceType: "document",
                     id: (_i = (_h = (_g = this.config).generateId) == null ? void 0 : _h.call(_g)) != null ? _i : generateId(),
                     mediaType: "text/plain",
-                    title: (_k = (_j = annotation.quote) != null ? _j : annotation.filename) != null ? _k : "Document",
-                    filename: (_l = annotation.filename) != null ? _l : annotation.file_id,
-                    ...annotation.file_id ? {
-                      providerMetadata: {
-                        [providerKey]: {
-                          fileId: annotation.file_id
-                        }
+                    title: annotation.filename,
+                    filename: annotation.filename,
+                    providerMetadata: {
+                      [providerOptionsName]: {
+                        type: annotation.type,
+                        fileId: annotation.file_id,
+                        index: annotation.index
                       }
-                    } : {}
+                    }
                   });
                 } else if (annotation.type === "container_file_citation") {
                   content.push({
                     type: "source",
                     sourceType: "document",
-                    id: (_o = (_n = (_m = this.config).generateId) == null ? void 0 : _n.call(_m)) != null ? _o : generateId(),
+                    id: (_l = (_k = (_j = this.config).generateId) == null ? void 0 : _k.call(_j)) != null ? _l : generateId(),
                     mediaType: "text/plain",
-                    title: (_q = (_p = annotation.filename) != null ? _p : annotation.file_id) != null ? _q : "Document",
-                    filename: (_r = annotation.filename) != null ? _r : annotation.file_id,
+                    title: annotation.filename,
+                    filename: annotation.filename,
                     providerMetadata: {
-                      [providerKey]: {
+                      [providerOptionsName]: {
+                        type: annotation.type,
                         fileId: annotation.file_id,
-                        containerId: annotation.container_id,
-                        ...annotation.index != null ? { index: annotation.index } : {}
+                        containerId: annotation.container_id
                       }
                     }
                   });
@@ -28979,14 +29279,15 @@ ${user}:`]
                   content.push({
                     type: "source",
                     sourceType: "document",
-                    id: (_u = (_t = (_s = this.config).generateId) == null ? void 0 : _t.call(_s)) != null ? _u : generateId(),
+                    id: (_o = (_n = (_m = this.config).generateId) == null ? void 0 : _n.call(_m)) != null ? _o : generateId(),
                     mediaType: "application/octet-stream",
                     title: annotation.file_id,
                     filename: annotation.file_id,
                     providerMetadata: {
-                      [providerKey]: {
+                      [providerOptionsName]: {
+                        type: annotation.type,
                         fileId: annotation.file_id,
-                        ...annotation.index != null ? { index: annotation.index } : {}
+                        index: annotation.index
                       }
                     }
                   });
@@ -29003,7 +29304,7 @@ ${user}:`]
               toolName: part.name,
               input: part.arguments,
               providerMetadata: {
-                [providerKey]: {
+                [providerOptionsName]: {
                   itemId: part.id
                 }
               }
@@ -29031,7 +29332,7 @@ ${user}:`]
             break;
           }
           case "mcp_call": {
-            const toolCallId = part.approval_request_id != null ? (_v = approvalRequestIdToDummyToolCallIdFromPrompt[part.approval_request_id]) != null ? _v : part.id : part.id;
+            const toolCallId = part.approval_request_id != null ? (_p = approvalRequestIdToDummyToolCallIdFromPrompt[part.approval_request_id]) != null ? _p : part.id : part.id;
             const toolName = `mcp.${part.name}`;
             content.push({
               type: "tool-call",
@@ -29054,7 +29355,7 @@ ${user}:`]
                 ...part.error != null ? { error: part.error } : {}
               },
               providerMetadata: {
-                [providerKey]: {
+                [providerOptionsName]: {
                   itemId: part.id
                 }
               }
@@ -29065,8 +29366,8 @@ ${user}:`]
             break;
           }
           case "mcp_approval_request": {
-            const approvalRequestId = (_w = part.approval_request_id) != null ? _w : part.id;
-            const dummyToolCallId = (_z = (_y = (_x = this.config).generateId) == null ? void 0 : _y.call(_x)) != null ? _z : generateId();
+            const approvalRequestId = (_q = part.approval_request_id) != null ? _q : part.id;
+            const dummyToolCallId = (_t = (_s = (_r = this.config).generateId) == null ? void 0 : _s.call(_r)) != null ? _t : generateId();
             const toolName = `mcp.${part.name}`;
             content.push({
               type: "tool-call",
@@ -29116,13 +29417,13 @@ ${user}:`]
               toolName: toolNameMapping.toCustomToolName("file_search"),
               result: {
                 queries: part.queries,
-                results: (_B = (_A = part.results) == null ? void 0 : _A.map((result) => ({
+                results: (_v = (_u = part.results) == null ? void 0 : _u.map((result) => ({
                   attributes: result.attributes,
                   fileId: result.file_id,
                   filename: result.filename,
                   score: result.score,
                   text: result.text
-                }))) != null ? _B : null
+                }))) != null ? _v : null
               }
             });
             break;
@@ -29158,7 +29459,7 @@ ${user}:`]
                 operation: part.operation
               }),
               providerMetadata: {
-                [providerKey]: {
+                [providerOptionsName]: {
                   itemId: part.id
                 }
               }
@@ -29168,23 +29469,23 @@ ${user}:`]
         }
       }
       const providerMetadata = {
-        [providerKey]: { responseId: response.id }
+        [providerOptionsName]: { responseId: response.id }
       };
       if (logprobs.length > 0) {
-        providerMetadata[providerKey].logprobs = logprobs;
+        providerMetadata[providerOptionsName].logprobs = logprobs;
       }
       if (typeof response.service_tier === "string") {
-        providerMetadata[providerKey].serviceTier = response.service_tier;
+        providerMetadata[providerOptionsName].serviceTier = response.service_tier;
       }
       const usage = response.usage;
       return {
         content,
         finishReason: {
           unified: mapOpenAIResponseFinishReason({
-            finishReason: (_C = response.incomplete_details) == null ? void 0 : _C.reason,
+            finishReason: (_w = response.incomplete_details) == null ? void 0 : _w.reason,
             hasFunctionCall
           }),
-          raw: (_E = (_D = response.incomplete_details) == null ? void 0 : _D.reason) != null ? _E : void 0
+          raw: (_y = (_x = response.incomplete_details) == null ? void 0 : _x.reason) != null ? _y : void 0
         },
         usage: convertOpenAIResponsesUsage(usage),
         request: { body },
@@ -29205,7 +29506,8 @@ ${user}:`]
         warnings,
         webSearchToolName,
         toolNameMapping,
-        store
+        store,
+        providerOptionsName
       } = await this.getArgs(options);
       const { responseHeaders, value: response } = await postJsonToApi({
         url: this.config.url({
@@ -29225,7 +29527,6 @@ ${user}:`]
         fetch: this.config.fetch
       });
       const self = this;
-      const providerKey = this.config.provider.replace(".responses", "");
       const approvalRequestIdToDummyToolCallIdFromPrompt = extractApprovalRequestIdToToolCallIdMapping(options.prompt);
       const approvalRequestIdToDummyToolCallIdFromStream = /* @__PURE__ */ new Map();
       let finishReason = {
@@ -29247,7 +29548,7 @@ ${user}:`]
               controller.enqueue({ type: "stream-start", warnings });
             },
             transform(chunk, controller) {
-              var _a, _b, _c, _d, _e, _f, _g, _h, _i, _j, _k, _l, _m, _n, _o, _p, _q, _r, _s, _t, _u, _v, _w, _x, _y, _z, _A, _B, _C, _D, _E, _F, _G, _H, _I, _J;
+              var _a, _b, _c, _d, _e, _f, _g, _h, _i, _j, _k, _l, _m, _n, _o, _p, _q, _r, _s, _t, _u, _v, _w, _x, _y, _z, _A, _B, _C, _D;
               if (options.includeRawChunks) {
                 controller.enqueue({ type: "raw", rawValue: chunk.rawValue });
               }
@@ -29390,7 +29691,7 @@ ${user}:`]
                     type: "text-start",
                     id: value.item.id,
                     providerMetadata: {
-                      [providerKey]: {
+                      [providerOptionsName]: {
                         itemId: value.item.id
                       }
                     }
@@ -29404,7 +29705,7 @@ ${user}:`]
                     type: "reasoning-start",
                     id: `${value.item.id}:0`,
                     providerMetadata: {
-                      [providerKey]: {
+                      [providerOptionsName]: {
                         itemId: value.item.id,
                         reasoningEncryptedContent: (_a = value.item.encrypted_content) != null ? _a : null
                       }
@@ -29417,7 +29718,7 @@ ${user}:`]
                     type: "text-end",
                     id: value.item.id,
                     providerMetadata: {
-                      [providerKey]: {
+                      [providerOptionsName]: {
                         itemId: value.item.id,
                         ...ongoingAnnotations.length > 0 && {
                           annotations: ongoingAnnotations
@@ -29438,7 +29739,7 @@ ${user}:`]
                     toolName: value.item.name,
                     input: value.item.arguments,
                     providerMetadata: {
-                      [providerKey]: {
+                      [providerOptionsName]: {
                         itemId: value.item.id
                       }
                     }
@@ -29539,7 +29840,7 @@ ${user}:`]
                       ...value.item.error != null ? { error: value.item.error } : {}
                     },
                     providerMetadata: {
-                      [providerKey]: {
+                      [providerOptionsName]: {
                         itemId: value.item.id
                       }
                     }
@@ -29577,7 +29878,7 @@ ${user}:`]
                         operation: value.item.operation
                       }),
                       providerMetadata: {
-                        [providerKey]: {
+                        [providerOptionsName]: {
                           itemId: value.item.id
                         }
                       }
@@ -29623,7 +29924,7 @@ ${user}:`]
                       }
                     }),
                     providerMetadata: {
-                      [providerKey]: { itemId: value.item.id }
+                      [providerOptionsName]: { itemId: value.item.id }
                     }
                   });
                 } else if (value.item.type === "shell_call") {
@@ -29638,7 +29939,7 @@ ${user}:`]
                       }
                     }),
                     providerMetadata: {
-                      [providerKey]: { itemId: value.item.id }
+                      [providerOptionsName]: { itemId: value.item.id }
                     }
                   });
                 } else if (value.item.type === "reasoning") {
@@ -29653,7 +29954,7 @@ ${user}:`]
                       type: "reasoning-end",
                       id: `${value.item.id}:${summaryIndex}`,
                       providerMetadata: {
-                        [providerKey]: {
+                        [providerOptionsName]: {
                           itemId: value.item.id,
                           reasoningEncryptedContent: (_k = value.item.encrypted_content) != null ? _k : null
                         }
@@ -29759,7 +30060,7 @@ ${user}:`]
                   id: value.item_id,
                   delta: value.delta
                 });
-                if (((_m = (_l = options.providerOptions) == null ? void 0 : _l.openai) == null ? void 0 : _m.logprobs) && value.logprobs) {
+                if (((_m = (_l = options.providerOptions) == null ? void 0 : _l[providerOptionsName]) == null ? void 0 : _m.logprobs) && value.logprobs) {
                   logprobs.push(value.logprobs);
                 }
               } else if (value.type === "response.reasoning_summary_part.added") {
@@ -29774,7 +30075,7 @@ ${user}:`]
                         type: "reasoning-end",
                         id: `${value.item_id}:${summaryIndex}`,
                         providerMetadata: {
-                          [providerKey]: { itemId: value.item_id }
+                          [providerOptionsName]: { itemId: value.item_id }
                         }
                       });
                       activeReasoningPart.summaryParts[summaryIndex] = "concluded";
@@ -29784,7 +30085,7 @@ ${user}:`]
                     type: "reasoning-start",
                     id: `${value.item_id}:${value.summary_index}`,
                     providerMetadata: {
-                      [providerKey]: {
+                      [providerOptionsName]: {
                         itemId: value.item_id,
                         reasoningEncryptedContent: (_o = (_n = activeReasoning[value.item_id]) == null ? void 0 : _n.encryptedContent) != null ? _o : null
                       }
@@ -29797,7 +30098,7 @@ ${user}:`]
                   id: `${value.item_id}:${value.summary_index}`,
                   delta: value.delta,
                   providerMetadata: {
-                    [providerKey]: {
+                    [providerOptionsName]: {
                       itemId: value.item_id
                     }
                   }
@@ -29808,7 +30109,7 @@ ${user}:`]
                     type: "reasoning-end",
                     id: `${value.item_id}:${value.summary_index}`,
                     providerMetadata: {
-                      [providerKey]: { itemId: value.item_id }
+                      [providerOptionsName]: { itemId: value.item_id }
                     }
                   });
                   activeReasoning[value.item_id].summaryParts[value.summary_index] = "concluded";
@@ -29843,29 +30144,29 @@ ${user}:`]
                     sourceType: "document",
                     id: (_x = (_w = (_v = self.config).generateId) == null ? void 0 : _w.call(_v)) != null ? _x : generateId(),
                     mediaType: "text/plain",
-                    title: (_z = (_y = value.annotation.quote) != null ? _y : value.annotation.filename) != null ? _z : "Document",
-                    filename: (_A = value.annotation.filename) != null ? _A : value.annotation.file_id,
-                    ...value.annotation.file_id ? {
-                      providerMetadata: {
-                        [providerKey]: {
-                          fileId: value.annotation.file_id
-                        }
+                    title: value.annotation.filename,
+                    filename: value.annotation.filename,
+                    providerMetadata: {
+                      [providerOptionsName]: {
+                        type: value.annotation.type,
+                        fileId: value.annotation.file_id,
+                        index: value.annotation.index
                       }
-                    } : {}
+                    }
                   });
                 } else if (value.annotation.type === "container_file_citation") {
                   controller.enqueue({
                     type: "source",
                     sourceType: "document",
-                    id: (_D = (_C = (_B = self.config).generateId) == null ? void 0 : _C.call(_B)) != null ? _D : generateId(),
+                    id: (_A = (_z = (_y = self.config).generateId) == null ? void 0 : _z.call(_y)) != null ? _A : generateId(),
                     mediaType: "text/plain",
-                    title: (_F = (_E = value.annotation.filename) != null ? _E : value.annotation.file_id) != null ? _F : "Document",
-                    filename: (_G = value.annotation.filename) != null ? _G : value.annotation.file_id,
+                    title: value.annotation.filename,
+                    filename: value.annotation.filename,
                     providerMetadata: {
-                      [providerKey]: {
+                      [providerOptionsName]: {
+                        type: value.annotation.type,
                         fileId: value.annotation.file_id,
-                        containerId: value.annotation.container_id,
-                        ...value.annotation.index != null ? { index: value.annotation.index } : {}
+                        containerId: value.annotation.container_id
                       }
                     }
                   });
@@ -29873,14 +30174,15 @@ ${user}:`]
                   controller.enqueue({
                     type: "source",
                     sourceType: "document",
-                    id: (_J = (_I = (_H = self.config).generateId) == null ? void 0 : _I.call(_H)) != null ? _J : generateId(),
+                    id: (_D = (_C = (_B = self.config).generateId) == null ? void 0 : _C.call(_B)) != null ? _D : generateId(),
                     mediaType: "application/octet-stream",
                     title: value.annotation.file_id,
                     filename: value.annotation.file_id,
                     providerMetadata: {
-                      [providerKey]: {
+                      [providerOptionsName]: {
+                        type: value.annotation.type,
                         fileId: value.annotation.file_id,
-                        ...value.annotation.index != null ? { index: value.annotation.index } : {}
+                        index: value.annotation.index
                       }
                     }
                   });
@@ -29891,15 +30193,15 @@ ${user}:`]
             },
             flush(controller) {
               const providerMetadata = {
-                [providerKey]: {
+                [providerOptionsName]: {
                   responseId
                 }
               };
               if (logprobs.length > 0) {
-                providerMetadata[providerKey].logprobs = logprobs;
+                providerMetadata[providerOptionsName].logprobs = logprobs;
               }
               if (serviceTier !== void 0) {
-                providerMetadata[providerKey].serviceTier = serviceTier;
+                providerMetadata[providerOptionsName].serviceTier = serviceTier;
               }
               controller.enqueue({
                 type: "finish",
@@ -30314,7 +30616,7 @@ ${user}:`]
   };
 
   // src/version.ts
-  var VERSION$4 = "3.0.2" ;
+  var VERSION$4 = "3.0.9" ;
 
   // src/openai-provider.ts
   function createOpenAI(options = {}) {
@@ -30418,7 +30720,7 @@ ${user}:`]
   // src/anthropic-provider.ts
 
   // src/version.ts
-  var VERSION$3 = "3.0.2" ;
+  var VERSION$3 = "3.0.12" ;
   var anthropicErrorDataSchema = lazySchema(
     () => zodSchema(
       object$1({
@@ -31060,6 +31362,7 @@ ${user}:`]
             }).nullish()
           }),
           usage: looseObject({
+            input_tokens: number$1().nullish(),
             output_tokens: number$1(),
             cache_creation_input_tokens: number$1().nullish()
           })
@@ -31333,7 +31636,8 @@ ${user}:`]
   var factory2 = createProviderToolFactoryWithOutputSchema({
     id: "anthropic.web_search_20250305",
     inputSchema: webSearch_20250305InputSchema,
-    outputSchema: webSearch_20250305OutputSchema
+    outputSchema: webSearch_20250305OutputSchema,
+    supportsDeferredResults: true
   });
   var webSearch_20250305 = (args = {}) => {
     return factory2(args);
@@ -31385,7 +31689,8 @@ ${user}:`]
   var factory3 = createProviderToolFactoryWithOutputSchema({
     id: "anthropic.web_fetch_20250910",
     inputSchema: webFetch_20250910InputSchema,
-    outputSchema: webFetch_20250910OutputSchema
+    outputSchema: webFetch_20250910OutputSchema,
+    supportsDeferredResults: true
   });
   var webFetch_20250910 = (args = {}) => {
     return factory3(args);
@@ -31883,6 +32188,15 @@ ${user}:`]
       functionality: `unsupported data type for text documents: ${typeof data}`
     });
   }
+  function isUrlData(data) {
+    return data instanceof URL || isUrlString(data);
+  }
+  function isUrlString(data) {
+    return typeof data === "string" && /^https?:\/\//i.test(data);
+  }
+  function getUrlString(data) {
+    return data instanceof URL ? data.toString() : data;
+  }
   async function convertToAnthropicMessagesPrompt({
     prompt,
     sendReasoning,
@@ -31966,9 +32280,9 @@ ${user}:`]
                       if (part.mediaType.startsWith("image/")) {
                         anthropicContent.push({
                           type: "image",
-                          source: part.data instanceof URL ? {
+                          source: isUrlData(part.data) ? {
                             type: "url",
-                            url: part.data.toString()
+                            url: getUrlString(part.data)
                           } : {
                             type: "base64",
                             media_type: part.mediaType === "image/*" ? "image/jpeg" : part.mediaType,
@@ -31986,9 +32300,9 @@ ${user}:`]
                         );
                         anthropicContent.push({
                           type: "document",
-                          source: part.data instanceof URL ? {
+                          source: isUrlData(part.data) ? {
                             type: "url",
-                            url: part.data.toString()
+                            url: getUrlString(part.data)
                           } : {
                             type: "base64",
                             media_type: "application/pdf",
@@ -32010,9 +32324,9 @@ ${user}:`]
                         );
                         anthropicContent.push({
                           type: "document",
-                          source: part.data instanceof URL ? {
+                          source: isUrlData(part.data) ? {
                             type: "url",
-                            url: part.data.toString()
+                            url: getUrlString(part.data)
                           } : {
                             type: "text",
                             media_type: "text/plain",
@@ -32918,6 +33232,15 @@ ${user}:`]
           });
         }
         baseArgs.max_tokens = maxTokens + (thinkingBudget != null ? thinkingBudget : 0);
+      } else {
+        if (topP != null && temperature != null) {
+          warnings.push({
+            type: "unsupported",
+            feature: "topP",
+            details: `topP is not supported when temperature is set. topP is ignored.`
+          });
+          baseArgs.top_p = void 0;
+        }
       }
       if (isKnownModel && baseArgs.max_tokens > maxOutputTokensForModel) {
         if (maxOutputTokens != null) {
@@ -33047,7 +33370,7 @@ ${user}:`]
       });
     }
     async doGenerate(options) {
-      var _a, _b, _c, _d, _e, _f, _g, _h, _i, _j;
+      var _a, _b, _c, _d, _e, _f, _g, _h, _i, _j, _k;
       const { args, warnings, betas, usesJsonResponseTool, toolNameMapping } = await this.getArgs({
         ...options,
         stream: false,
@@ -33071,6 +33394,7 @@ ${user}:`]
       });
       const content = [];
       const mcpToolCalls = {};
+      const serverToolCalls = {};
       let isJsonResponseFromTool = false;
       for (const part of response.content) {
         switch (part.type) {
@@ -33165,6 +33489,7 @@ ${user}:`]
                 providerExecuted: true
               });
             } else if (part.name === "tool_search_tool_regex" || part.name === "tool_search_tool_bm25") {
+              serverToolCalls[part.id] = part.name;
               content.push({
                 type: "tool-call",
                 toolCallId: part.id,
@@ -33328,11 +33653,12 @@ ${user}:`]
           }
           // tool search tool results:
           case "tool_search_tool_result": {
+            const providerToolName = (_c = serverToolCalls[part.tool_use_id]) != null ? _c : "tool_search_tool_regex";
             if (part.content.type === "tool_search_tool_search_result") {
               content.push({
                 type: "tool-result",
                 toolCallId: part.tool_use_id,
-                toolName: toolNameMapping.toCustomToolName("tool_search"),
+                toolName: toolNameMapping.toCustomToolName(providerToolName),
                 result: part.content.tool_references.map((ref) => ({
                   type: ref.type,
                   toolName: ref.tool_name
@@ -33342,7 +33668,7 @@ ${user}:`]
               content.push({
                 type: "tool-result",
                 toolCallId: part.tool_use_id,
-                toolName: toolNameMapping.toCustomToolName("tool_search"),
+                toolName: toolNameMapping.toCustomToolName(providerToolName),
                 isError: true,
                 result: {
                   type: "tool_search_tool_result_error",
@@ -33361,13 +33687,13 @@ ${user}:`]
             finishReason: response.stop_reason,
             isJsonResponseFromTool
           }),
-          raw: (_c = response.stop_reason) != null ? _c : void 0
+          raw: (_d = response.stop_reason) != null ? _d : void 0
         },
         usage: convertAnthropicMessagesUsage(response.usage),
         request: { body: args },
         response: {
-          id: (_d = response.id) != null ? _d : void 0,
-          modelId: (_e = response.model) != null ? _e : void 0,
+          id: (_e = response.id) != null ? _e : void 0,
+          modelId: (_f = response.model) != null ? _f : void 0,
           headers: responseHeaders,
           body: rawResponse
         },
@@ -33375,20 +33701,20 @@ ${user}:`]
         providerMetadata: {
           anthropic: {
             usage: response.usage,
-            cacheCreationInputTokens: (_f = response.usage.cache_creation_input_tokens) != null ? _f : null,
-            stopSequence: (_g = response.stop_sequence) != null ? _g : null,
+            cacheCreationInputTokens: (_g = response.usage.cache_creation_input_tokens) != null ? _g : null,
+            stopSequence: (_h = response.stop_sequence) != null ? _h : null,
             container: response.container ? {
               expiresAt: response.container.expires_at,
               id: response.container.id,
-              skills: (_i = (_h = response.container.skills) == null ? void 0 : _h.map((skill) => ({
+              skills: (_j = (_i = response.container.skills) == null ? void 0 : _i.map((skill) => ({
                 type: skill.type,
                 skillId: skill.skill_id,
                 version: skill.version
-              }))) != null ? _i : null
+              }))) != null ? _j : null
             } : null,
-            contextManagement: (_j = mapAnthropicResponseContextManagement(
+            contextManagement: (_k = mapAnthropicResponseContextManagement(
               response.context_management
-            )) != null ? _j : null
+            )) != null ? _k : null
           }
         }
       };
@@ -33431,6 +33757,7 @@ ${user}:`]
       };
       const contentBlocks = {};
       const mcpToolCalls = {};
+      const serverToolCalls = {};
       let contextManagement = null;
       let rawUsage = void 0;
       let cacheCreationInputTokens = null;
@@ -33445,7 +33772,7 @@ ${user}:`]
             controller.enqueue({ type: "stream-start", warnings });
           },
           transform(chunk, controller) {
-            var _a2, _b2, _c, _d, _e, _f, _g, _h, _i, _j, _k, _l;
+            var _a2, _b2, _c, _d, _e, _f, _g, _h, _i, _j, _k, _l, _m;
             if (options.includeRawChunks) {
               controller.enqueue({ type: "raw", rawValue: chunk.rawValue });
             }
@@ -33557,6 +33884,7 @@ ${user}:`]
                         providerExecuted: true
                       });
                     } else if (part.name === "tool_search_tool_regex" || part.name === "tool_search_tool_bm25") {
+                      serverToolCalls[part.id] = part.name;
                       const customToolName = toolNameMapping.toCustomToolName(
                         part.name
                       );
@@ -33701,11 +34029,12 @@ ${user}:`]
                   }
                   // tool search tool results:
                   case "tool_search_tool_result": {
+                    const providerToolName = (_c = serverToolCalls[part.tool_use_id]) != null ? _c : "tool_search_tool_regex";
                     if (part.content.type === "tool_search_tool_search_result") {
                       controller.enqueue({
                         type: "tool-result",
                         toolCallId: part.tool_use_id,
-                        toolName: toolNameMapping.toCustomToolName("tool_search"),
+                        toolName: toolNameMapping.toCustomToolName(providerToolName),
                         result: part.content.tool_references.map((ref) => ({
                           type: ref.type,
                           toolName: ref.tool_name
@@ -33715,7 +34044,7 @@ ${user}:`]
                       controller.enqueue({
                         type: "tool-result",
                         toolCallId: part.tool_use_id,
-                        toolName: toolNameMapping.toCustomToolName("tool_search"),
+                        toolName: toolNameMapping.toCustomToolName(providerToolName),
                         isError: true,
                         result: {
                           type: "tool_search_tool_result_error",
@@ -33914,12 +34243,12 @@ ${user}:`]
               }
               case "message_start": {
                 usage.input_tokens = value.message.usage.input_tokens;
-                usage.cache_read_input_tokens = (_c = value.message.usage.cache_read_input_tokens) != null ? _c : 0;
-                usage.cache_creation_input_tokens = (_d = value.message.usage.cache_creation_input_tokens) != null ? _d : 0;
+                usage.cache_read_input_tokens = (_d = value.message.usage.cache_read_input_tokens) != null ? _d : 0;
+                usage.cache_creation_input_tokens = (_e = value.message.usage.cache_creation_input_tokens) != null ? _e : 0;
                 rawUsage = {
                   ...value.message.usage
                 };
-                cacheCreationInputTokens = (_e = value.message.usage.cache_creation_input_tokens) != null ? _e : null;
+                cacheCreationInputTokens = (_f = value.message.usage.cache_creation_input_tokens) != null ? _f : null;
                 if (value.message.container != null) {
                   container = {
                     expiresAt: value.message.container.expires_at,
@@ -33938,8 +34267,8 @@ ${user}:`]
                 }
                 controller.enqueue({
                   type: "response-metadata",
-                  id: (_f = value.message.id) != null ? _f : void 0,
-                  modelId: (_g = value.message.model) != null ? _g : void 0
+                  id: (_g = value.message.id) != null ? _g : void 0,
+                  modelId: (_h = value.message.model) != null ? _h : void 0
                 });
                 if (value.message.content != null) {
                   for (let contentIndex = 0; contentIndex < value.message.content.length; contentIndex++) {
@@ -33955,7 +34284,7 @@ ${user}:`]
                         id: part.id,
                         toolName: part.name
                       });
-                      const inputStr = JSON.stringify((_h = part.input) != null ? _h : {});
+                      const inputStr = JSON.stringify((_i = part.input) != null ? _i : {});
                       controller.enqueue({
                         type: "tool-input-delta",
                         id: part.id,
@@ -33984,23 +34313,26 @@ ${user}:`]
                 return;
               }
               case "message_delta": {
+                if (value.usage.input_tokens != null && usage.input_tokens !== value.usage.input_tokens) {
+                  usage.input_tokens = value.usage.input_tokens;
+                }
                 usage.output_tokens = value.usage.output_tokens;
                 finishReason = {
                   unified: mapAnthropicStopReason({
                     finishReason: value.delta.stop_reason,
                     isJsonResponseFromTool
                   }),
-                  raw: (_i = value.delta.stop_reason) != null ? _i : void 0
+                  raw: (_j = value.delta.stop_reason) != null ? _j : void 0
                 };
-                stopSequence = (_j = value.delta.stop_sequence) != null ? _j : null;
+                stopSequence = (_k = value.delta.stop_sequence) != null ? _k : null;
                 container = value.delta.container != null ? {
                   expiresAt: value.delta.container.expires_at,
                   id: value.delta.container.id,
-                  skills: (_l = (_k = value.delta.container.skills) == null ? void 0 : _k.map((skill) => ({
+                  skills: (_m = (_l = value.delta.container.skills) == null ? void 0 : _l.map((skill) => ({
                     type: skill.type,
                     skillId: skill.skill_id,
                     version: skill.version
-                  }))) != null ? _l : null
+                  }))) != null ? _m : null
                 } : null;
                 if (value.delta.context_management) {
                   contextManagement = mapAnthropicResponseContextManagement(
@@ -34075,7 +34407,7 @@ ${user}:`]
     }
   };
   function getModelCapabilities(modelId) {
-    if (modelId.includes("claude-sonnet-4-5") || modelId.includes("claude-opus-4-5")) {
+    if (modelId.includes("claude-sonnet-4-5") || modelId.includes("claude-opus-4-5") || modelId.includes("claude-haiku-4-5")) {
       return {
         maxOutputTokens: 64e3,
         supportsStructuredOutput: true,
@@ -34087,7 +34419,7 @@ ${user}:`]
         supportsStructuredOutput: true,
         isKnownModel: true
       };
-    } else if (modelId.includes("claude-sonnet-4-") || modelId.includes("claude-3-7-sonnet") || modelId.includes("claude-haiku-4-5")) {
+    } else if (modelId.includes("claude-sonnet-4-") || modelId.includes("claude-3-7-sonnet")) {
       return {
         maxOutputTokens: 64e3,
         supportsStructuredOutput: false,
@@ -34533,7 +34865,8 @@ ${user}:`]
         fetch: options.fetch,
         generateId: (_a2 = options.generateId) != null ? _a2 : generateId,
         supportedUrls: () => ({
-          "image/*": [/^https?:\/\/.*$/]
+          "image/*": [/^https?:\/\/.*$/],
+          "application/pdf": [/^https?:\/\/.*$/]
         })
       });
     };
@@ -34621,7 +34954,7 @@ ${user}:`]
     return (_b = (_a = message == null ? void 0 : message.providerOptions) == null ? void 0 : _a.openaiCompatible) != null ? _b : {};
   }
   function convertToOpenAICompatibleChatMessages(prompt) {
-    var _a;
+    var _a, _b, _c;
     const messages = [];
     for (const { role, content, ...message } of prompt) {
       const metadata = getOpenAIMetadata({ ...message });
@@ -34680,6 +35013,7 @@ ${user}:`]
                 break;
               }
               case "tool-call": {
+                const thoughtSignature = (_b = (_a = part.providerOptions) == null ? void 0 : _a.google) == null ? void 0 : _b.thoughtSignature;
                 toolCalls.push({
                   id: part.toolCallId,
                   type: "function",
@@ -34687,7 +35021,15 @@ ${user}:`]
                     name: part.toolName,
                     arguments: JSON.stringify(part.input)
                   },
-                  ...partMetadata
+                  ...partMetadata,
+                  // Include extra_content for Google Gemini thought signatures
+                  ...thoughtSignature ? {
+                    extra_content: {
+                      google: {
+                        thought_signature: String(thoughtSignature)
+                      }
+                    }
+                  } : {}
                 });
                 break;
               }
@@ -34714,7 +35056,7 @@ ${user}:`]
                 contentValue = output.value;
                 break;
               case "execution-denied":
-                contentValue = (_a = output.reason) != null ? _a : "Tool execution denied.";
+                contentValue = (_c = output.reason) != null ? _c : "Tool execution denied.";
                 break;
               case "content":
               case "json":
@@ -34953,7 +35295,7 @@ ${user}:`]
       };
     }
     async doGenerate(options) {
-      var _a, _b, _c, _d, _e, _f;
+      var _a, _b, _c, _d, _e, _f, _g, _h;
       const { args, warnings } = await this.getArgs({ ...options });
       const body = JSON.stringify(args);
       const {
@@ -34989,21 +35331,27 @@ ${user}:`]
       }
       if (choice.message.tool_calls != null) {
         for (const toolCall of choice.message.tool_calls) {
+          const thoughtSignature = (_c = (_b = toolCall.extra_content) == null ? void 0 : _b.google) == null ? void 0 : _c.thought_signature;
           content.push({
             type: "tool-call",
-            toolCallId: (_b = toolCall.id) != null ? _b : generateId(),
+            toolCallId: (_d = toolCall.id) != null ? _d : generateId(),
             toolName: toolCall.function.name,
-            input: toolCall.function.arguments
+            input: toolCall.function.arguments,
+            ...thoughtSignature ? {
+              providerMetadata: {
+                [this.providerOptionsName]: { thoughtSignature }
+              }
+            } : {}
           });
         }
       }
       const providerMetadata = {
         [this.providerOptionsName]: {},
-        ...await ((_d = (_c = this.config.metadataExtractor) == null ? void 0 : _c.extractMetadata) == null ? void 0 : _d.call(_c, {
+        ...await ((_f = (_e = this.config.metadataExtractor) == null ? void 0 : _e.extractMetadata) == null ? void 0 : _f.call(_e, {
           parsedBody: rawResponse
         }))
       };
-      const completionTokenDetails = (_e = responseBody.usage) == null ? void 0 : _e.completion_tokens_details;
+      const completionTokenDetails = (_g = responseBody.usage) == null ? void 0 : _g.completion_tokens_details;
       if ((completionTokenDetails == null ? void 0 : completionTokenDetails.accepted_prediction_tokens) != null) {
         providerMetadata[this.providerOptionsName].acceptedPredictionTokens = completionTokenDetails == null ? void 0 : completionTokenDetails.accepted_prediction_tokens;
       }
@@ -35014,7 +35362,7 @@ ${user}:`]
         content,
         finishReason: {
           unified: mapOpenAICompatibleFinishReason(choice.finish_reason),
-          raw: (_f = choice.finish_reason) != null ? _f : void 0
+          raw: (_h = choice.finish_reason) != null ? _h : void 0
         },
         usage: convertOpenAICompatibleChatUsage(responseBody.usage),
         providerMetadata,
@@ -35068,7 +35416,7 @@ ${user}:`]
               controller.enqueue({ type: "stream-start", warnings });
             },
             transform(chunk, controller) {
-              var _a2, _b, _c, _d, _e, _f, _g, _h, _i, _j, _k, _l, _m, _n;
+              var _a2, _b, _c, _d, _e, _f, _g, _h, _i, _j, _k, _l, _m, _n, _o, _p, _q, _r;
               if (options.includeRawChunks) {
                 controller.enqueue({ type: "raw", rawValue: chunk.rawValue });
               }
@@ -35136,7 +35484,7 @@ ${user}:`]
               }
               if (delta.tool_calls != null) {
                 for (const toolCallDelta of delta.tool_calls) {
-                  const index = toolCallDelta.index;
+                  const index = (_c = toolCallDelta.index) != null ? _c : toolCalls.length;
                   if (toolCalls[index] == null) {
                     if (toolCallDelta.id == null) {
                       throw new InvalidResponseDataError({
@@ -35144,7 +35492,7 @@ ${user}:`]
                         message: `Expected 'id' to be a string.`
                       });
                     }
-                    if (((_c = toolCallDelta.function) == null ? void 0 : _c.name) == null) {
+                    if (((_d = toolCallDelta.function) == null ? void 0 : _d.name) == null) {
                       throw new InvalidResponseDataError({
                         data: toolCallDelta,
                         message: `Expected 'function.name' to be a string.`
@@ -35160,12 +35508,13 @@ ${user}:`]
                       type: "function",
                       function: {
                         name: toolCallDelta.function.name,
-                        arguments: (_d = toolCallDelta.function.arguments) != null ? _d : ""
+                        arguments: (_e = toolCallDelta.function.arguments) != null ? _e : ""
                       },
-                      hasFinished: false
+                      hasFinished: false,
+                      thoughtSignature: (_h = (_g = (_f = toolCallDelta.extra_content) == null ? void 0 : _f.google) == null ? void 0 : _g.thought_signature) != null ? _h : void 0
                     };
                     const toolCall2 = toolCalls[index];
-                    if (((_e = toolCall2.function) == null ? void 0 : _e.name) != null && ((_f = toolCall2.function) == null ? void 0 : _f.arguments) != null) {
+                    if (((_i = toolCall2.function) == null ? void 0 : _i.name) != null && ((_j = toolCall2.function) == null ? void 0 : _j.arguments) != null) {
                       if (toolCall2.function.arguments.length > 0) {
                         controller.enqueue({
                           type: "tool-input-delta",
@@ -35180,9 +35529,16 @@ ${user}:`]
                         });
                         controller.enqueue({
                           type: "tool-call",
-                          toolCallId: (_g = toolCall2.id) != null ? _g : generateId(),
+                          toolCallId: (_k = toolCall2.id) != null ? _k : generateId(),
                           toolName: toolCall2.function.name,
-                          input: toolCall2.function.arguments
+                          input: toolCall2.function.arguments,
+                          ...toolCall2.thoughtSignature ? {
+                            providerMetadata: {
+                              [providerOptionsName]: {
+                                thoughtSignature: toolCall2.thoughtSignature
+                              }
+                            }
+                          } : {}
                         });
                         toolCall2.hasFinished = true;
                       }
@@ -35193,24 +35549,31 @@ ${user}:`]
                   if (toolCall.hasFinished) {
                     continue;
                   }
-                  if (((_h = toolCallDelta.function) == null ? void 0 : _h.arguments) != null) {
-                    toolCall.function.arguments += (_j = (_i = toolCallDelta.function) == null ? void 0 : _i.arguments) != null ? _j : "";
+                  if (((_l = toolCallDelta.function) == null ? void 0 : _l.arguments) != null) {
+                    toolCall.function.arguments += (_n = (_m = toolCallDelta.function) == null ? void 0 : _m.arguments) != null ? _n : "";
                   }
                   controller.enqueue({
                     type: "tool-input-delta",
                     id: toolCall.id,
-                    delta: (_k = toolCallDelta.function.arguments) != null ? _k : ""
+                    delta: (_o = toolCallDelta.function.arguments) != null ? _o : ""
                   });
-                  if (((_l = toolCall.function) == null ? void 0 : _l.name) != null && ((_m = toolCall.function) == null ? void 0 : _m.arguments) != null && isParsableJson(toolCall.function.arguments)) {
+                  if (((_p = toolCall.function) == null ? void 0 : _p.name) != null && ((_q = toolCall.function) == null ? void 0 : _q.arguments) != null && isParsableJson(toolCall.function.arguments)) {
                     controller.enqueue({
                       type: "tool-input-end",
                       id: toolCall.id
                     });
                     controller.enqueue({
                       type: "tool-call",
-                      toolCallId: (_n = toolCall.id) != null ? _n : generateId(),
+                      toolCallId: (_r = toolCall.id) != null ? _r : generateId(),
                       toolName: toolCall.function.name,
-                      input: toolCall.function.arguments
+                      input: toolCall.function.arguments,
+                      ...toolCall.thoughtSignature ? {
+                        providerMetadata: {
+                          [providerOptionsName]: {
+                            thoughtSignature: toolCall.thoughtSignature
+                          }
+                        }
+                      } : {}
                     });
                     toolCall.hasFinished = true;
                   }
@@ -35236,7 +35599,14 @@ ${user}:`]
                   type: "tool-call",
                   toolCallId: (_a2 = toolCall.id) != null ? _a2 : generateId(),
                   toolName: toolCall.function.name,
-                  input: toolCall.function.arguments
+                  input: toolCall.function.arguments,
+                  ...toolCall.thoughtSignature ? {
+                    providerMetadata: {
+                      [providerOptionsName]: {
+                        thoughtSignature: toolCall.thoughtSignature
+                      }
+                    }
+                  } : {}
                 });
               }
               const providerMetadata = {
@@ -35276,7 +35646,7 @@ ${user}:`]
       rejected_prediction_tokens: number$1().nullish()
     }).nullish()
   }).nullish();
-  var OpenAICompatibleChatResponseSchema = object$1({
+  var OpenAICompatibleChatResponseSchema = looseObject({
     id: string().nullish(),
     created: number$1().nullish(),
     model: string().nullish(),
@@ -35293,7 +35663,13 @@ ${user}:`]
               function: object$1({
                 name: string(),
                 arguments: string()
-              })
+              }),
+              // Support for Google Gemini thought signatures via OpenAI compatibility
+              extra_content: object$1({
+                google: object$1({
+                  thought_signature: string().nullish()
+                }).nullish()
+              }).nullish()
             })
           ).nullish()
         }),
@@ -35302,7 +35678,7 @@ ${user}:`]
     ),
     usage: openaiCompatibleTokenUsageSchema
   });
-  var chunkBaseSchema = object$1({
+  var chunkBaseSchema = looseObject({
     id: string().nullish(),
     created: number$1().nullish(),
     model: string().nullish(),
@@ -35317,12 +35693,19 @@ ${user}:`]
           reasoning: string().nullish(),
           tool_calls: array$1(
             object$1({
-              index: number$1(),
+              index: number$1().nullish(),
+              //google does not send index
               id: string().nullish(),
               function: object$1({
                 name: string().nullish(),
                 arguments: string().nullish()
-              })
+              }),
+              // Support for Google Gemini thought signatures via OpenAI compatibility
+              extra_content: object$1({
+                google: object$1({
+                  thought_signature: string().nullish()
+                }).nullish()
+              }).nullish()
             })
           ).nullish()
         }).nullish(),
@@ -35626,8 +36009,8 @@ ${user}:`]
         cacheWrite: void 0
       },
       outputTokens: {
-        total: usage.completion_tokens + reasoningTokens,
-        text: usage.completion_tokens,
+        total: usage.completion_tokens,
+        text: usage.completion_tokens - reasoningTokens,
         reasoning: reasoningTokens
       },
       raw: usage
@@ -35938,12 +36321,13 @@ ${user}:`]
     async doGenerate(options) {
       var _a, _b;
       const { args: body, warnings } = await this.getArgs(options);
+      const url = `${(_a = this.config.baseURL) != null ? _a : "https://api.x.ai/v1"}/chat/completions`;
       const {
         responseHeaders,
         value: response,
         rawValue: rawResponse
       } = await postJsonToApi({
-        url: `${(_a = this.config.baseURL) != null ? _a : "https://api.x.ai/v1"}/chat/completions`,
+        url,
         headers: combineHeaders(this.config.headers(), options.headers),
         body,
         failedResponseHandler: xaiFailedResponseHandler,
@@ -35953,6 +36337,17 @@ ${user}:`]
         abortSignal: options.abortSignal,
         fetch: this.config.fetch
       });
+      if (response.error != null) {
+        throw new APICallError({
+          message: response.error,
+          url,
+          requestBodyValues: body,
+          statusCode: 200,
+          responseHeaders,
+          responseBody: JSON.stringify(rawResponse),
+          isRetryable: response.code === "The service is currently unavailable"
+        });
+      }
       const choice = response.choices[0];
       const content = [];
       if (choice.message.content != null && choice.message.content.length > 0) {
@@ -35982,12 +36377,12 @@ ${user}:`]
         }
       }
       if (response.citations != null) {
-        for (const url of response.citations) {
+        for (const url2 of response.citations) {
           content.push({
             type: "source",
             sourceType: "url",
             id: this.config.generateId(),
-            url
+            url: url2
           });
         }
       }
@@ -35998,6 +36393,7 @@ ${user}:`]
           raw: (_b = choice.finish_reason) != null ? _b : void 0
         },
         usage: convertXaiChatUsage(response.usage),
+        // defined when there is no error
         request: { body },
         response: {
           ...getResponseMetadata$2(response),
@@ -36017,12 +36413,47 @@ ${user}:`]
           include_usage: true
         }
       };
+      const url = `${(_a = this.config.baseURL) != null ? _a : "https://api.x.ai/v1"}/chat/completions`;
       const { responseHeaders, value: response } = await postJsonToApi({
-        url: `${(_a = this.config.baseURL) != null ? _a : "https://api.x.ai/v1"}/chat/completions`,
+        url,
         headers: combineHeaders(this.config.headers(), options.headers),
         body,
         failedResponseHandler: xaiFailedResponseHandler,
-        successfulResponseHandler: createEventSourceResponseHandler(xaiChatChunkSchema),
+        successfulResponseHandler: async ({ response: response2 }) => {
+          const responseHeaders2 = extractResponseHeaders(response2);
+          const contentType = response2.headers.get("content-type");
+          if (contentType == null ? void 0 : contentType.includes("application/json")) {
+            const responseBody = await response2.text();
+            const parsedError = await safeParseJSON({
+              text: responseBody,
+              schema: xaiStreamErrorSchema
+            });
+            if (parsedError.success) {
+              throw new APICallError({
+                message: parsedError.value.error,
+                url,
+                requestBodyValues: body,
+                statusCode: 200,
+                responseHeaders: responseHeaders2,
+                responseBody,
+                isRetryable: parsedError.value.code === "The service is currently unavailable"
+              });
+            }
+            throw new APICallError({
+              message: "Invalid JSON response",
+              url,
+              requestBodyValues: body,
+              statusCode: 200,
+              responseHeaders: responseHeaders2,
+              responseBody
+            });
+          }
+          return createEventSourceResponseHandler(xaiChatChunkSchema)({
+            response: response2,
+            url,
+            requestBodyValues: body
+          });
+        },
         abortSignal: options.abortSignal,
         fetch: this.config.fetch
       });
@@ -36034,6 +36465,7 @@ ${user}:`]
       let isFirstChunk = true;
       const contentBlocks = {};
       const lastReasoningDeltas = {};
+      let activeReasoningBlockId = void 0;
       const self = this;
       return {
         stream: response.pipeThrough(
@@ -36058,12 +36490,12 @@ ${user}:`]
                 isFirstChunk = false;
               }
               if (value.citations != null) {
-                for (const url of value.citations) {
+                for (const url2 of value.citations) {
                   controller.enqueue({
                     type: "source",
                     sourceType: "url",
                     id: self.config.generateId(),
-                    url
+                    url: url2
                   });
                 }
               }
@@ -36084,13 +36516,21 @@ ${user}:`]
               const choiceIndex = choice.index;
               if (delta.content != null && delta.content.length > 0) {
                 const textContent = delta.content;
+                if (activeReasoningBlockId != null && !contentBlocks[activeReasoningBlockId].ended) {
+                  controller.enqueue({
+                    type: "reasoning-end",
+                    id: activeReasoningBlockId
+                  });
+                  contentBlocks[activeReasoningBlockId].ended = true;
+                  activeReasoningBlockId = void 0;
+                }
                 const lastMessage = body.messages[body.messages.length - 1];
                 if ((lastMessage == null ? void 0 : lastMessage.role) === "assistant" && textContent === lastMessage.content) {
                   return;
                 }
                 const blockId = `text-${value.id || choiceIndex}`;
                 if (contentBlocks[blockId] == null) {
-                  contentBlocks[blockId] = { type: "text" };
+                  contentBlocks[blockId] = { type: "text", ended: false };
                   controller.enqueue({
                     type: "text-start",
                     id: blockId
@@ -36109,7 +36549,8 @@ ${user}:`]
                 }
                 lastReasoningDeltas[blockId] = delta.reasoning_content;
                 if (contentBlocks[blockId] == null) {
-                  contentBlocks[blockId] = { type: "reasoning" };
+                  contentBlocks[blockId] = { type: "reasoning", ended: false };
+                  activeReasoningBlockId = blockId;
                   controller.enqueue({
                     type: "reasoning-start",
                     id: blockId
@@ -36122,6 +36563,14 @@ ${user}:`]
                 });
               }
               if (delta.tool_calls != null) {
+                if (activeReasoningBlockId != null && !contentBlocks[activeReasoningBlockId].ended) {
+                  controller.enqueue({
+                    type: "reasoning-end",
+                    id: activeReasoningBlockId
+                  });
+                  contentBlocks[activeReasoningBlockId].ended = true;
+                  activeReasoningBlockId = void 0;
+                }
                 for (const toolCall of delta.tool_calls) {
                   const toolCallId = toolCall.id;
                   controller.enqueue({
@@ -36149,10 +36598,12 @@ ${user}:`]
             },
             flush(controller) {
               for (const [blockId, block] of Object.entries(contentBlocks)) {
-                controller.enqueue({
-                  type: block.type === "text" ? "text-end" : "reasoning-end",
-                  id: blockId
-                });
+                if (!block.ended) {
+                  controller.enqueue({
+                    type: block.type === "text" ? "text-end" : "reasoning-end",
+                    id: blockId
+                  });
+                }
               }
               controller.enqueue({ type: "finish", finishReason, usage });
             }
@@ -36204,10 +36655,12 @@ ${user}:`]
         index: number$1(),
         finish_reason: string().nullish()
       })
-    ),
-    object: literal("chat.completion"),
-    usage: xaiUsageSchema,
-    citations: array$1(string().url()).nullish()
+    ).nullish(),
+    object: literal("chat.completion").nullish(),
+    usage: xaiUsageSchema.nullish(),
+    citations: array$1(string().url()).nullish(),
+    code: string().nullish(),
+    error: string().nullish()
   });
   var xaiChatChunkSchema = object$1({
     id: string().nullish(),
@@ -36237,8 +36690,10 @@ ${user}:`]
     usage: xaiUsageSchema.nullish(),
     citations: array$1(string().url()).nullish()
   });
-
-  // src/responses/convert-to-xai-responses-input.ts
+  var xaiStreamErrorSchema = object$1({
+    code: string(),
+    error: string()
+  });
   async function convertToXaiResponsesInput({
     prompt
   }) {
@@ -36255,18 +36710,23 @@ ${user}:`]
           break;
         }
         case "user": {
-          let userContent = "";
+          const contentParts = [];
           for (const block of message.content) {
             switch (block.type) {
               case "text": {
-                userContent += block.text;
+                contentParts.push({ type: "input_text", text: block.text });
                 break;
               }
               case "file": {
-                inputWarnings.push({
-                  type: "other",
-                  message: `xAI Responses API does not support ${block.type} in user messages`
-                });
+                if (block.mediaType.startsWith("image/")) {
+                  const mediaType = block.mediaType === "image/*" ? "image/jpeg" : block.mediaType;
+                  const imageUrl = block.data instanceof URL ? block.data.toString() : `data:${mediaType};base64,${convertToBase64(block.data)}`;
+                  contentParts.push({ type: "input_image", image_url: imageUrl });
+                } else {
+                  throw new UnsupportedFunctionalityError({
+                    functionality: `file part media type ${block.mediaType}`
+                  });
+                }
                 break;
               }
               default: {
@@ -36279,7 +36739,7 @@ ${user}:`]
           }
           input.push({
             role: "user",
-            content: userContent
+            content: contentParts
           });
           break;
         }
@@ -36495,7 +36955,8 @@ ${user}:`]
       type: literal("reasoning"),
       id: string(),
       summary: array$1(reasoningSummaryPartSchema),
-      status: string()
+      status: string(),
+      encrypted_content: string().nullish()
     })
   ]);
   var xaiResponsesUsageSchema = object$1({
@@ -36637,6 +37098,16 @@ ${user}:`]
       output_index: number$1()
     }),
     object$1({
+      type: literal("response.custom_tool_call_input.done"),
+      item_id: string(),
+      output_index: number$1()
+    }),
+    object$1({
+      type: literal("response.custom_tool_call_input.delta"),
+      item_id: string(),
+      output_index: number$1()
+    }),
+    object$1({
       type: literal("response.code_execution_call.in_progress"),
       item_id: string(),
       output_index: number$1()
@@ -36662,9 +37133,27 @@ ${user}:`]
       output_index: number$1()
     }),
     object$1({
+      type: literal("response.code_interpreter_call.interpreting"),
+      item_id: string(),
+      output_index: number$1()
+    }),
+    object$1({
       type: literal("response.code_interpreter_call.completed"),
       item_id: string(),
       output_index: number$1()
+    }),
+    // Code interpreter code streaming events
+    object$1({
+      type: literal("response.code_interpreter_call_code.delta"),
+      item_id: string(),
+      output_index: number$1(),
+      delta: string()
+    }),
+    object$1({
+      type: literal("response.code_interpreter_call_code.done"),
+      item_id: string(),
+      output_index: number$1(),
+      code: string()
     }),
     object$1({
       type: literal("response.done"),
@@ -36840,11 +37329,9 @@ ${user}:`]
       } else {
         xaiTools2.push({
           type: "function",
-          function: {
-            name: tool.name,
-            description: tool.description,
-            parameters: tool.inputSchema
-          }
+          name: tool.name,
+          description: tool.description,
+          parameters: tool.inputSchema
         });
       }
     }
@@ -36954,11 +37441,12 @@ ${user}:`]
       topP,
       stopSequences,
       seed,
+      responseFormat,
       providerOptions,
       tools,
       toolChoice
     }) {
-      var _a, _b, _c, _d;
+      var _a, _b, _c, _d, _e;
       const warnings = [];
       const options = (_a = await parseProviderOptions({
         provider: "xai",
@@ -36996,6 +37484,17 @@ ${user}:`]
         temperature,
         top_p: topP,
         seed,
+        ...(responseFormat == null ? void 0 : responseFormat.type) === "json" && {
+          text: {
+            format: responseFormat.schema != null ? {
+              type: "json_schema",
+              strict: true,
+              name: (_e = responseFormat.name) != null ? _e : "response",
+              description: responseFormat.description,
+              schema: responseFormat.schema
+            } : { type: "json_object" }
+          }
+        },
         ...options.reasoningEffort != null && {
           reasoning: { effort: options.reasoningEffort }
         },
@@ -37060,11 +37559,11 @@ ${user}:`]
       for (const part of response.output) {
         if (part.type === "web_search_call" || part.type === "x_search_call" || part.type === "code_interpreter_call" || part.type === "code_execution_call" || part.type === "view_image_call" || part.type === "view_x_video_call" || part.type === "custom_tool_call") {
           let toolName = (_b = part.name) != null ? _b : "";
-          if (webSearchSubTools.includes((_c = part.name) != null ? _c : "")) {
+          if (webSearchSubTools.includes((_c = part.name) != null ? _c : "") || part.type === "web_search_call") {
             toolName = webSearchToolName != null ? webSearchToolName : "web_search";
-          } else if (xSearchSubTools.includes((_d = part.name) != null ? _d : "")) {
+          } else if (xSearchSubTools.includes((_d = part.name) != null ? _d : "") || part.type === "x_search_call") {
             toolName = xSearchToolName != null ? xSearchToolName : "x_search";
-          } else if (part.name === "code_execution") {
+          } else if (part.name === "code_execution" || part.type === "code_interpreter_call" || part.type === "code_execution_call") {
             toolName = codeExecutionToolName != null ? codeExecutionToolName : "code_execution";
           }
           const toolInput = part.type === "custom_tool_call" ? (_e = part.input) != null ? _e : "" : (_f = part.arguments) != null ? _f : "";
@@ -37109,6 +37608,32 @@ ${user}:`]
               toolName: part.name,
               input: part.arguments
             });
+            break;
+          }
+          case "reasoning": {
+            const summaryTexts = part.summary.map((s) => s.text).filter((text) => text && text.length > 0);
+            if (summaryTexts.length > 0) {
+              const reasoningText = summaryTexts.join("");
+              if (part.encrypted_content || part.id) {
+                content.push({
+                  type: "reasoning",
+                  text: reasoningText,
+                  providerMetadata: {
+                    xai: {
+                      ...part.encrypted_content && {
+                        reasoningEncryptedContent: part.encrypted_content
+                      },
+                      ...part.id && { itemId: part.id }
+                    }
+                  }
+                });
+              } else {
+                content.push({
+                  type: "reasoning",
+                  text: reasoningText
+                });
+              }
+            }
             break;
           }
         }
@@ -37161,6 +37686,7 @@ ${user}:`]
       let isFirstChunk = true;
       const contentBlocks = {};
       const seenToolCalls = /* @__PURE__ */ new Set();
+      const activeReasoning = {};
       const self = this;
       return {
         stream: response.pipeThrough(
@@ -37192,7 +37718,12 @@ ${user}:`]
                 const blockId = `reasoning-${event.item_id}`;
                 controller.enqueue({
                   type: "reasoning-start",
-                  id: blockId
+                  id: blockId,
+                  providerMetadata: {
+                    xai: {
+                      itemId: event.item_id
+                    }
+                  }
                 });
               }
               if (event.type === "response.reasoning_summary_text.delta") {
@@ -37200,16 +37731,17 @@ ${user}:`]
                 controller.enqueue({
                   type: "reasoning-delta",
                   id: blockId,
-                  delta: event.delta
+                  delta: event.delta,
+                  providerMetadata: {
+                    xai: {
+                      itemId: event.item_id
+                    }
+                  }
                 });
                 return;
               }
               if (event.type === "response.reasoning_summary_text.done") {
-                const blockId = `reasoning-${event.item_id}`;
-                controller.enqueue({
-                  type: "reasoning-end",
-                  id: blockId
-                });
+                return;
               }
               if (event.type === "response.output_text.delta") {
                 const blockId = `text-${event.item_id}`;
@@ -37271,29 +37803,48 @@ ${user}:`]
               }
               if (event.type === "response.output_item.added" || event.type === "response.output_item.done") {
                 const part = event.item;
+                if (part.type === "reasoning") {
+                  if (event.type === "response.output_item.done") {
+                    controller.enqueue({
+                      type: "reasoning-end",
+                      id: `reasoning-${part.id}`,
+                      providerMetadata: {
+                        xai: {
+                          ...part.encrypted_content && {
+                            reasoningEncryptedContent: part.encrypted_content
+                          },
+                          ...part.id && { itemId: part.id }
+                        }
+                      }
+                    });
+                    delete activeReasoning[part.id];
+                  }
+                  return;
+                }
                 if (part.type === "web_search_call" || part.type === "x_search_call" || part.type === "code_interpreter_call" || part.type === "code_execution_call" || part.type === "view_image_call" || part.type === "view_x_video_call" || part.type === "custom_tool_call") {
-                  if (!seenToolCalls.has(part.id)) {
+                  const webSearchSubTools = [
+                    "web_search",
+                    "web_search_with_snippets",
+                    "browse_page"
+                  ];
+                  const xSearchSubTools = [
+                    "x_user_search",
+                    "x_keyword_search",
+                    "x_semantic_search",
+                    "x_thread_fetch"
+                  ];
+                  let toolName = (_c = part.name) != null ? _c : "";
+                  if (webSearchSubTools.includes((_d = part.name) != null ? _d : "") || part.type === "web_search_call") {
+                    toolName = webSearchToolName != null ? webSearchToolName : "web_search";
+                  } else if (xSearchSubTools.includes((_e = part.name) != null ? _e : "") || part.type === "x_search_call") {
+                    toolName = xSearchToolName != null ? xSearchToolName : "x_search";
+                  } else if (part.name === "code_execution" || part.type === "code_interpreter_call" || part.type === "code_execution_call") {
+                    toolName = codeExecutionToolName != null ? codeExecutionToolName : "code_execution";
+                  }
+                  const toolInput = part.type === "custom_tool_call" ? (_f = part.input) != null ? _f : "" : (_g = part.arguments) != null ? _g : "";
+                  const shouldEmit = part.type === "custom_tool_call" ? event.type === "response.output_item.done" : !seenToolCalls.has(part.id);
+                  if (shouldEmit && !seenToolCalls.has(part.id)) {
                     seenToolCalls.add(part.id);
-                    const webSearchSubTools = [
-                      "web_search",
-                      "web_search_with_snippets",
-                      "browse_page"
-                    ];
-                    const xSearchSubTools = [
-                      "x_user_search",
-                      "x_keyword_search",
-                      "x_semantic_search",
-                      "x_thread_fetch"
-                    ];
-                    let toolName = (_c = part.name) != null ? _c : "";
-                    if (webSearchSubTools.includes((_d = part.name) != null ? _d : "")) {
-                      toolName = webSearchToolName != null ? webSearchToolName : "web_search";
-                    } else if (xSearchSubTools.includes((_e = part.name) != null ? _e : "")) {
-                      toolName = xSearchToolName != null ? xSearchToolName : "x_search";
-                    } else if (part.name === "code_execution") {
-                      toolName = codeExecutionToolName != null ? codeExecutionToolName : "code_execution";
-                    }
-                    const toolInput = part.type === "custom_tool_call" ? (_f = part.input) != null ? _f : "" : (_g = part.arguments) != null ? _g : "";
                     controller.enqueue({
                       type: "tool-input-start",
                       id: part.id,
@@ -37328,12 +37879,12 @@ ${user}:`]
                           type: "text-start",
                           id: blockId
                         });
+                        controller.enqueue({
+                          type: "text-delta",
+                          id: blockId,
+                          delta: contentPart.text
+                        });
                       }
-                      controller.enqueue({
-                        type: "text-delta",
-                        id: blockId,
-                        delta: contentPart.text
-                      });
                     }
                     if (contentPart.annotations) {
                       for (const annotation of contentPart.annotations) {
@@ -37436,7 +37987,7 @@ ${user}:`]
   };
 
   // src/version.ts
-  var VERSION$2 = "3.0.3" ;
+  var VERSION$2 = "3.0.20" ;
 
   // src/xai-provider.ts
   var xaiErrorStructure = {
@@ -37945,7 +38496,7 @@ ${user}:`]
   };
 
   // src/version.ts
-  var VERSION$1 = "3.0.2" ;
+  var VERSION$1 = "3.0.5" ;
 
   // src/perplexity-provider.ts
   function createPerplexity(options = {}) {
@@ -37988,7 +38539,7 @@ ${user}:`]
   // src/cerebras-provider.ts
 
   // src/version.ts
-  var VERSION = "2.0.3" ;
+  var VERSION = "2.0.8" ;
 
   // src/cerebras-provider.ts
   var cerebrasErrorSchema = object$1({
@@ -40117,22 +40668,14 @@ Here are some examples demonstrating the correct JSON output format.
       if (!this.agenticMode) {
         systemPrompt += `
 - Strictly base all your answers on the webpage content provided below.
-- If the user's question cannot be answered from the content, state that the information is not available on the page.`;
+- If the user's question cannot be answered from the content, state that the information is not available on the page.
+
+Here is the initial info about the current page:
+`;
+        const pageContext = await messageManagerAPI.getPageTextContent(!this.citationsEnabled);
+        systemPrompt += JSON.stringify(pageContext);
       }
       return systemPrompt;
-    }
-
-    async _addUserPromptWithContext(prompt) {
-      let contextString = "";
-      if (this.agenticMode) {
-        const pageContext = messageManagerAPI.getUrlAndTitle();
-        contextString = `Page URL: ${pageContext.url}\nPage Title: ${pageContext.title}`;
-      } else {
-        const pageContext = await messageManagerAPI.getPageTextContent(!this.citationsEnabled);
-        contextString = `Page URL: ${pageContext.url}\nPage Title: ${pageContext.title}\nPage Content: """\n${pageContext.textContent}\n"""`;
-      }
-
-      return `Use the following page context to answer the user's question.\n${contextString}\n\nUser Question: ${prompt}`;
     }
 
     parseModelResponseText(responseText) {
@@ -40183,31 +40726,19 @@ Here are some examples demonstrating the correct JSON output format.
         return object;
       }
 
-      const userPromptWithContext = await this._addUserPromptWithContext(prompt);
-      this.history.push({ role: "user", content: prompt });
-      const llmHistory = [...this.history];
-      llmHistory[llmHistory.length - 1] = { role: "user", content: userPromptWithContext };
-
       if (!this.agenticMode) {
         if (this.streamEnabled) {
           const self = this;
-          const streamResult = await super.streamText({
-            abortSignal,
-            messages: llmHistory,
-            onFinish: (result) => {
-              self.history.push(...result.response.messages);
-              if (browseBotFindbar?.findbar) {
-                browseBotFindbar.findbar.history = self.getHistory();
-              }
-            },
-          });
+          const streamResult = await super.streamText({ prompt, abortSignal });
+          (async () => {
+            await streamResult.text;
+            if (browseBotFindbar?.findbar) {
+              browseBotFindbar.findbar.history = self.getHistory();
+            }
+          })();
           return streamResult;
         } else {
-          const result = await super.generateText({
-            abortSignal,
-            messages: llmHistory,
-          });
-          this.history.push(...result.response.messages);
+          const result = await super.generateText({ prompt, abortSignal });
           if (browseBotFindbar?.findbar) {
             browseBotFindbar.findbar.history = this.getHistory();
           }
@@ -40241,18 +40772,17 @@ Here are some examples demonstrating the correct JSON output format.
       const tools = getTools(findbarToolGroups, { shouldToolBeCalled, afterToolCall });
 
       const commonConfig = {
+        prompt,
         tools,
         stopWhen: stepCountIs(this.maxToolCalls),
         abortSignal,
-        messages: llmHistory,
       };
 
       if (this.streamEnabled) {
         const self = this;
         return super.streamText({
           ...commonConfig,
-          onFinish: (result) => {
-            self.history.push(...result.response.messages);
+          onFinish: () => {
             if (browseBotFindbar?.findbar) {
               browseBotFindbar.findbar.history = self.getHistory();
             }
@@ -40260,7 +40790,6 @@ Here are some examples demonstrating the correct JSON output format.
         });
       } else {
         const result = await super.generateText(commonConfig);
-        this.history.push(...result.response.messages);
         if (browseBotFindbar?.findbar) {
           browseBotFindbar.findbar.history = this.getHistory();
         }
