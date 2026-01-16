@@ -4,8 +4,8 @@
   "name": "Browse Bot",
   "description": "Transforms the standard Zen Browser findbar into a modern, floating, AI-powered chat interface. Inspired by Arc Browser.",
   "author": "Bibek Bhusal",
-  "version": "2.5.2b",
-  "updatedAt": "2026-01-15",
+  "version": "2.5.3b",
+  "updatedAt": "2026-01-16",
   "tags": [
     "ai",
     "findbar",
