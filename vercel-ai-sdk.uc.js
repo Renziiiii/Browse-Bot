@@ -143,53 +143,53 @@ var InvalidPromptError = class extends (_b5$1 = AISDKError, _a5$2 = symbol5$2, _
 
 // src/errors/invalid-response-data-error.ts
 var name5$2 = "AI_InvalidResponseDataError";
-var marker6$1 = `vercel.ai.error.${name5$2}`;
-var symbol6$1 = Symbol.for(marker6$1);
-var _a6$1, _b6$1;
-var InvalidResponseDataError = class extends (_b6$1 = AISDKError, _a6$1 = symbol6$1, _b6$1) {
+var marker6$2 = `vercel.ai.error.${name5$2}`;
+var symbol6$2 = Symbol.for(marker6$2);
+var _a6$2, _b6$1;
+var InvalidResponseDataError = class extends (_b6$1 = AISDKError, _a6$2 = symbol6$2, _b6$1) {
   constructor({
     data,
     message = `Invalid response data: ${JSON.stringify(data)}.`
   }) {
     super({ name: name5$2, message });
-    this[_a6$1] = true;
+    this[_a6$2] = true;
     this.data = data;
   }
   static isInstance(error) {
-    return AISDKError.hasMarker(error, marker6$1);
+    return AISDKError.hasMarker(error, marker6$2);
   }
 };
 
 // src/errors/json-parse-error.ts
-var name6$1 = "AI_JSONParseError";
-var marker7$2 = `vercel.ai.error.${name6$1}`;
-var symbol7$2 = Symbol.for(marker7$2);
-var _a7$2, _b7$1;
-var JSONParseError = class extends (_b7$1 = AISDKError, _a7$2 = symbol7$2, _b7$1) {
+var name6$2 = "AI_JSONParseError";
+var marker7$1 = `vercel.ai.error.${name6$2}`;
+var symbol7$1 = Symbol.for(marker7$1);
+var _a7$1, _b7$1;
+var JSONParseError = class extends (_b7$1 = AISDKError, _a7$1 = symbol7$1, _b7$1) {
   constructor({ text, cause }) {
     super({
-      name: name6$1,
+      name: name6$2,
       message: `JSON parsing failed: Text: ${text}.
 Error message: ${getErrorMessage$1(cause)}`,
       cause
     });
-    this[_a7$2] = true;
+    this[_a7$1] = true;
     this.text = text;
   }
   static isInstance(error) {
-    return AISDKError.hasMarker(error, marker7$2);
+    return AISDKError.hasMarker(error, marker7$1);
   }
 };
 
 // src/errors/load-api-key-error.ts
-var name7$1 = "AI_LoadAPIKeyError";
-var marker8$1 = `vercel.ai.error.${name7$1}`;
+var name7 = "AI_LoadAPIKeyError";
+var marker8$1 = `vercel.ai.error.${name7}`;
 var symbol8$1 = Symbol.for(marker8$1);
 var _a8$1, _b8;
 var LoadAPIKeyError = class extends (_b8 = AISDKError, _a8$1 = symbol8$1, _b8) {
   // used in isInstance
   constructor({ message }) {
-    super({ name: name7$1, message });
+    super({ name: name7, message });
     this[_a8$1] = true;
   }
   static isInstance(error) {
@@ -199,10 +199,10 @@ var LoadAPIKeyError = class extends (_b8 = AISDKError, _a8$1 = symbol8$1, _b8) {
 
 // src/errors/no-such-model-error.ts
 var name10$1 = "AI_NoSuchModelError";
-var marker11 = `vercel.ai.error.${name10$1}`;
-var symbol11 = Symbol.for(marker11);
-var _a11, _b11;
-var NoSuchModelError = class extends (_b11 = AISDKError, _a11 = symbol11, _b11) {
+var marker11$1 = `vercel.ai.error.${name10$1}`;
+var symbol11$1 = Symbol.for(marker11$1);
+var _a11$1, _b11;
+var NoSuchModelError = class extends (_b11 = AISDKError, _a11$1 = symbol11$1, _b11) {
   constructor({
     errorName = name10$1,
     modelId,
@@ -210,24 +210,24 @@ var NoSuchModelError = class extends (_b11 = AISDKError, _a11 = symbol11, _b11) 
     message = `No such ${modelType}: ${modelId}`
   }) {
     super({ name: errorName, message });
-    this[_a11] = true;
+    this[_a11$1] = true;
     this.modelId = modelId;
     this.modelType = modelType;
   }
   static isInstance(error) {
-    return AISDKError.hasMarker(error, marker11);
+    return AISDKError.hasMarker(error, marker11$1);
   }
 };
 
 // src/errors/too-many-embedding-values-for-call-error.ts
-var name11 = "AI_TooManyEmbeddingValuesForCallError";
-var marker12$1 = `vercel.ai.error.${name11}`;
+var name11$1 = "AI_TooManyEmbeddingValuesForCallError";
+var marker12$1 = `vercel.ai.error.${name11$1}`;
 var symbol12$1 = Symbol.for(marker12$1);
 var _a12$1, _b12;
 var TooManyEmbeddingValuesForCallError = class extends (_b12 = AISDKError, _a12$1 = symbol12$1, _b12) {
   constructor(options) {
     super({
-      name: name11,
+      name: name11$1,
       message: `Too many values for a single embedding call. The ${options.provider} model "${options.modelId}" can only embed up to ${options.maxEmbeddingsPerCall} values per call, but ${options.values.length} values were provided.`
     });
     this[_a12$1] = true;
@@ -1471,7 +1471,7 @@ class Doc {
 const version = {
     major: 4,
     minor: 3,
-    patch: 4,
+    patch: 6,
 };
 
 const $ZodType = /*@__PURE__*/ $constructor("$ZodType", (inst, def) => {
@@ -2659,11 +2659,9 @@ const $ZodRecord = /*@__PURE__*/ $constructor("$ZodRecord", (inst, def) => {
                 if (keyResult instanceof Promise) {
                     throw new Error("Async schemas not supported in object keys currently");
                 }
-                // Numeric string fallback: if key failed with "expected number", retry with Number(key)
-                const checkNumericKey = typeof key === "string" &&
-                    number$2.test(key) &&
-                    keyResult.issues.length &&
-                    keyResult.issues.some((iss) => iss.code === "invalid_type" && iss.expected === "number");
+                // Numeric string fallback: if key is a numeric string and failed, retry with Number(key)
+                // This handles z.number(), z.literal([1, 2, 3]), and unions containing numeric literals
+                const checkNumericKey = typeof key === "string" && number$2.test(key) && keyResult.issues.length;
                 if (checkNumericKey) {
                     const retryResult = def.keyType._zod.run({ value: Number(key), issues: [] }, ctx);
                     if (retryResult instanceof Promise) {
@@ -3908,7 +3906,7 @@ function finalize(ctx, schema) {
                 }
             }
             // When ref was extracted to $defs, remove properties that match the definition
-            if (refSchema.$ref) {
+            if (refSchema.$ref && refSeen.def) {
                 for (const key in schema) {
                     if (key === "$ref" || key === "allOf")
                         continue;
@@ -6239,7 +6237,7 @@ function withUserAgentSuffix(headers, ...userAgentSuffixParts) {
 }
 
 // src/version.ts
-var VERSION$a = "4.0.2" ;
+var VERSION$a = "4.0.9" ;
 
 // src/get-from-api.ts
 var getOriginalFetch = () => globalThis.fetch;
@@ -6483,29 +6481,38 @@ function secureJsonParse(text) {
 
 // src/add-additional-properties-to-json-schema.ts
 function addAdditionalPropertiesToJsonSchema(jsonSchema2) {
-  if (jsonSchema2.type === "object") {
+  if (jsonSchema2.type === "object" || Array.isArray(jsonSchema2.type) && jsonSchema2.type.includes("object")) {
     jsonSchema2.additionalProperties = false;
-    const properties = jsonSchema2.properties;
+    const { properties } = jsonSchema2;
     if (properties != null) {
-      for (const property in properties) {
-        properties[property] = addAdditionalPropertiesToJsonSchema(
-          properties[property]
-        );
+      for (const key of Object.keys(properties)) {
+        properties[key] = visit(properties[key]);
       }
     }
   }
-  if (jsonSchema2.type === "array" && jsonSchema2.items != null) {
-    if (Array.isArray(jsonSchema2.items)) {
-      jsonSchema2.items = jsonSchema2.items.map(
-        (item) => addAdditionalPropertiesToJsonSchema(item)
-      );
-    } else {
-      jsonSchema2.items = addAdditionalPropertiesToJsonSchema(
-        jsonSchema2.items
-      );
+  if (jsonSchema2.items != null) {
+    jsonSchema2.items = Array.isArray(jsonSchema2.items) ? jsonSchema2.items.map(visit) : visit(jsonSchema2.items);
+  }
+  if (jsonSchema2.anyOf != null) {
+    jsonSchema2.anyOf = jsonSchema2.anyOf.map(visit);
+  }
+  if (jsonSchema2.allOf != null) {
+    jsonSchema2.allOf = jsonSchema2.allOf.map(visit);
+  }
+  if (jsonSchema2.oneOf != null) {
+    jsonSchema2.oneOf = jsonSchema2.oneOf.map(visit);
+  }
+  const { definitions } = jsonSchema2;
+  if (definitions != null) {
+    for (const key of Object.keys(definitions)) {
+      definitions[key] = visit(definitions[key]);
     }
   }
   return jsonSchema2;
+}
+function visit(def) {
+  if (typeof def === "boolean") return def;
+  return addAdditionalPropertiesToJsonSchema(def);
 }
 
 // src/to-json-schema/zod3-to-json-schema/options.ts
@@ -7705,9 +7712,11 @@ function asSchema(schema) {
 }
 function standardSchema(standardSchema2) {
   return jsonSchema(
-    () => standardSchema2["~standard"].jsonSchema.input({
-      target: "draft-07"
-    }),
+    () => addAdditionalPropertiesToJsonSchema(
+      standardSchema2["~standard"].jsonSchema.input({
+        target: "draft-07"
+      })
+    ),
     {
       validate: async (value) => {
         const result = await standardSchema2["~standard"].validate(value);
@@ -8311,12 +8320,14 @@ var GatewayError = class _GatewayError extends (_b = Error, _a$1 = symbol$1, _b)
   constructor({
     message,
     statusCode = 500,
-    cause
+    cause,
+    generationId
   }) {
-    super(message);
+    super(generationId ? `${message} [${generationId}]` : message);
     this[_a$1] = true;
     this.statusCode = statusCode;
     this.cause = cause;
+    this.generationId = generationId;
   }
   /**
    * Checks if the given error is a Gateway Error.
@@ -8340,9 +8351,10 @@ var GatewayAuthenticationError = class _GatewayAuthenticationError extends (_b2 
   constructor({
     message = "Authentication failed",
     statusCode = 401,
-    cause
+    cause,
+    generationId
   } = {}) {
-    super({ message, statusCode, cause });
+    super({ message, statusCode, cause, generationId });
     this[_a2] = true;
     // used in isInstance
     this.name = name$1;
@@ -8359,7 +8371,8 @@ var GatewayAuthenticationError = class _GatewayAuthenticationError extends (_b2 
     oidcTokenProvided,
     message = "Authentication failed",
     statusCode = 401,
-    cause
+    cause,
+    generationId
   }) {
     let contextualMessage;
     if (apiKeyProvided) {
@@ -8387,7 +8400,8 @@ Run 'npx vercel link' to link your project, then 'vc env pull' to fetch the toke
     return new _GatewayAuthenticationError({
       message: contextualMessage,
       statusCode,
-      cause
+      cause,
+      generationId
     });
   }
 };
@@ -8401,9 +8415,10 @@ var GatewayInvalidRequestError = class extends (_b3 = GatewayError, _a3$1 = symb
   constructor({
     message = "Invalid request",
     statusCode = 400,
-    cause
+    cause,
+    generationId
   } = {}) {
-    super({ message, statusCode, cause });
+    super({ message, statusCode, cause, generationId });
     this[_a3$1] = true;
     // used in isInstance
     this.name = name2;
@@ -8423,9 +8438,10 @@ var GatewayRateLimitError = class extends (_b4 = GatewayError, _a4$1 = symbol4$1
   constructor({
     message = "Rate limit exceeded",
     statusCode = 429,
-    cause
+    cause,
+    generationId
   } = {}) {
-    super({ message, statusCode, cause });
+    super({ message, statusCode, cause, generationId });
     this[_a4$1] = true;
     // used in isInstance
     this.name = name3$1;
@@ -8451,9 +8467,10 @@ var GatewayModelNotFoundError = class extends (_b5 = GatewayError, _a5$1 = symbo
     message = "Model not found",
     statusCode = 404,
     modelId,
-    cause
+    cause,
+    generationId
   } = {}) {
-    super({ message, statusCode, cause });
+    super({ message, statusCode, cause, generationId });
     this[_a5$1] = true;
     // used in isInstance
     this.name = name4$1;
@@ -8467,49 +8484,51 @@ var GatewayModelNotFoundError = class extends (_b5 = GatewayError, _a5$1 = symbo
 
 // src/errors/gateway-internal-server-error.ts
 var name5$1 = "GatewayInternalServerError";
-var marker6 = `vercel.ai.gateway.error.${name5$1}`;
-var symbol6 = Symbol.for(marker6);
-var _a6, _b6;
-var GatewayInternalServerError = class extends (_b6 = GatewayError, _a6 = symbol6, _b6) {
+var marker6$1 = `vercel.ai.gateway.error.${name5$1}`;
+var symbol6$1 = Symbol.for(marker6$1);
+var _a6$1, _b6;
+var GatewayInternalServerError = class extends (_b6 = GatewayError, _a6$1 = symbol6$1, _b6) {
   constructor({
     message = "Internal server error",
     statusCode = 500,
-    cause
+    cause,
+    generationId
   } = {}) {
-    super({ message, statusCode, cause });
-    this[_a6] = true;
+    super({ message, statusCode, cause, generationId });
+    this[_a6$1] = true;
     // used in isInstance
     this.name = name5$1;
     this.type = "internal_server_error";
   }
   static isInstance(error) {
-    return GatewayError.hasMarker(error) && symbol6 in error;
+    return GatewayError.hasMarker(error) && symbol6$1 in error;
   }
 };
 
 // src/errors/gateway-response-error.ts
-var name6 = "GatewayResponseError";
-var marker7$1 = `vercel.ai.gateway.error.${name6}`;
-var symbol7$1 = Symbol.for(marker7$1);
-var _a7$1, _b7;
-var GatewayResponseError = class extends (_b7 = GatewayError, _a7$1 = symbol7$1, _b7) {
+var name6$1 = "GatewayResponseError";
+var marker7 = `vercel.ai.gateway.error.${name6$1}`;
+var symbol7 = Symbol.for(marker7);
+var _a7, _b7;
+var GatewayResponseError = class extends (_b7 = GatewayError, _a7 = symbol7, _b7) {
   constructor({
     message = "Invalid response from Gateway",
     statusCode = 502,
     response,
     validationError,
-    cause
+    cause,
+    generationId
   } = {}) {
-    super({ message, statusCode, cause });
-    this[_a7$1] = true;
+    super({ message, statusCode, cause, generationId });
+    this[_a7] = true;
     // used in isInstance
-    this.name = name6;
+    this.name = name6$1;
     this.type = "response_error";
     this.response = response;
     this.validationError = validationError;
   }
   static isInstance(error) {
-    return GatewayError.hasMarker(error) && symbol7$1 in error;
+    return GatewayError.hasMarker(error) && symbol7 in error;
   }
 };
 async function createGatewayErrorFromResponse({
@@ -8519,34 +8538,49 @@ async function createGatewayErrorFromResponse({
   cause,
   authMethod
 }) {
+  var _a8;
   const parseResult = await safeValidateTypes({
     value: response,
     schema: gatewayErrorResponseSchema
   });
   if (!parseResult.success) {
+    const rawGenerationId = typeof response === "object" && response !== null && "generationId" in response ? response.generationId : void 0;
     return new GatewayResponseError({
       message: `Invalid error response format: ${defaultMessage}`,
       statusCode,
       response,
       validationError: parseResult.error,
-      cause
+      cause,
+      generationId: rawGenerationId
     });
   }
   const validatedResponse = parseResult.value;
   const errorType = validatedResponse.error.type;
   const message = validatedResponse.error.message;
+  const generationId = (_a8 = validatedResponse.generationId) != null ? _a8 : void 0;
   switch (errorType) {
     case "authentication_error":
       return GatewayAuthenticationError.createContextualError({
         apiKeyProvided: authMethod === "api-key",
         oidcTokenProvided: authMethod === "oidc",
         statusCode,
-        cause
+        cause,
+        generationId
       });
     case "invalid_request_error":
-      return new GatewayInvalidRequestError({ message, statusCode, cause });
+      return new GatewayInvalidRequestError({
+        message,
+        statusCode,
+        cause,
+        generationId
+      });
     case "rate_limit_exceeded":
-      return new GatewayRateLimitError({ message, statusCode, cause });
+      return new GatewayRateLimitError({
+        message,
+        statusCode,
+        cause,
+        generationId
+      });
     case "model_not_found": {
       const modelResult = await safeValidateTypes({
         value: validatedResponse.error.param,
@@ -8556,13 +8590,24 @@ async function createGatewayErrorFromResponse({
         message,
         statusCode,
         modelId: modelResult.success ? modelResult.value.modelId : void 0,
-        cause
+        cause,
+        generationId
       });
     }
     case "internal_server_error":
-      return new GatewayInternalServerError({ message, statusCode, cause });
+      return new GatewayInternalServerError({
+        message,
+        statusCode,
+        cause,
+        generationId
+      });
     default:
-      return new GatewayInternalServerError({ message, statusCode, cause });
+      return new GatewayInternalServerError({
+        message,
+        statusCode,
+        cause,
+        generationId
+      });
   }
 }
 var gatewayErrorResponseSchema = lazySchema(
@@ -8573,7 +8618,8 @@ var gatewayErrorResponseSchema = lazySchema(
         type: string().nullish(),
         param: unknown().nullish(),
         code: union([string(), number$1()]).nullish()
-      })
+      }),
+      generationId: string().nullish()
     })
   )
 );
@@ -8952,6 +8998,8 @@ var GatewayImageModel = class {
     size,
     aspectRatio,
     seed,
+    files,
+    mask,
     providerOptions,
     headers,
     abortSignal
@@ -8977,7 +9025,11 @@ var GatewayImageModel = class {
           ...size && { size },
           ...aspectRatio && { aspectRatio },
           ...seed && { seed },
-          ...providerOptions && { providerOptions }
+          ...providerOptions && { providerOptions },
+          ...files && {
+            files: files.map((file) => maybeEncodeImageFile(file))
+          },
+          ...mask && { mask: maybeEncodeImageFile(mask) }
         },
         successfulResponseHandler: createJsonResponseHandler(
           gatewayImageResponseSchema
@@ -9014,6 +9066,15 @@ var GatewayImageModel = class {
     };
   }
 };
+function maybeEncodeImageFile(file) {
+  if (file.type === "file" && file.data instanceof Uint8Array) {
+    return {
+      ...file,
+      data: convertUint8ArrayToBase64(file.data)
+    };
+  }
+  return file;
+}
 var providerMetadataEntrySchema = object$1({
   images: array$1(unknown()).optional()
 }).catchall(unknown());
@@ -9028,13 +9089,104 @@ var gatewayImageResponseSchema = object$1({
   ).optional(),
   providerMetadata: record(string(), providerMetadataEntrySchema).optional()
 });
+var perplexitySearchInputSchema = lazySchema(
+  () => zodSchema(
+    object$1({
+      query: union([string(), array$1(string())]).describe(
+        "Search query (string) or multiple queries (array of up to 5 strings). Multi-query searches return combined results from all queries."
+      ),
+      max_results: number$1().optional().describe(
+        "Maximum number of search results to return (1-20, default: 10)"
+      ),
+      max_tokens_per_page: number$1().optional().describe(
+        "Maximum number of tokens to extract per search result page (256-2048, default: 2048)"
+      ),
+      max_tokens: number$1().optional().describe(
+        "Maximum total tokens across all search results (default: 25000, max: 1000000)"
+      ),
+      country: string().optional().describe(
+        "Two-letter ISO 3166-1 alpha-2 country code for regional search results (e.g., 'US', 'GB', 'FR')"
+      ),
+      search_domain_filter: array$1(string()).optional().describe(
+        "List of domains to include or exclude from search results (max 20). To include: ['nature.com', 'science.org']. To exclude: ['-example.com', '-spam.net']"
+      ),
+      search_language_filter: array$1(string()).optional().describe(
+        "List of ISO 639-1 language codes to filter results (max 10, lowercase). Examples: ['en', 'fr', 'de']"
+      ),
+      search_after_date: string().optional().describe(
+        "Include only results published after this date. Format: 'MM/DD/YYYY' (e.g., '3/1/2025'). Cannot be used with search_recency_filter."
+      ),
+      search_before_date: string().optional().describe(
+        "Include only results published before this date. Format: 'MM/DD/YYYY' (e.g., '3/15/2025'). Cannot be used with search_recency_filter."
+      ),
+      last_updated_after_filter: string().optional().describe(
+        "Include only results last updated after this date. Format: 'MM/DD/YYYY' (e.g., '3/1/2025'). Cannot be used with search_recency_filter."
+      ),
+      last_updated_before_filter: string().optional().describe(
+        "Include only results last updated before this date. Format: 'MM/DD/YYYY' (e.g., '3/15/2025'). Cannot be used with search_recency_filter."
+      ),
+      search_recency_filter: _enum(["day", "week", "month", "year"]).optional().describe(
+        "Filter results by relative time period. Cannot be used with search_after_date or search_before_date."
+      )
+    })
+  )
+);
+var perplexitySearchOutputSchema = lazySchema(
+  () => zodSchema(
+    union([
+      // Success response
+      object$1({
+        results: array$1(
+          object$1({
+            title: string(),
+            url: string(),
+            snippet: string(),
+            date: string().optional(),
+            lastUpdated: string().optional()
+          })
+        ),
+        id: string()
+      }),
+      // Error response
+      object$1({
+        error: _enum([
+          "api_error",
+          "rate_limit",
+          "timeout",
+          "invalid_input",
+          "unknown"
+        ]),
+        statusCode: number$1().optional(),
+        message: string()
+      })
+    ])
+  )
+);
+var perplexitySearchToolFactory = createProviderToolFactoryWithOutputSchema({
+  id: "gateway.perplexity_search",
+  inputSchema: perplexitySearchInputSchema,
+  outputSchema: perplexitySearchOutputSchema
+});
+var perplexitySearch = (config = {}) => perplexitySearchToolFactory(config);
+
+// src/gateway-tools.ts
+var gatewayTools = {
+  /**
+   * Search the web using Perplexity's Search API for real-time information,
+   * news, research papers, and articles.
+   *
+   * Provides ranked search results with advanced filtering options including
+   * domain, language, date range, and recency filters.
+   */
+  perplexitySearch
+};
 async function getVercelRequestId() {
   var _a8;
   return (_a8 = indexBrowserExports.getContext().headers) == null ? void 0 : _a8["x-vercel-id"];
 }
 
 // src/version.ts
-var VERSION$9 = "3.0.5" ;
+var VERSION$9 = "3.0.22" ;
 
 // src/gateway-provider.ts
 var AI_GATEWAY_PROTOCOL_VERSION = "0.0.1";
@@ -9163,6 +9315,7 @@ function createGatewayProvider(options = {}) {
   };
   provider.embeddingModel = createEmbeddingModel;
   provider.textEmbeddingModel = createEmbeddingModel;
+  provider.tools = gatewayTools;
   return provider;
 }
 var gateway = createGatewayProvider();
@@ -10719,7 +10872,7 @@ var SpanStatusCode;
 // Split module-level variable definition into separate files to allow
 // tree-shaking on each api instance.
 /** Entrypoint for context API */
-ContextAPI.getInstance();
+var context = ContextAPI.getInstance();
 
 /*
  * Copyright The OpenTelemetry Authors
@@ -11133,8 +11286,8 @@ var trace = TraceAPI.getInstance();
 
 var __defProp = Object.defineProperty;
 var __export = (target, all) => {
-  for (var name16 in all)
-    __defProp(target, name16, { get: all[name16], enumerable: true });
+  for (var name18 in all)
+    __defProp(target, name18, { get: all[name18], enumerable: true });
 };
 var name = "AI_InvalidArgumentError";
 var marker = `vercel.ai.error.${name}`;
@@ -11220,10 +11373,30 @@ var ToolCallNotFoundForApprovalError = class extends AISDKError {
   }
 };
 _a5 = symbol5;
-var name7 = "AI_NoObjectGeneratedError";
-var marker7 = `vercel.ai.error.${name7}`;
-var symbol7 = Symbol.for(marker7);
-var _a7;
+var name6 = "AI_MissingToolResultsError";
+var marker6 = `vercel.ai.error.${name6}`;
+var symbol6 = Symbol.for(marker6);
+var _a6;
+var MissingToolResultsError = class extends AISDKError {
+  constructor({ toolCallIds }) {
+    super({
+      name: name6,
+      message: `Tool result${toolCallIds.length > 1 ? "s are" : " is"} missing for tool call${toolCallIds.length > 1 ? "s" : ""} ${toolCallIds.join(
+        ", "
+      )}.`
+    });
+    this[_a6] = true;
+    this.toolCallIds = toolCallIds;
+  }
+  static isInstance(error) {
+    return AISDKError.hasMarker(error, marker6);
+  }
+};
+_a6 = symbol6;
+var name8 = "AI_NoObjectGeneratedError";
+var marker8 = `vercel.ai.error.${name8}`;
+var symbol8 = Symbol.for(marker8);
+var _a8;
 var NoObjectGeneratedError = class extends AISDKError {
   constructor({
     message = "No object generated.",
@@ -11233,75 +11406,75 @@ var NoObjectGeneratedError = class extends AISDKError {
     usage,
     finishReason
   }) {
-    super({ name: name7, message, cause });
-    this[_a7] = true;
+    super({ name: name8, message, cause });
+    this[_a8] = true;
     this.text = text2;
     this.response = response;
     this.usage = usage;
     this.finishReason = finishReason;
   }
   static isInstance(error) {
-    return AISDKError.hasMarker(error, marker7);
+    return AISDKError.hasMarker(error, marker8);
   }
 };
-_a7 = symbol7;
-var name8 = "AI_NoOutputGeneratedError";
-var marker8 = `vercel.ai.error.${name8}`;
-var symbol8 = Symbol.for(marker8);
-var _a8;
+_a8 = symbol8;
+var name9 = "AI_NoOutputGeneratedError";
+var marker9 = `vercel.ai.error.${name9}`;
+var symbol9 = Symbol.for(marker9);
+var _a9;
 var NoOutputGeneratedError = class extends AISDKError {
   // used in isInstance
   constructor({
     message = "No output generated.",
     cause
   } = {}) {
-    super({ name: name8, message, cause });
-    this[_a8] = true;
-  }
-  static isInstance(error) {
-    return AISDKError.hasMarker(error, marker8);
-  }
-};
-_a8 = symbol8;
-var name9 = "AI_NoSuchToolError";
-var marker9 = `vercel.ai.error.${name9}`;
-var symbol9 = Symbol.for(marker9);
-var _a9;
-var NoSuchToolError = class extends AISDKError {
-  constructor({
-    toolName,
-    availableTools = void 0,
-    message = `Model tried to call unavailable tool '${toolName}'. ${availableTools === void 0 ? "No tools are available." : `Available tools: ${availableTools.join(", ")}.`}`
-  }) {
-    super({ name: name9, message });
+    super({ name: name9, message, cause });
     this[_a9] = true;
-    this.toolName = toolName;
-    this.availableTools = availableTools;
   }
   static isInstance(error) {
     return AISDKError.hasMarker(error, marker9);
   }
 };
 _a9 = symbol9;
-var name10 = "AI_ToolCallRepairError";
+var name10 = "AI_NoSuchToolError";
 var marker10 = `vercel.ai.error.${name10}`;
 var symbol10 = Symbol.for(marker10);
 var _a10;
-var ToolCallRepairError = class extends AISDKError {
+var NoSuchToolError = class extends AISDKError {
   constructor({
-    cause,
-    originalError,
-    message = `Error repairing tool call: ${getErrorMessage$1(cause)}`
+    toolName,
+    availableTools = void 0,
+    message = `Model tried to call unavailable tool '${toolName}'. ${availableTools === void 0 ? "No tools are available." : `Available tools: ${availableTools.join(", ")}.`}`
   }) {
-    super({ name: name10, message, cause });
+    super({ name: name10, message });
     this[_a10] = true;
-    this.originalError = originalError;
+    this.toolName = toolName;
+    this.availableTools = availableTools;
   }
   static isInstance(error) {
     return AISDKError.hasMarker(error, marker10);
   }
 };
 _a10 = symbol10;
+var name11 = "AI_ToolCallRepairError";
+var marker11 = `vercel.ai.error.${name11}`;
+var symbol11 = Symbol.for(marker11);
+var _a11;
+var ToolCallRepairError = class extends AISDKError {
+  constructor({
+    cause,
+    originalError,
+    message = `Error repairing tool call: ${getErrorMessage$1(cause)}`
+  }) {
+    super({ name: name11, message, cause });
+    this[_a11] = true;
+    this.originalError = originalError;
+  }
+  static isInstance(error) {
+    return AISDKError.hasMarker(error, marker11);
+  }
+};
+_a11 = symbol11;
 var UnsupportedModelVersionError = class extends AISDKError {
   constructor(options) {
     super({
@@ -11313,45 +11486,65 @@ var UnsupportedModelVersionError = class extends AISDKError {
     this.modelId = options.modelId;
   }
 };
-var name12 = "AI_InvalidMessageRoleError";
+var name12 = "AI_UIMessageStreamError";
 var marker12 = `vercel.ai.error.${name12}`;
 var symbol12 = Symbol.for(marker12);
 var _a12;
-var InvalidMessageRoleError = class extends AISDKError {
+var UIMessageStreamError = class extends AISDKError {
   constructor({
-    role,
-    message = `Invalid message role: '${role}'. Must be one of: "system", "user", "assistant", "tool".`
+    chunkType,
+    chunkId,
+    message
   }) {
     super({ name: name12, message });
     this[_a12] = true;
-    this.role = role;
+    this.chunkType = chunkType;
+    this.chunkId = chunkId;
   }
   static isInstance(error) {
     return AISDKError.hasMarker(error, marker12);
   }
 };
 _a12 = symbol12;
-var name14 = "AI_RetryError";
+var name14 = "AI_InvalidMessageRoleError";
 var marker14 = `vercel.ai.error.${name14}`;
 var symbol14 = Symbol.for(marker14);
 var _a14;
-var RetryError = class extends AISDKError {
+var InvalidMessageRoleError = class extends AISDKError {
   constructor({
-    message,
-    reason,
-    errors
+    role,
+    message = `Invalid message role: '${role}'. Must be one of: "system", "user", "assistant", "tool".`
   }) {
     super({ name: name14, message });
     this[_a14] = true;
-    this.reason = reason;
-    this.errors = errors;
-    this.lastError = errors[errors.length - 1];
+    this.role = role;
   }
   static isInstance(error) {
     return AISDKError.hasMarker(error, marker14);
   }
 };
 _a14 = symbol14;
+var name16 = "AI_RetryError";
+var marker16 = `vercel.ai.error.${name16}`;
+var symbol16 = Symbol.for(marker16);
+var _a16;
+var RetryError = class extends AISDKError {
+  constructor({
+    message,
+    reason,
+    errors
+  }) {
+    super({ name: name16, message });
+    this[_a16] = true;
+    this.reason = reason;
+    this.errors = errors;
+    this.lastError = errors[errors.length - 1];
+  }
+  static isInstance(error) {
+    return AISDKError.hasMarker(error, marker16);
+  }
+};
+_a16 = symbol16;
 
 // src/logger/log-warnings.ts
 function formatWarning({
@@ -11525,8 +11718,31 @@ function resolveLanguageModel(model) {
   return getGlobalProvider().languageModel(model);
 }
 function getGlobalProvider() {
-  var _a16;
-  return (_a16 = globalThis.AI_SDK_DEFAULT_PROVIDER) != null ? _a16 : gateway;
+  var _a18;
+  return (_a18 = globalThis.AI_SDK_DEFAULT_PROVIDER) != null ? _a18 : gateway;
+}
+
+// src/prompt/call-settings.ts
+function getTotalTimeoutMs(timeout) {
+  if (timeout == null) {
+    return void 0;
+  }
+  if (typeof timeout === "number") {
+    return timeout;
+  }
+  return timeout.totalMs;
+}
+function getStepTimeoutMs(timeout) {
+  if (timeout == null || typeof timeout === "number") {
+    return void 0;
+  }
+  return timeout.stepMs;
+}
+function getChunkTimeoutMs(timeout) {
+  if (timeout == null || typeof timeout === "number") {
+    return void 0;
+  }
+  return timeout.chunkMs;
 }
 var imageMediaTypeSignatures = [
   {
@@ -11641,11 +11857,11 @@ function detectMediaType({
 }
 
 // src/version.ts
-var VERSION$7 = "6.0.6" ;
+var VERSION$7 = "6.0.49" ;
 
 // src/util/download/download.ts
 var download = async ({ url }) => {
-  var _a16;
+  var _a18;
   const urlText = url.toString();
   try {
     const response = await fetch(urlText, {
@@ -11664,7 +11880,7 @@ var download = async ({ url }) => {
     }
     return {
       data: new Uint8Array(await response.arrayBuffer()),
-      mediaType: (_a16 = response.headers.get("content-type")) != null ? _a16 : void 0
+      mediaType: (_a18 = response.headers.get("content-type")) != null ? _a18 : void 0
     };
   } catch (error) {
     if (DownloadError.isInstance(error)) {
@@ -11705,8 +11921,8 @@ var dataContentSchema = union([
   custom(
     // Buffer might not be available in some environments such as CloudFlare:
     (value) => {
-      var _a16, _b;
-      return (_b = (_a16 = globalThis.Buffer) == null ? void 0 : _a16.isBuffer(value)) != null ? _b : false;
+      var _a18, _b;
+      return (_b = (_a18 = globalThis.Buffer) == null ? void 0 : _a18.isBuffer(value)) != null ? _b : false;
     },
     { message: "Must be a Buffer" }
   )
@@ -11764,6 +11980,32 @@ async function convertToLanguageModelPrompt({
     download2,
     supportedUrls
   );
+  const approvalIdToToolCallId = /* @__PURE__ */ new Map();
+  for (const message of prompt.messages) {
+    if (message.role === "assistant" && Array.isArray(message.content)) {
+      for (const part of message.content) {
+        if (part.type === "tool-approval-request" && "approvalId" in part && "toolCallId" in part) {
+          approvalIdToToolCallId.set(
+            part.approvalId,
+            part.toolCallId
+          );
+        }
+      }
+    }
+  }
+  const approvedToolCallIds = /* @__PURE__ */ new Set();
+  for (const message of prompt.messages) {
+    if (message.role === "tool") {
+      for (const part of message.content) {
+        if (part.type === "tool-approval-response") {
+          const toolCallId = approvalIdToToolCallId.get(part.approvalId);
+          if (toolCallId) {
+            approvedToolCallIds.add(toolCallId);
+          }
+        }
+      }
+    }
+  }
   const messages = [
     ...prompt.system != null ? typeof prompt.system === "string" ? [{ role: "system", content: prompt.system }] : asArray(prompt.system).map((message) => ({
       role: "system",
@@ -11787,7 +12029,51 @@ async function convertToLanguageModelPrompt({
       combinedMessages.push(message);
     }
   }
-  return combinedMessages;
+  const toolCallIds = /* @__PURE__ */ new Set();
+  for (const message of combinedMessages) {
+    switch (message.role) {
+      case "assistant": {
+        for (const content of message.content) {
+          if (content.type === "tool-call" && !content.providerExecuted) {
+            toolCallIds.add(content.toolCallId);
+          }
+        }
+        break;
+      }
+      case "tool": {
+        for (const content of message.content) {
+          if (content.type === "tool-result") {
+            toolCallIds.delete(content.toolCallId);
+          }
+        }
+        break;
+      }
+      case "user":
+      case "system":
+        for (const id of approvedToolCallIds) {
+          toolCallIds.delete(id);
+        }
+        if (toolCallIds.size > 0) {
+          throw new MissingToolResultsError({
+            toolCallIds: Array.from(toolCallIds)
+          });
+        }
+        break;
+    }
+  }
+  for (const id of approvedToolCallIds) {
+    toolCallIds.delete(id);
+  }
+  if (toolCallIds.size > 0) {
+    throw new MissingToolResultsError({ toolCallIds: Array.from(toolCallIds) });
+  }
+  return combinedMessages.filter(
+    // Filter out empty tool messages (e.g. if they only contained
+    // tool-approval-response parts that were removed).
+    // This prevents sending invalid empty messages to the provider.
+    // Note: provider-executed tool-approval-response parts are preserved.
+    (message) => message.role !== "tool" || message.content.length > 0
+  );
 }
 function convertToLanguageModelMessage({
   message,
@@ -11926,8 +12212,8 @@ async function downloadAssets(messages, download2, supportedUrls) {
   ).flat().filter(
     (part) => part.type === "image" || part.type === "file"
   ).map((part) => {
-    var _a16;
-    const mediaType = (_a16 = part.mediaType) != null ? _a16 : part.type === "image" ? "image/*" : void 0;
+    var _a18;
+    const mediaType = (_a18 = part.mediaType) != null ? _a18 : part.type === "image" ? "image/*" : void 0;
     let data = part.type === "image" ? part.image : part.data;
     if (typeof data === "string") {
       try {
@@ -11957,7 +12243,7 @@ async function downloadAssets(messages, download2, supportedUrls) {
   );
 }
 function convertPartToLanguageModelPart(part, downloadedAssets) {
-  var _a16;
+  var _a18;
   if (part.type === "text") {
     return {
       type: "text",
@@ -11990,7 +12276,7 @@ function convertPartToLanguageModelPart(part, downloadedAssets) {
   switch (type) {
     case "image": {
       if (data instanceof Uint8Array || typeof data === "string") {
-        mediaType = (_a16 = detectMediaType({ data, signatures: imageMediaTypeSignatures })) != null ? _a16 : mediaType;
+        mediaType = (_a18 = detectMediaType({ data, signatures: imageMediaTypeSignatures })) != null ? _a18 : mediaType;
       }
       return {
         type: "file",
@@ -12172,10 +12458,10 @@ async function prepareToolsAndToolChoice({
     };
   }
   const filteredTools = activeTools != null ? Object.entries(tools).filter(
-    ([name16]) => activeTools.includes(name16)
+    ([name18]) => activeTools.includes(name18)
   ) : Object.entries(tools);
   const languageModelTools = [];
-  for (const [name16, tool2] of filteredTools) {
+  for (const [name18, tool2] of filteredTools) {
     const toolType = tool2.type;
     switch (toolType) {
       case void 0:
@@ -12183,7 +12469,7 @@ async function prepareToolsAndToolChoice({
       case "function":
         languageModelTools.push({
           type: "function",
-          name: name16,
+          name: name18,
           description: tool2.description,
           inputSchema: await asSchema(tool2.inputSchema).jsonSchema,
           ...tool2.inputExamples != null ? { inputExamples: tool2.inputExamples } : {},
@@ -12194,7 +12480,7 @@ async function prepareToolsAndToolChoice({
       case "provider":
         languageModelTools.push({
           type: "provider",
-          name: name16,
+          name: name18,
           id: tool2.id,
           args: tool2.args
         });
@@ -12509,17 +12795,26 @@ function getBaseTelemetryAttributes({
   telemetry,
   headers
 }) {
-  var _a16;
+  var _a18;
   return {
     "ai.model.provider": model.provider,
     "ai.model.id": model.modelId,
     // settings:
     ...Object.entries(settings).reduce((attributes, [key, value]) => {
-      attributes[`ai.settings.${key}`] = value;
+      if (key === "timeout") {
+        const totalTimeoutMs = getTotalTimeoutMs(
+          value
+        );
+        if (totalTimeoutMs != null) {
+          attributes[`ai.settings.${key}`] = totalTimeoutMs;
+        }
+      } else {
+        attributes[`ai.settings.${key}`] = value;
+      }
       return attributes;
     }, {}),
     // add metadata as attributes:
-    ...Object.entries((_a16 = telemetry == null ? void 0 : telemetry.metadata) != null ? _a16 : {}).reduce(
+    ...Object.entries((_a18 = telemetry == null ? void 0 : telemetry.metadata) != null ? _a18 : {}).reduce(
       (attributes, [key, value]) => {
         attributes[`ai.telemetry.metadata.${key}`] = value;
         return attributes;
@@ -12541,7 +12836,7 @@ var noopTracer = {
   startSpan() {
     return noopSpan;
   },
-  startActiveSpan(name16, arg1, arg2, arg3) {
+  startActiveSpan(name18, arg1, arg2, arg3) {
     if (typeof arg1 === "function") {
       return arg1(noopSpan);
     }
@@ -12608,18 +12903,19 @@ function getTracer({
   return trace.getTracer("ai");
 }
 async function recordSpan({
-  name: name16,
+  name: name18,
   tracer,
   attributes,
   fn,
   endWhenDone = true
 }) {
   return tracer.startActiveSpan(
-    name16,
+    name18,
     { attributes: await attributes },
     async (span) => {
+      const ctx = context.active();
       try {
-        const result = await fn(span);
+        const result = await context.with(ctx, () => fn(span));
         if (endWhenDone) {
           span.end();
         }
@@ -12745,12 +13041,12 @@ function createNullLanguageModelUsage() {
   };
 }
 function addLanguageModelUsage(usage1, usage2) {
-  var _a16, _b, _c, _d, _e, _f, _g, _h, _i, _j;
+  var _a18, _b, _c, _d, _e, _f, _g, _h, _i, _j;
   return {
     inputTokens: addTokenCounts(usage1.inputTokens, usage2.inputTokens),
     inputTokenDetails: {
       noCacheTokens: addTokenCounts(
-        (_a16 = usage1.inputTokenDetails) == null ? void 0 : _a16.noCacheTokens,
+        (_a18 = usage1.inputTokenDetails) == null ? void 0 : _a18.noCacheTokens,
         (_b = usage2.inputTokenDetails) == null ? void 0 : _b.noCacheTokens
       ),
       cacheReadTokens: addTokenCounts(
@@ -13523,37 +13819,42 @@ async function parsePartialJson(jsonText) {
 
 // src/generate-text/output.ts
 var text = () => ({
+  name: "text",
   responseFormat: Promise.resolve({ type: "text" }),
   async parseCompleteOutput({ text: text2 }) {
     return text2;
   },
   async parsePartialOutput({ text: text2 }) {
     return { partial: text2 };
+  },
+  createElementStreamTransform() {
+    return void 0;
   }
 });
 var object = ({
   schema: inputSchema,
-  name: name16,
+  name: name18,
   description
 }) => {
   const schema = asSchema(inputSchema);
   return {
+    name: "object",
     responseFormat: resolve(schema.jsonSchema).then((jsonSchema2) => ({
       type: "json",
       schema: jsonSchema2,
-      ...name16 != null && { name: name16 },
+      ...name18 != null && { name: name18 },
       ...description != null && { description }
     })),
-    async parseCompleteOutput({ text: text2 }, context) {
+    async parseCompleteOutput({ text: text2 }, context2) {
       const parseResult = await safeParseJSON({ text: text2 });
       if (!parseResult.success) {
         throw new NoObjectGeneratedError({
           message: "No object generated: could not parse the response.",
           cause: parseResult.error,
           text: text2,
-          response: context.response,
-          usage: context.usage,
-          finishReason: context.finishReason
+          response: context2.response,
+          usage: context2.usage,
+          finishReason: context2.finishReason
         });
       }
       const validationResult = await safeValidateTypes({
@@ -13565,9 +13866,9 @@ var object = ({
           message: "No object generated: response did not match schema.",
           cause: validationResult.error,
           text: text2,
-          response: context.response,
-          usage: context.usage,
-          finishReason: context.finishReason
+          response: context2.response,
+          usage: context2.usage,
+          finishReason: context2.finishReason
         });
       }
       return validationResult.value;
@@ -13587,16 +13888,20 @@ var object = ({
           };
         }
       }
+    },
+    createElementStreamTransform() {
+      return void 0;
     }
   };
 };
 var array = ({
   element: inputElementSchema,
-  name: name16,
+  name: name18,
   description
 }) => {
   const elementSchema = asSchema(inputElementSchema);
   return {
+    name: "array",
     // JSON schema that describes an array of elements:
     responseFormat: resolve(elementSchema.jsonSchema).then((jsonSchema2) => {
       const { $schema, ...itemSchema } = jsonSchema2;
@@ -13611,20 +13916,20 @@ var array = ({
           required: ["elements"],
           additionalProperties: false
         },
-        ...name16 != null && { name: name16 },
+        ...name18 != null && { name: name18 },
         ...description != null && { description }
       };
     }),
-    async parseCompleteOutput({ text: text2 }, context) {
+    async parseCompleteOutput({ text: text2 }, context2) {
       const parseResult = await safeParseJSON({ text: text2 });
       if (!parseResult.success) {
         throw new NoObjectGeneratedError({
           message: "No object generated: could not parse the response.",
           cause: parseResult.error,
           text: text2,
-          response: context.response,
-          usage: context.usage,
-          finishReason: context.finishReason
+          response: context2.response,
+          usage: context2.usage,
+          finishReason: context2.finishReason
         });
       }
       const outerValue = parseResult.value;
@@ -13636,9 +13941,9 @@ var array = ({
             cause: "response must be an object with an elements array"
           }),
           text: text2,
-          response: context.response,
-          usage: context.usage,
-          finishReason: context.finishReason
+          response: context2.response,
+          usage: context2.usage,
+          finishReason: context2.finishReason
         });
       }
       for (const element of outerValue.elements) {
@@ -13651,9 +13956,9 @@ var array = ({
             message: "No object generated: response did not match schema.",
             cause: validationResult.error,
             text: text2,
-            response: context.response,
-            usage: context.usage,
-            finishReason: context.finishReason
+            response: context2.response,
+            usage: context2.usage,
+            finishReason: context2.finishReason
           });
         }
       }
@@ -13686,15 +13991,28 @@ var array = ({
           return { partial: parsedElements };
         }
       }
+    },
+    createElementStreamTransform() {
+      let publishedElements = 0;
+      return new TransformStream({
+        transform({ partialOutput }, controller) {
+          if (partialOutput != null) {
+            for (; publishedElements < partialOutput.length; publishedElements++) {
+              controller.enqueue(partialOutput[publishedElements]);
+            }
+          }
+        }
+      });
     }
   };
 };
 var choice = ({
   options: choiceOptions,
-  name: name16,
+  name: name18,
   description
 }) => {
   return {
+    name: "choice",
     // JSON schema that describes an enumeration:
     responseFormat: Promise.resolve({
       type: "json",
@@ -13707,19 +14025,19 @@ var choice = ({
         required: ["result"],
         additionalProperties: false
       },
-      ...name16 != null && { name: name16 },
+      ...name18 != null && { name: name18 },
       ...description != null && { description }
     }),
-    async parseCompleteOutput({ text: text2 }, context) {
+    async parseCompleteOutput({ text: text2 }, context2) {
       const parseResult = await safeParseJSON({ text: text2 });
       if (!parseResult.success) {
         throw new NoObjectGeneratedError({
           message: "No object generated: could not parse the response.",
           cause: parseResult.error,
           text: text2,
-          response: context.response,
-          usage: context.usage,
-          finishReason: context.finishReason
+          response: context2.response,
+          usage: context2.usage,
+          finishReason: context2.finishReason
         });
       }
       const outerValue = parseResult.value;
@@ -13731,9 +14049,9 @@ var choice = ({
             cause: "response must be an object that contains a choice value."
           }),
           text: text2,
-          response: context.response,
-          usage: context.usage,
-          finishReason: context.finishReason
+          response: context2.response,
+          usage: context2.usage,
+          finishReason: context2.finishReason
         });
       }
       return outerValue.result;
@@ -13761,29 +14079,33 @@ var choice = ({
           }
         }
       }
+    },
+    createElementStreamTransform() {
+      return void 0;
     }
   };
 };
 var json = ({
-  name: name16,
+  name: name18,
   description
 } = {}) => {
   return {
+    name: "json",
     responseFormat: Promise.resolve({
       type: "json",
-      ...name16 != null && { name: name16 },
+      ...name18 != null && { name: name18 },
       ...description != null && { description }
     }),
-    async parseCompleteOutput({ text: text2 }, context) {
+    async parseCompleteOutput({ text: text2 }, context2) {
       const parseResult = await safeParseJSON({ text: text2 });
       if (!parseResult.success) {
         throw new NoObjectGeneratedError({
           message: "No object generated: could not parse the response.",
           cause: parseResult.error,
           text: text2,
-          response: context.response,
-          usage: context.usage,
-          finishReason: context.finishReason
+          response: context2.response,
+          usage: context2.usage,
+          finishReason: context2.finishReason
         });
       }
       return parseResult.value;
@@ -13800,6 +14122,9 @@ var json = ({
           return result.value === void 0 ? void 0 : { partial: result.value };
         }
       }
+    },
+    createElementStreamTransform() {
+      return void 0;
     }
   };
 };
@@ -13810,7 +14135,7 @@ async function parseToolCall({
   system,
   messages
 }) {
-  var _a16;
+  var _a18;
   try {
     if (tools == null) {
       if (toolCall.providerExecuted && toolCall.dynamic) {
@@ -13859,7 +14184,7 @@ async function parseToolCall({
       dynamic: true,
       invalid: true,
       error,
-      title: (_a16 = tools == null ? void 0 : tools[toolCall.toolName]) == null ? void 0 : _a16.title,
+      title: (_a18 = tools == null ? void 0 : tools[toolCall.toolName]) == null ? void 0 : _a18.title,
       providerExecuted: toolCall.providerExecuted,
       providerMetadata: toolCall.providerMetadata
     };
@@ -14131,6 +14456,34 @@ async function toResponseMessages({
   return responseMessages;
 }
 
+// src/util/merge-abort-signals.ts
+function mergeAbortSignals(...signals) {
+  const validSignals = signals.filter(
+    (signal) => signal != null
+  );
+  if (validSignals.length === 0) {
+    return void 0;
+  }
+  if (validSignals.length === 1) {
+    return validSignals[0];
+  }
+  const controller = new AbortController();
+  for (const signal of validSignals) {
+    if (signal.aborted) {
+      controller.abort(signal.reason);
+      return controller.signal;
+    }
+    signal.addEventListener(
+      "abort",
+      () => {
+        controller.abort(signal.reason);
+      },
+      { once: true }
+    );
+  }
+  return controller.signal;
+}
+
 // src/generate-text/generate-text.ts
 var originalGenerateId = createIdGenerator({
   prefix: "aitxt",
@@ -14145,6 +14498,7 @@ async function generateText({
   messages,
   maxRetries: maxRetriesArg,
   abortSignal,
+  timeout,
   headers,
   stopWhen = stepCountIs(1),
   experimental_output,
@@ -14158,19 +14512,24 @@ async function generateText({
   experimental_repairToolCall: repairToolCall,
   experimental_download: download2,
   experimental_context,
-  _internal: {
-    generateId: generateId2 = originalGenerateId,
-    currentDate = () => /* @__PURE__ */ new Date()
-  } = {},
+  _internal: { generateId: generateId2 = originalGenerateId } = {},
   onStepFinish,
   onFinish,
   ...settings
 }) {
   const model = resolveLanguageModel(modelArg);
   const stopConditions = asArray(stopWhen);
+  const totalTimeoutMs = getTotalTimeoutMs(timeout);
+  const stepTimeoutMs = getStepTimeoutMs(timeout);
+  const stepAbortController = stepTimeoutMs != null ? new AbortController() : void 0;
+  const mergedAbortSignal = mergeAbortSignals(
+    abortSignal,
+    totalTimeoutMs != null ? AbortSignal.timeout(totalTimeoutMs) : void 0,
+    stepAbortController == null ? void 0 : stepAbortController.signal
+  );
   const { maxRetries, retry } = prepareRetries({
     maxRetries: maxRetriesArg,
-    abortSignal
+    abortSignal: mergedAbortSignal
   });
   const callSettings = prepareCallSettings(settings);
   const headersWithUserAgent = withUserAgentSuffix(
@@ -14211,7 +14570,7 @@ async function generateText({
       }),
       tracer,
       fn: async (span) => {
-        var _a16, _b, _c, _d, _e, _f, _g, _h;
+        var _a18, _b, _c, _d, _e, _f, _g, _h;
         const initialMessages = initialPrompt.messages;
         const responseMessages = [];
         const { approvedToolApprovals, deniedToolApprovals } = collectToolApprovals({ messages: initialMessages });
@@ -14227,7 +14586,7 @@ async function generateText({
             tracer,
             telemetry,
             messages: initialMessages,
-            abortSignal,
+            abortSignal: mergedAbortSignal,
             experimental_context
           });
           const toolContent = [];
@@ -14295,263 +14654,270 @@ async function generateText({
         const steps = [];
         const pendingDeferredToolCalls = /* @__PURE__ */ new Map();
         do {
-          const stepInputMessages = [...initialMessages, ...responseMessages];
-          const prepareStepResult = await (prepareStep == null ? void 0 : prepareStep({
-            model,
-            steps,
-            stepNumber: steps.length,
-            messages: stepInputMessages,
-            experimental_context
-          }));
-          const stepModel = resolveLanguageModel(
-            (_a16 = prepareStepResult == null ? void 0 : prepareStepResult.model) != null ? _a16 : model
-          );
-          const promptMessages = await convertToLanguageModelPrompt({
-            prompt: {
-              system: (_b = prepareStepResult == null ? void 0 : prepareStepResult.system) != null ? _b : initialPrompt.system,
-              messages: (_c = prepareStepResult == null ? void 0 : prepareStepResult.messages) != null ? _c : stepInputMessages
-            },
-            supportedUrls: await stepModel.supportedUrls,
-            download: download2
-          });
-          experimental_context = (_d = prepareStepResult == null ? void 0 : prepareStepResult.experimental_context) != null ? _d : experimental_context;
-          const { toolChoice: stepToolChoice, tools: stepTools } = await prepareToolsAndToolChoice({
-            tools,
-            toolChoice: (_e = prepareStepResult == null ? void 0 : prepareStepResult.toolChoice) != null ? _e : toolChoice,
-            activeTools: (_f = prepareStepResult == null ? void 0 : prepareStepResult.activeTools) != null ? _f : activeTools
-          });
-          currentModelResponse = await retry(
-            () => {
-              var _a17;
-              return recordSpan({
-                name: "ai.generateText.doGenerate",
-                attributes: selectTelemetryAttributes({
-                  telemetry,
-                  attributes: {
-                    ...assembleOperationName({
-                      operationId: "ai.generateText.doGenerate",
-                      telemetry
-                    }),
-                    ...baseTelemetryAttributes,
-                    // model:
-                    "ai.model.provider": stepModel.provider,
-                    "ai.model.id": stepModel.modelId,
-                    // prompt:
-                    "ai.prompt.messages": {
-                      input: () => stringifyForTelemetry(promptMessages)
-                    },
-                    "ai.prompt.tools": {
-                      // convert the language model level tools:
-                      input: () => stepTools == null ? void 0 : stepTools.map((tool2) => JSON.stringify(tool2))
-                    },
-                    "ai.prompt.toolChoice": {
-                      input: () => stepToolChoice != null ? JSON.stringify(stepToolChoice) : void 0
-                    },
-                    // standardized gen-ai llm span attributes:
-                    "gen_ai.system": stepModel.provider,
-                    "gen_ai.request.model": stepModel.modelId,
-                    "gen_ai.request.frequency_penalty": settings.frequencyPenalty,
-                    "gen_ai.request.max_tokens": settings.maxOutputTokens,
-                    "gen_ai.request.presence_penalty": settings.presencePenalty,
-                    "gen_ai.request.stop_sequences": settings.stopSequences,
-                    "gen_ai.request.temperature": (_a17 = settings.temperature) != null ? _a17 : void 0,
-                    "gen_ai.request.top_k": settings.topK,
-                    "gen_ai.request.top_p": settings.topP
-                  }
-                }),
-                tracer,
-                fn: async (span2) => {
-                  var _a18, _b2, _c2, _d2, _e2, _f2, _g2, _h2;
-                  const stepProviderOptions = mergeObjects(
-                    providerOptions,
-                    prepareStepResult == null ? void 0 : prepareStepResult.providerOptions
-                  );
-                  const result = await stepModel.doGenerate({
-                    ...callSettings2,
-                    tools: stepTools,
-                    toolChoice: stepToolChoice,
-                    responseFormat: await (output == null ? void 0 : output.responseFormat),
-                    prompt: promptMessages,
-                    providerOptions: stepProviderOptions,
-                    abortSignal,
-                    headers: headersWithUserAgent
-                  });
-                  const responseData = {
-                    id: (_b2 = (_a18 = result.response) == null ? void 0 : _a18.id) != null ? _b2 : generateId2(),
-                    timestamp: (_d2 = (_c2 = result.response) == null ? void 0 : _c2.timestamp) != null ? _d2 : currentDate(),
-                    modelId: (_f2 = (_e2 = result.response) == null ? void 0 : _e2.modelId) != null ? _f2 : stepModel.modelId,
-                    headers: (_g2 = result.response) == null ? void 0 : _g2.headers,
-                    body: (_h2 = result.response) == null ? void 0 : _h2.body
-                  };
-                  span2.setAttributes(
-                    await selectTelemetryAttributes({
-                      telemetry,
-                      attributes: {
-                        "ai.response.finishReason": result.finishReason.unified,
-                        "ai.response.text": {
-                          output: () => extractTextContent$1(result.content)
-                        },
-                        "ai.response.toolCalls": {
-                          output: () => {
-                            const toolCalls = asToolCalls(result.content);
-                            return toolCalls == null ? void 0 : JSON.stringify(toolCalls);
-                          }
-                        },
-                        "ai.response.id": responseData.id,
-                        "ai.response.model": responseData.modelId,
-                        "ai.response.timestamp": responseData.timestamp.toISOString(),
-                        "ai.response.providerMetadata": JSON.stringify(
-                          result.providerMetadata
-                        ),
-                        // TODO rename telemetry attributes to inputTokens and outputTokens
-                        "ai.usage.promptTokens": result.usage.inputTokens.total,
-                        "ai.usage.completionTokens": result.usage.outputTokens.total,
-                        // standardized gen-ai llm span attributes:
-                        "gen_ai.response.finish_reasons": [
-                          result.finishReason.unified
-                        ],
-                        "gen_ai.response.id": responseData.id,
-                        "gen_ai.response.model": responseData.modelId,
-                        "gen_ai.usage.input_tokens": result.usage.inputTokens.total,
-                        "gen_ai.usage.output_tokens": result.usage.outputTokens.total
-                      }
-                    })
-                  );
-                  return { ...result, response: responseData };
-                }
-              });
-            }
-          );
-          const stepToolCalls = await Promise.all(
-            currentModelResponse.content.filter(
-              (part) => part.type === "tool-call"
-            ).map(
-              (toolCall) => parseToolCall({
-                toolCall,
-                tools,
-                repairToolCall,
-                system,
-                messages: stepInputMessages
-              })
-            )
-          );
-          const toolApprovalRequests = {};
-          for (const toolCall of stepToolCalls) {
-            if (toolCall.invalid) {
-              continue;
-            }
-            const tool2 = tools == null ? void 0 : tools[toolCall.toolName];
-            if (tool2 == null) {
-              continue;
-            }
-            if ((tool2 == null ? void 0 : tool2.onInputAvailable) != null) {
-              await tool2.onInputAvailable({
-                input: toolCall.input,
-                toolCallId: toolCall.toolCallId,
-                messages: stepInputMessages,
-                abortSignal,
-                experimental_context
-              });
-            }
-            if (await isApprovalNeeded({
-              tool: tool2,
-              toolCall,
+          const stepTimeoutId = stepTimeoutMs != null ? setTimeout(() => stepAbortController.abort(), stepTimeoutMs) : void 0;
+          try {
+            const stepInputMessages = [...initialMessages, ...responseMessages];
+            const prepareStepResult = await (prepareStep == null ? void 0 : prepareStep({
+              model,
+              steps,
+              stepNumber: steps.length,
               messages: stepInputMessages,
               experimental_context
-            })) {
-              toolApprovalRequests[toolCall.toolCallId] = {
-                type: "tool-approval-request",
-                approvalId: generateId2(),
-                toolCall
-              };
-            }
-          }
-          const invalidToolCalls = stepToolCalls.filter(
-            (toolCall) => toolCall.invalid && toolCall.dynamic
-          );
-          clientToolOutputs = [];
-          for (const toolCall of invalidToolCalls) {
-            clientToolOutputs.push({
-              type: "tool-error",
-              toolCallId: toolCall.toolCallId,
-              toolName: toolCall.toolName,
-              input: toolCall.input,
-              error: getErrorMessage(toolCall.error),
-              dynamic: true
-            });
-          }
-          clientToolCalls = stepToolCalls.filter(
-            (toolCall) => !toolCall.providerExecuted
-          );
-          if (tools != null) {
-            clientToolOutputs.push(
-              ...await executeTools({
-                toolCalls: clientToolCalls.filter(
-                  (toolCall) => !toolCall.invalid && toolApprovalRequests[toolCall.toolCallId] == null
-                ),
-                tools,
-                tracer,
-                telemetry,
-                messages: stepInputMessages,
-                abortSignal,
-                experimental_context
-              })
+            }));
+            const stepModel = resolveLanguageModel(
+              (_a18 = prepareStepResult == null ? void 0 : prepareStepResult.model) != null ? _a18 : model
             );
-          }
-          for (const toolCall of stepToolCalls) {
-            if (!toolCall.providerExecuted)
-              continue;
-            const tool2 = tools == null ? void 0 : tools[toolCall.toolName];
-            if ((tool2 == null ? void 0 : tool2.type) === "provider" && tool2.supportsDeferredResults) {
-              const hasResultInResponse = currentModelResponse.content.some(
-                (part) => part.type === "tool-result" && part.toolCallId === toolCall.toolCallId
-              );
-              if (!hasResultInResponse) {
-                pendingDeferredToolCalls.set(toolCall.toolCallId, {
-                  toolName: toolCall.toolName
+            const promptMessages = await convertToLanguageModelPrompt({
+              prompt: {
+                system: (_b = prepareStepResult == null ? void 0 : prepareStepResult.system) != null ? _b : initialPrompt.system,
+                messages: (_c = prepareStepResult == null ? void 0 : prepareStepResult.messages) != null ? _c : stepInputMessages
+              },
+              supportedUrls: await stepModel.supportedUrls,
+              download: download2
+            });
+            experimental_context = (_d = prepareStepResult == null ? void 0 : prepareStepResult.experimental_context) != null ? _d : experimental_context;
+            const { toolChoice: stepToolChoice, tools: stepTools } = await prepareToolsAndToolChoice({
+              tools,
+              toolChoice: (_e = prepareStepResult == null ? void 0 : prepareStepResult.toolChoice) != null ? _e : toolChoice,
+              activeTools: (_f = prepareStepResult == null ? void 0 : prepareStepResult.activeTools) != null ? _f : activeTools
+            });
+            currentModelResponse = await retry(
+              () => {
+                var _a19;
+                return recordSpan({
+                  name: "ai.generateText.doGenerate",
+                  attributes: selectTelemetryAttributes({
+                    telemetry,
+                    attributes: {
+                      ...assembleOperationName({
+                        operationId: "ai.generateText.doGenerate",
+                        telemetry
+                      }),
+                      ...baseTelemetryAttributes,
+                      // model:
+                      "ai.model.provider": stepModel.provider,
+                      "ai.model.id": stepModel.modelId,
+                      // prompt:
+                      "ai.prompt.messages": {
+                        input: () => stringifyForTelemetry(promptMessages)
+                      },
+                      "ai.prompt.tools": {
+                        // convert the language model level tools:
+                        input: () => stepTools == null ? void 0 : stepTools.map((tool2) => JSON.stringify(tool2))
+                      },
+                      "ai.prompt.toolChoice": {
+                        input: () => stepToolChoice != null ? JSON.stringify(stepToolChoice) : void 0
+                      },
+                      // standardized gen-ai llm span attributes:
+                      "gen_ai.system": stepModel.provider,
+                      "gen_ai.request.model": stepModel.modelId,
+                      "gen_ai.request.frequency_penalty": settings.frequencyPenalty,
+                      "gen_ai.request.max_tokens": settings.maxOutputTokens,
+                      "gen_ai.request.presence_penalty": settings.presencePenalty,
+                      "gen_ai.request.stop_sequences": settings.stopSequences,
+                      "gen_ai.request.temperature": (_a19 = settings.temperature) != null ? _a19 : void 0,
+                      "gen_ai.request.top_k": settings.topK,
+                      "gen_ai.request.top_p": settings.topP
+                    }
+                  }),
+                  tracer,
+                  fn: async (span2) => {
+                    var _a20, _b2, _c2, _d2, _e2, _f2, _g2, _h2;
+                    const stepProviderOptions = mergeObjects(
+                      providerOptions,
+                      prepareStepResult == null ? void 0 : prepareStepResult.providerOptions
+                    );
+                    const result = await stepModel.doGenerate({
+                      ...callSettings2,
+                      tools: stepTools,
+                      toolChoice: stepToolChoice,
+                      responseFormat: await (output == null ? void 0 : output.responseFormat),
+                      prompt: promptMessages,
+                      providerOptions: stepProviderOptions,
+                      abortSignal: mergedAbortSignal,
+                      headers: headersWithUserAgent
+                    });
+                    const responseData = {
+                      id: (_b2 = (_a20 = result.response) == null ? void 0 : _a20.id) != null ? _b2 : generateId2(),
+                      timestamp: (_d2 = (_c2 = result.response) == null ? void 0 : _c2.timestamp) != null ? _d2 : /* @__PURE__ */ new Date(),
+                      modelId: (_f2 = (_e2 = result.response) == null ? void 0 : _e2.modelId) != null ? _f2 : stepModel.modelId,
+                      headers: (_g2 = result.response) == null ? void 0 : _g2.headers,
+                      body: (_h2 = result.response) == null ? void 0 : _h2.body
+                    };
+                    span2.setAttributes(
+                      await selectTelemetryAttributes({
+                        telemetry,
+                        attributes: {
+                          "ai.response.finishReason": result.finishReason.unified,
+                          "ai.response.text": {
+                            output: () => extractTextContent$1(result.content)
+                          },
+                          "ai.response.toolCalls": {
+                            output: () => {
+                              const toolCalls = asToolCalls(result.content);
+                              return toolCalls == null ? void 0 : JSON.stringify(toolCalls);
+                            }
+                          },
+                          "ai.response.id": responseData.id,
+                          "ai.response.model": responseData.modelId,
+                          "ai.response.timestamp": responseData.timestamp.toISOString(),
+                          "ai.response.providerMetadata": JSON.stringify(
+                            result.providerMetadata
+                          ),
+                          // TODO rename telemetry attributes to inputTokens and outputTokens
+                          "ai.usage.promptTokens": result.usage.inputTokens.total,
+                          "ai.usage.completionTokens": result.usage.outputTokens.total,
+                          // standardized gen-ai llm span attributes:
+                          "gen_ai.response.finish_reasons": [
+                            result.finishReason.unified
+                          ],
+                          "gen_ai.response.id": responseData.id,
+                          "gen_ai.response.model": responseData.modelId,
+                          "gen_ai.usage.input_tokens": result.usage.inputTokens.total,
+                          "gen_ai.usage.output_tokens": result.usage.outputTokens.total
+                        }
+                      })
+                    );
+                    return { ...result, response: responseData };
+                  }
                 });
               }
+            );
+            const stepToolCalls = await Promise.all(
+              currentModelResponse.content.filter(
+                (part) => part.type === "tool-call"
+              ).map(
+                (toolCall) => parseToolCall({
+                  toolCall,
+                  tools,
+                  repairToolCall,
+                  system,
+                  messages: stepInputMessages
+                })
+              )
+            );
+            const toolApprovalRequests = {};
+            for (const toolCall of stepToolCalls) {
+              if (toolCall.invalid) {
+                continue;
+              }
+              const tool2 = tools == null ? void 0 : tools[toolCall.toolName];
+              if (tool2 == null) {
+                continue;
+              }
+              if ((tool2 == null ? void 0 : tool2.onInputAvailable) != null) {
+                await tool2.onInputAvailable({
+                  input: toolCall.input,
+                  toolCallId: toolCall.toolCallId,
+                  messages: stepInputMessages,
+                  abortSignal: mergedAbortSignal,
+                  experimental_context
+                });
+              }
+              if (await isApprovalNeeded({
+                tool: tool2,
+                toolCall,
+                messages: stepInputMessages,
+                experimental_context
+              })) {
+                toolApprovalRequests[toolCall.toolCallId] = {
+                  type: "tool-approval-request",
+                  approvalId: generateId2(),
+                  toolCall
+                };
+              }
             }
-          }
-          for (const part of currentModelResponse.content) {
-            if (part.type === "tool-result") {
-              pendingDeferredToolCalls.delete(part.toolCallId);
+            const invalidToolCalls = stepToolCalls.filter(
+              (toolCall) => toolCall.invalid && toolCall.dynamic
+            );
+            clientToolOutputs = [];
+            for (const toolCall of invalidToolCalls) {
+              clientToolOutputs.push({
+                type: "tool-error",
+                toolCallId: toolCall.toolCallId,
+                toolName: toolCall.toolName,
+                input: toolCall.input,
+                error: getErrorMessage(toolCall.error),
+                dynamic: true
+              });
             }
-          }
-          const stepContent = asContent({
-            content: currentModelResponse.content,
-            toolCalls: stepToolCalls,
-            toolOutputs: clientToolOutputs,
-            toolApprovalRequests: Object.values(toolApprovalRequests),
-            tools
-          });
-          responseMessages.push(
-            ...await toResponseMessages({
-              content: stepContent,
+            clientToolCalls = stepToolCalls.filter(
+              (toolCall) => !toolCall.providerExecuted
+            );
+            if (tools != null) {
+              clientToolOutputs.push(
+                ...await executeTools({
+                  toolCalls: clientToolCalls.filter(
+                    (toolCall) => !toolCall.invalid && toolApprovalRequests[toolCall.toolCallId] == null
+                  ),
+                  tools,
+                  tracer,
+                  telemetry,
+                  messages: stepInputMessages,
+                  abortSignal: mergedAbortSignal,
+                  experimental_context
+                })
+              );
+            }
+            for (const toolCall of stepToolCalls) {
+              if (!toolCall.providerExecuted)
+                continue;
+              const tool2 = tools == null ? void 0 : tools[toolCall.toolName];
+              if ((tool2 == null ? void 0 : tool2.type) === "provider" && tool2.supportsDeferredResults) {
+                const hasResultInResponse = currentModelResponse.content.some(
+                  (part) => part.type === "tool-result" && part.toolCallId === toolCall.toolCallId
+                );
+                if (!hasResultInResponse) {
+                  pendingDeferredToolCalls.set(toolCall.toolCallId, {
+                    toolName: toolCall.toolName
+                  });
+                }
+              }
+            }
+            for (const part of currentModelResponse.content) {
+              if (part.type === "tool-result") {
+                pendingDeferredToolCalls.delete(part.toolCallId);
+              }
+            }
+            const stepContent = asContent({
+              content: currentModelResponse.content,
+              toolCalls: stepToolCalls,
+              toolOutputs: clientToolOutputs,
+              toolApprovalRequests: Object.values(toolApprovalRequests),
               tools
-            })
-          );
-          const currentStepResult = new DefaultStepResult({
-            content: stepContent,
-            finishReason: currentModelResponse.finishReason.unified,
-            rawFinishReason: currentModelResponse.finishReason.raw,
-            usage: asLanguageModelUsage(currentModelResponse.usage),
-            warnings: currentModelResponse.warnings,
-            providerMetadata: currentModelResponse.providerMetadata,
-            request: (_g = currentModelResponse.request) != null ? _g : {},
-            response: {
-              ...currentModelResponse.response,
-              // deep clone msgs to avoid mutating past messages in multi-step:
-              messages: structuredClone(responseMessages)
+            });
+            responseMessages.push(
+              ...await toResponseMessages({
+                content: stepContent,
+                tools
+              })
+            );
+            const currentStepResult = new DefaultStepResult({
+              content: stepContent,
+              finishReason: currentModelResponse.finishReason.unified,
+              rawFinishReason: currentModelResponse.finishReason.raw,
+              usage: asLanguageModelUsage(currentModelResponse.usage),
+              warnings: currentModelResponse.warnings,
+              providerMetadata: currentModelResponse.providerMetadata,
+              request: (_g = currentModelResponse.request) != null ? _g : {},
+              response: {
+                ...currentModelResponse.response,
+                // deep clone msgs to avoid mutating past messages in multi-step:
+                messages: structuredClone(responseMessages)
+              }
+            });
+            logWarnings({
+              warnings: (_h = currentModelResponse.warnings) != null ? _h : [],
+              provider: stepModel.provider,
+              model: stepModel.modelId
+            });
+            steps.push(currentStepResult);
+            await (onStepFinish == null ? void 0 : onStepFinish(currentStepResult));
+          } finally {
+            if (stepTimeoutId != null) {
+              clearTimeout(stepTimeoutId);
             }
-          });
-          logWarnings({
-            warnings: (_h = currentModelResponse.warnings) != null ? _h : [],
-            provider: stepModel.provider,
-            model: stepModel.modelId
-          });
-          steps.push(currentStepResult);
-          await (onStepFinish == null ? void 0 : onStepFinish(currentStepResult));
+          }
         } while (
           // Continue if:
           // 1. There are client tool calls that have all been executed, OR
@@ -15053,21 +15419,23 @@ function processUIMessageStream({
     new TransformStream({
       async transform(chunk, controller) {
         await runUpdateMessageJob(async ({ state, write }) => {
-          var _a16, _b, _c, _d;
+          var _a18, _b, _c, _d;
           function getToolInvocation(toolCallId) {
             const toolInvocations = state.message.parts.filter(isToolUIPart);
             const toolInvocation = toolInvocations.find(
               (invocation) => invocation.toolCallId === toolCallId
             );
             if (toolInvocation == null) {
-              throw new Error(
-                `no tool invocation found for tool call ${toolCallId}`
-              );
+              throw new UIMessageStreamError({
+                chunkType: "tool-invocation",
+                chunkId: toolCallId,
+                message: `No tool invocation found for tool call ID "${toolCallId}".`
+              });
             }
             return toolInvocation;
           }
           function updateToolPart(options) {
-            var _a17;
+            var _a19;
             const part = state.message.parts.find(
               (part2) => isStaticToolUIPart(part2) && part2.toolCallId === options.toolCallId
             );
@@ -15083,8 +15451,8 @@ function processUIMessageStream({
               if (options.title !== void 0) {
                 anyPart.title = options.title;
               }
-              anyPart.providerExecuted = (_a17 = anyOptions.providerExecuted) != null ? _a17 : part.providerExecuted;
-              if (anyOptions.providerMetadata != null && part.state === "input-available") {
+              anyPart.providerExecuted = (_a19 = anyOptions.providerExecuted) != null ? _a19 : part.providerExecuted;
+              if (anyOptions.providerMetadata != null) {
                 part.callProviderMetadata = anyOptions.providerMetadata;
               }
             } else {
@@ -15104,7 +15472,7 @@ function processUIMessageStream({
             }
           }
           function updateDynamicToolPart(options) {
-            var _a17, _b2;
+            var _a19, _b2;
             const part = state.message.parts.find(
               (part2) => part2.type === "dynamic-tool" && part2.toolCallId === options.toolCallId
             );
@@ -15116,13 +15484,13 @@ function processUIMessageStream({
               anyPart.input = anyOptions.input;
               anyPart.output = anyOptions.output;
               anyPart.errorText = anyOptions.errorText;
-              anyPart.rawInput = (_a17 = anyOptions.rawInput) != null ? _a17 : anyPart.rawInput;
+              anyPart.rawInput = (_a19 = anyOptions.rawInput) != null ? _a19 : anyPart.rawInput;
               anyPart.preliminary = anyOptions.preliminary;
               if (options.title !== void 0) {
                 anyPart.title = options.title;
               }
               anyPart.providerExecuted = (_b2 = anyOptions.providerExecuted) != null ? _b2 : part.providerExecuted;
-              if (anyOptions.providerMetadata != null && part.state === "input-available") {
+              if (anyOptions.providerMetadata != null) {
                 part.callProviderMetadata = anyOptions.providerMetadata;
               }
             } else {
@@ -15168,13 +15536,27 @@ function processUIMessageStream({
             }
             case "text-delta": {
               const textPart = state.activeTextParts[chunk.id];
+              if (textPart == null) {
+                throw new UIMessageStreamError({
+                  chunkType: "text-delta",
+                  chunkId: chunk.id,
+                  message: `Received text-delta for missing text part with ID "${chunk.id}". Ensure a "text-start" chunk is sent before any "text-delta" chunks.`
+                });
+              }
               textPart.text += chunk.delta;
-              textPart.providerMetadata = (_a16 = chunk.providerMetadata) != null ? _a16 : textPart.providerMetadata;
+              textPart.providerMetadata = (_a18 = chunk.providerMetadata) != null ? _a18 : textPart.providerMetadata;
               write();
               break;
             }
             case "text-end": {
               const textPart = state.activeTextParts[chunk.id];
+              if (textPart == null) {
+                throw new UIMessageStreamError({
+                  chunkType: "text-end",
+                  chunkId: chunk.id,
+                  message: `Received text-end for missing text part with ID "${chunk.id}". Ensure a "text-start" chunk is sent before any "text-end" chunks.`
+                });
+              }
               textPart.state = "done";
               textPart.providerMetadata = (_b = chunk.providerMetadata) != null ? _b : textPart.providerMetadata;
               delete state.activeTextParts[chunk.id];
@@ -15195,6 +15577,13 @@ function processUIMessageStream({
             }
             case "reasoning-delta": {
               const reasoningPart = state.activeReasoningParts[chunk.id];
+              if (reasoningPart == null) {
+                throw new UIMessageStreamError({
+                  chunkType: "reasoning-delta",
+                  chunkId: chunk.id,
+                  message: `Received reasoning-delta for missing reasoning part with ID "${chunk.id}". Ensure a "reasoning-start" chunk is sent before any "reasoning-delta" chunks.`
+                });
+              }
               reasoningPart.text += chunk.delta;
               reasoningPart.providerMetadata = (_c = chunk.providerMetadata) != null ? _c : reasoningPart.providerMetadata;
               write();
@@ -15202,6 +15591,13 @@ function processUIMessageStream({
             }
             case "reasoning-end": {
               const reasoningPart = state.activeReasoningParts[chunk.id];
+              if (reasoningPart == null) {
+                throw new UIMessageStreamError({
+                  chunkType: "reasoning-end",
+                  chunkId: chunk.id,
+                  message: `Received reasoning-end for missing reasoning part with ID "${chunk.id}". Ensure a "reasoning-start" chunk is sent before any "reasoning-end" chunks.`
+                });
+              }
               reasoningPart.providerMetadata = (_d = chunk.providerMetadata) != null ? _d : reasoningPart.providerMetadata;
               reasoningPart.state = "done";
               delete state.activeReasoningParts[chunk.id];
@@ -15256,7 +15652,8 @@ function processUIMessageStream({
                   state: "input-streaming",
                   input: void 0,
                   providerExecuted: chunk.providerExecuted,
-                  title: chunk.title
+                  title: chunk.title,
+                  providerMetadata: chunk.providerMetadata
                 });
               } else {
                 updateToolPart({
@@ -15265,7 +15662,8 @@ function processUIMessageStream({
                   state: "input-streaming",
                   input: void 0,
                   providerExecuted: chunk.providerExecuted,
-                  title: chunk.title
+                  title: chunk.title,
+                  providerMetadata: chunk.providerMetadata
                 });
               }
               write();
@@ -15273,6 +15671,13 @@ function processUIMessageStream({
             }
             case "tool-input-delta": {
               const partialToolCall = state.partialToolCalls[chunk.toolCallId];
+              if (partialToolCall == null) {
+                throw new UIMessageStreamError({
+                  chunkType: "tool-input-delta",
+                  chunkId: chunk.toolCallId,
+                  message: `Received tool-input-delta for missing tool call with ID "${chunk.toolCallId}". Ensure a "tool-input-start" chunk is sent before any "tool-input-delta" chunks.`
+                });
+              }
               partialToolCall.text += chunk.inputTextDelta;
               const { value: partialArgs } = await parsePartialJson(
                 partialToolCall.text
@@ -15608,11 +16013,13 @@ function createAsyncIterableStream(source) {
     const reader = this.getReader();
     let finished = false;
     async function cleanup(cancelStream) {
-      var _a16;
+      var _a18;
+      if (finished)
+        return;
       finished = true;
       try {
         if (cancelStream) {
-          await ((_a16 = reader.cancel) == null ? void 0 : _a16.call(reader));
+          await ((_a18 = reader.cancel) == null ? void 0 : _a18.call(reader));
         }
       } finally {
         try {
@@ -15638,7 +16045,7 @@ function createAsyncIterableStream(source) {
         return { done: false, value };
       },
       /**
-       * Called on early exit (e.g., break from for-await).
+       * May be called on early exit (e.g., break from for-await) or after completion.
        * Ensures the stream is cancelled and resources are released.
        * @returns A promise resolving to a completed IteratorResult.
        */
@@ -15778,8 +16185,8 @@ function createStitchableStream() {
 
 // src/util/now.ts
 function now() {
-  var _a16, _b;
-  return (_b = (_a16 = globalThis == null ? void 0 : globalThis.performance) == null ? void 0 : _a16.now()) != null ? _b : Date.now();
+  var _a18, _b;
+  return (_b = (_a18 = globalThis == null ? void 0 : globalThis.performance) == null ? void 0 : _a18.now()) != null ? _b : Date.now();
 }
 function runToolsTransformation({
   tools,
@@ -15938,6 +16345,12 @@ function runToolsTransformation({
                 }
               }).then((result) => {
                 toolResultsStreamController.enqueue(result);
+              }).catch((error) => {
+                toolResultsStreamController.enqueue({
+                  type: "error",
+                  error
+                });
+              }).finally(() => {
                 outstandingToolResults.delete(toolExecutionId);
                 attemptClose();
               });
@@ -16024,6 +16437,7 @@ function streamText({
   messages,
   maxRetries,
   abortSignal,
+  timeout,
   headers,
   stopWhen = stepCountIs(1),
   experimental_output,
@@ -16045,20 +16459,30 @@ function streamText({
   onAbort,
   onStepFinish,
   experimental_context,
-  _internal: {
-    now: now2 = now,
-    generateId: generateId2 = originalGenerateId2,
-    currentDate = () => /* @__PURE__ */ new Date()
-  } = {},
+  _internal: { now: now2 = now, generateId: generateId2 = originalGenerateId2 } = {},
   ...settings
 }) {
+  const totalTimeoutMs = getTotalTimeoutMs(timeout);
+  const stepTimeoutMs = getStepTimeoutMs(timeout);
+  const chunkTimeoutMs = getChunkTimeoutMs(timeout);
+  const stepAbortController = stepTimeoutMs != null ? new AbortController() : void 0;
+  const chunkAbortController = chunkTimeoutMs != null ? new AbortController() : void 0;
   return new DefaultStreamTextResult({
     model: resolveLanguageModel(model),
     telemetry,
     headers,
     settings,
     maxRetries,
-    abortSignal,
+    abortSignal: mergeAbortSignals(
+      abortSignal,
+      totalTimeoutMs != null ? AbortSignal.timeout(totalTimeoutMs) : void 0,
+      stepAbortController == null ? void 0 : stepAbortController.signal,
+      chunkAbortController == null ? void 0 : chunkAbortController.signal
+    ),
+    stepTimeoutMs,
+    stepAbortController,
+    chunkTimeoutMs,
+    chunkAbortController,
     system,
     prompt,
     messages,
@@ -16078,7 +16502,6 @@ function streamText({
     onAbort,
     onStepFinish,
     now: now2,
-    currentDate,
     generateId: generateId2,
     experimental_context,
     download: download2
@@ -16107,7 +16530,7 @@ function createOutputTransformStream(output) {
   }
   return new TransformStream({
     async transform(chunk, controller) {
-      var _a16;
+      var _a18;
       if (chunk.type === "finish-step" && textChunk.length > 0) {
         publishTextChunk({ controller });
       }
@@ -16134,7 +16557,7 @@ function createOutputTransformStream(output) {
       }
       text2 += chunk.text;
       textChunk += chunk.text;
-      textProviderMetadata = (_a16 = chunk.providerMetadata) != null ? _a16 : textProviderMetadata;
+      textProviderMetadata = (_a18 = chunk.providerMetadata) != null ? _a18 : textProviderMetadata;
       const result = await output.parsePartialOutput({ text: text2 });
       if (result !== void 0) {
         const currentJson = JSON.stringify(result.partial);
@@ -16154,6 +16577,10 @@ var DefaultStreamTextResult = class {
     settings,
     maxRetries: maxRetriesArg,
     abortSignal,
+    stepTimeoutMs,
+    stepAbortController,
+    chunkTimeoutMs,
+    chunkAbortController,
     system,
     prompt,
     messages,
@@ -16168,7 +16595,6 @@ var DefaultStreamTextResult = class {
     prepareStep,
     includeRawChunks,
     now: now2,
-    currentDate,
     generateId: generateId2,
     onChunk,
     onError,
@@ -16200,7 +16626,7 @@ var DefaultStreamTextResult = class {
     let activeReasoningContent = {};
     const eventProcessor = new TransformStream({
       async transform(chunk, controller) {
-        var _a16, _b, _c, _d;
+        var _a18, _b, _c, _d;
         controller.enqueue(chunk);
         const { part } = chunk;
         if (part.type === "text-delta" || part.type === "reasoning-delta" || part.type === "source" || part.type === "tool-call" || part.type === "tool-result" || part.type === "tool-input-start" || part.type === "tool-input-delta" || part.type === "raw") {
@@ -16230,7 +16656,7 @@ var DefaultStreamTextResult = class {
             return;
           }
           activeText.text += part.text;
-          activeText.providerMetadata = (_a16 = part.providerMetadata) != null ? _a16 : activeText.providerMetadata;
+          activeText.providerMetadata = (_a18 = part.providerMetadata) != null ? _a18 : activeText.providerMetadata;
         }
         if (part.type === "text-end") {
           const activeText = activeTextContent[part.id];
@@ -16347,7 +16773,7 @@ var DefaultStreamTextResult = class {
       async flush(controller) {
         try {
           if (recordedSteps.length === 0) {
-            const error = new NoOutputGeneratedError({
+            const error = (abortSignal == null ? void 0 : abortSignal.aborted) ? abortSignal.reason : new NoOutputGeneratedError({
               message: "No output generated. Check the stream for errors."
             });
             self._finishReason.reject(error);
@@ -16395,8 +16821,8 @@ var DefaultStreamTextResult = class {
                 "ai.response.text": { output: () => finalStep.text },
                 "ai.response.toolCalls": {
                   output: () => {
-                    var _a16;
-                    return ((_a16 = finalStep.toolCalls) == null ? void 0 : _a16.length) ? JSON.stringify(finalStep.toolCalls) : void 0;
+                    var _a18;
+                    return ((_a18 = finalStep.toolCalls) == null ? void 0 : _a18.length) ? JSON.stringify(finalStep.toolCalls) : void 0;
                   }
                 },
                 "ai.response.providerMetadata": JSON.stringify(
@@ -16428,7 +16854,13 @@ var DefaultStreamTextResult = class {
       async pull(controller) {
         function abort() {
           onAbort == null ? void 0 : onAbort({ steps: recordedSteps });
-          controller.enqueue({ type: "abort" });
+          controller.enqueue({
+            type: "abort",
+            // The `reason` is usually of type DOMException, but it can also be of any type,
+            // so we use getErrorMessage for serialization because it is already designed to accept values of the unknown type.
+            // See: https://developer.mozilla.org/en-US/docs/Web/API/AbortSignal/reason
+            ...(abortSignal == null ? void 0 : abortSignal.reason) !== void 0 ? { reason: getErrorMessage$1(abortSignal.reason) } : {}
+          });
           controller.close();
         }
         try {
@@ -16612,8 +17044,32 @@ var DefaultStreamTextResult = class {
           responseMessages,
           usage
         }) {
-          var _a16, _b, _c, _d, _e, _f;
+          var _a18, _b, _c, _d, _e, _f;
           const includeRawChunks2 = self.includeRawChunks;
+          const stepTimeoutId = stepTimeoutMs != null ? setTimeout(() => stepAbortController.abort(), stepTimeoutMs) : void 0;
+          let chunkTimeoutId = void 0;
+          function resetChunkTimeout() {
+            if (chunkTimeoutMs != null) {
+              if (chunkTimeoutId != null) {
+                clearTimeout(chunkTimeoutId);
+              }
+              chunkTimeoutId = setTimeout(
+                () => chunkAbortController.abort(),
+                chunkTimeoutMs
+              );
+            }
+          }
+          function clearChunkTimeout() {
+            if (chunkTimeoutId != null) {
+              clearTimeout(chunkTimeoutId);
+              chunkTimeoutId = void 0;
+            }
+          }
+          function clearStepTimeout() {
+            if (stepTimeoutId != null) {
+              clearTimeout(stepTimeoutId);
+            }
+          }
           stepFinish = new DelayedPromise();
           const stepInputMessages = [...initialMessages, ...responseMessages];
           const prepareStepResult = await (prepareStep == null ? void 0 : prepareStep({
@@ -16624,7 +17080,7 @@ var DefaultStreamTextResult = class {
             experimental_context
           }));
           const stepModel = resolveLanguageModel(
-            (_a16 = prepareStepResult == null ? void 0 : prepareStepResult.model) != null ? _a16 : model
+            (_a18 = prepareStepResult == null ? void 0 : prepareStepResult.model) != null ? _a18 : model
           );
           const promptMessages = await convertToLanguageModelPrompt({
             prompt: {
@@ -16729,7 +17185,7 @@ var DefaultStreamTextResult = class {
           let stepFirstChunk = true;
           let stepResponse = {
             id: generateId2(),
-            timestamp: currentDate(),
+            timestamp: /* @__PURE__ */ new Date(),
             modelId: model.modelId
           };
           let activeText = "";
@@ -16737,7 +17193,8 @@ var DefaultStreamTextResult = class {
             streamWithToolResults.pipeThrough(
               new TransformStream({
                 async transform(chunk, controller) {
-                  var _a17, _b2, _c2, _d2, _e2;
+                  var _a19, _b2, _c2, _d2, _e2;
+                  resetChunkTimeout();
                   if (chunk.type === "stream-start") {
                     warnings = chunk.warnings;
                     return;
@@ -16810,7 +17267,7 @@ var DefaultStreamTextResult = class {
                     }
                     case "response-metadata": {
                       stepResponse = {
-                        id: (_a17 = chunk.id) != null ? _a17 : stepResponse.id,
+                        id: (_a19 = chunk.id) != null ? _a19 : stepResponse.id,
                         timestamp: (_b2 = chunk.timestamp) != null ? _b2 : stepResponse.timestamp,
                         modelId: (_c2 = chunk.modelId) != null ? _c2 : stepResponse.modelId
                       };
@@ -16968,6 +17425,8 @@ var DefaultStreamTextResult = class {
                       pendingDeferredToolCalls.delete(output2.toolCallId);
                     }
                   }
+                  clearStepTimeout();
+                  clearChunkTimeout();
                   if (
                     // Continue if:
                     // 1. There are client tool calls that have all been executed, OR
@@ -17140,14 +17599,14 @@ var DefaultStreamTextResult = class {
     );
   }
   async consumeStream(options) {
-    var _a16;
+    var _a18;
     try {
       await consumeStream({
         stream: this.fullStream,
         onError: options == null ? void 0 : options.onError
       });
     } catch (error) {
-      (_a16 = options == null ? void 0 : options.onError) == null ? void 0 : _a16.call(options, error);
+      (_a18 = options == null ? void 0 : options.onError) == null ? void 0 : _a18.call(options, error);
     }
   }
   get experimental_partialOutputStream() {
@@ -17166,10 +17625,20 @@ var DefaultStreamTextResult = class {
       )
     );
   }
+  get elementStream() {
+    var _a18, _b, _c;
+    const transform = (_a18 = this.outputSpecification) == null ? void 0 : _a18.createElementStreamTransform();
+    if (transform == null) {
+      throw new UnsupportedFunctionalityError({
+        functionality: `element streams in ${(_c = (_b = this.outputSpecification) == null ? void 0 : _b.name) != null ? _c : "text"} mode`
+      });
+    }
+    return createAsyncIterableStream(this.teeStream().pipeThrough(transform));
+  }
   get output() {
     return this.finalStep.then((step) => {
-      var _a16;
-      const output = (_a16 = this.outputSpecification) != null ? _a16 : text();
+      var _a18;
+      const output = (_a18 = this.outputSpecification) != null ? _a18 : text();
       return output.parseCompleteOutput(
         { text: step.text },
         {
@@ -17196,8 +17665,8 @@ var DefaultStreamTextResult = class {
       responseMessageId: generateMessageId
     }) : void 0;
     const isDynamic = (part) => {
-      var _a16;
-      const tool2 = (_a16 = this.tools) == null ? void 0 : _a16[part.toolName];
+      var _a18;
+      const tool2 = (_a18 = this.tools) == null ? void 0 : _a18[part.toolName];
       if (tool2 == null) {
         return part.dynamic;
       }
@@ -17298,6 +17767,7 @@ var DefaultStreamTextResult = class {
                 toolCallId: part.id,
                 toolName: part.toolName,
                 ...part.providerExecuted != null ? { providerExecuted: part.providerExecuted } : {},
+                ...part.providerMetadata != null ? { providerMetadata: part.providerMetadata } : {},
                 ...dynamic != null ? { dynamic } : {},
                 ...part.title != null ? { title: part.title } : {}
               });
@@ -18178,7 +18648,7 @@ var mistralContentSchema = union([
       }),
       object$1({
         type: literal("reference"),
-        reference_ids: array$1(number$1())
+        reference_ids: array$1(union([string(), number$1()]))
       }),
       object$1({
         type: literal("thinking"),
@@ -18299,7 +18769,7 @@ var MistralTextEmbeddingResponseSchema = object$1({
 });
 
 // src/version.ts
-var VERSION$6 = "3.0.2" ;
+var VERSION$6 = "3.0.12" ;
 
 // src/mistral-provider.ts
 function createMistral(options = {}) {
@@ -18354,7 +18824,7 @@ createMistral();
 // src/google-provider.ts
 
 // src/version.ts
-var VERSION$5 = "3.0.2" ;
+var VERSION$5 = "3.0.13" ;
 var googleErrorDataSchema = lazySchema(
   () => zodSchema(
     object$1({
@@ -18970,7 +19440,7 @@ function prepareTools$3({
   ].some((id) => id === modelId);
   const isGemini2orNewer = modelId.includes("gemini-2") || modelId.includes("gemini-3") || isLatest;
   const supportsDynamicRetrieval = modelId.includes("gemini-1.5-flash") && !modelId.includes("-8b");
-  const supportsFileSearch = modelId.includes("gemini-2.5");
+  const supportsFileSearch = modelId.includes("gemini-2.5") || modelId.includes("gemini-3");
   if (tools == null) {
     return { tools: void 0, toolConfig: void 0, toolWarnings };
   }
@@ -19043,7 +19513,7 @@ function prepareTools$3({
             toolWarnings.push({
               type: "unsupported",
               feature: `provider-defined tool ${tool.id}`,
-              details: "The file search tool is only supported with Gemini 2.5 models."
+              details: "The file search tool is only supported with Gemini 2.5 models and Gemini 3 models."
             });
           }
           break;
@@ -19394,7 +19864,10 @@ var GoogleGenerativeAILanguageModel = class {
       finishReason: {
         unified: mapGoogleGenerativeAIFinishReason({
           finishReason: candidate.finishReason,
-          hasToolCalls: content.some((part) => part.type === "tool-call")
+          // Only count client-executed tool calls for finish reason determination.
+          hasToolCalls: content.some(
+            (part) => part.type === "tool-call" && !part.providerExecuted
+          )
         }),
         raw: (_e = candidate.finishReason) != null ? _e : void 0
       },
@@ -19497,7 +19970,6 @@ var GoogleGenerativeAILanguageModel = class {
                     input: JSON.stringify(part.executableCode),
                     providerExecuted: true
                   });
-                  hasToolCalls = true;
                 } else if ("codeExecutionResult" in part && part.codeExecutionResult) {
                   const toolCallId = lastCodeExecutionToolCallId;
                   if (toolCallId) {
@@ -21894,11 +22366,16 @@ var modelMaxImagesPerCall = {
   "gpt-image-1-mini": 10,
   "gpt-image-1.5": 10
 };
-var hasDefaultResponseFormat = /* @__PURE__ */ new Set([
-  "gpt-image-1",
+var defaultResponseFormatPrefixes = [
   "gpt-image-1-mini",
-  "gpt-image-1.5"
-]);
+  "gpt-image-1.5",
+  "gpt-image-1"
+];
+function hasDefaultResponseFormat(modelId) {
+  return defaultResponseFormatPrefixes.some(
+    (prefix) => modelId.startsWith(prefix)
+  );
+}
 
 // src/image/openai-image-model.ts
 var OpenAIImageModel = class {
@@ -22017,7 +22494,7 @@ var OpenAIImageModel = class {
         n,
         size,
         ...(_h = providerOptions.openai) != null ? _h : {},
-        ...!hasDefaultResponseFormat.has(this.modelId) ? { response_format: "b64_json" } : {}
+        ...!hasDefaultResponseFormat(this.modelId) ? { response_format: "b64_json" } : {}
       },
       failedResponseHandler: openaiFailedResponseHandler,
       successfulResponseHandler: createJsonResponseHandler(
@@ -22569,8 +23046,10 @@ async function convertToOpenAIResponsesInput({
   prompt,
   toolNameMapping,
   systemMessageMode,
+  providerOptionsName,
   fileIdPrefixes,
   store,
+  hasConversation = false,
   hasLocalShellTool = false,
   hasShellTool = false,
   hasApplyPatchTool = false
@@ -22624,7 +23103,7 @@ async function convertToOpenAIResponsesInput({
                     ...part.data instanceof URL ? { image_url: part.data.toString() } : typeof part.data === "string" && isFileId(part.data, fileIdPrefixes) ? { file_id: part.data } : {
                       image_url: `data:${mediaType};base64,${convertToBase64(part.data)}`
                     },
-                    detail: (_b2 = (_a2 = part.providerOptions) == null ? void 0 : _a2.openai) == null ? void 0 : _b2.imageDetail
+                    detail: (_b2 = (_a2 = part.providerOptions) == null ? void 0 : _a2[providerOptionsName]) == null ? void 0 : _b2.imageDetail
                   };
                 } else if (part.mediaType === "application/pdf") {
                   if (part.data instanceof URL) {
@@ -22656,7 +23135,10 @@ async function convertToOpenAIResponsesInput({
         for (const part of content) {
           switch (part.type) {
             case "text": {
-              const id = (_b = (_a = part.providerOptions) == null ? void 0 : _a.openai) == null ? void 0 : _b.itemId;
+              const id = (_b = (_a = part.providerOptions) == null ? void 0 : _a[providerOptionsName]) == null ? void 0 : _b.itemId;
+              if (hasConversation && id != null) {
+                break;
+              }
               if (store && id != null) {
                 input.push({ type: "item_reference", id });
                 break;
@@ -22669,7 +23151,10 @@ async function convertToOpenAIResponsesInput({
               break;
             }
             case "tool-call": {
-              const id = (_g = (_d = (_c = part.providerOptions) == null ? void 0 : _c.openai) == null ? void 0 : _d.itemId) != null ? _g : (_f = (_e = part.providerMetadata) == null ? void 0 : _e.openai) == null ? void 0 : _f.itemId;
+              const id = (_g = (_d = (_c = part.providerOptions) == null ? void 0 : _c[providerOptionsName]) == null ? void 0 : _d.itemId) != null ? _g : (_f = (_e = part.providerMetadata) == null ? void 0 : _e[providerOptionsName]) == null ? void 0 : _f.itemId;
+              if (hasConversation && id != null) {
+                break;
+              }
               if (part.providerExecuted) {
                 if (store && id != null) {
                   input.push({ type: "item_reference", id });
@@ -22721,6 +23206,20 @@ async function convertToOpenAIResponsesInput({
                 });
                 break;
               }
+              if (hasApplyPatchTool && resolvedToolName === "apply_patch") {
+                const parsedInput = await validateTypes({
+                  value: part.input,
+                  schema: applyPatchInputSchema
+                });
+                input.push({
+                  type: "apply_patch_call",
+                  call_id: parsedInput.callId,
+                  id,
+                  status: "completed",
+                  operation: parsedInput.operation
+                });
+                break;
+              }
               input.push({
                 type: "function_call",
                 call_id: part.toolCallId,
@@ -22735,8 +23234,11 @@ async function convertToOpenAIResponsesInput({
               if (part.output.type === "execution-denied" || part.output.type === "json" && typeof part.output.value === "object" && part.output.value != null && "type" in part.output.value && part.output.value.type === "execution-denied") {
                 break;
               }
+              if (hasConversation) {
+                break;
+              }
               if (store) {
-                const itemId = (_j = (_i = (_h = part.providerMetadata) == null ? void 0 : _h.openai) == null ? void 0 : _i.itemId) != null ? _j : part.toolCallId;
+                const itemId = (_j = (_i = (_h = part.providerMetadata) == null ? void 0 : _h[providerOptionsName]) == null ? void 0 : _i.itemId) != null ? _j : part.toolCallId;
                 input.push({ type: "item_reference", id: itemId });
               } else {
                 warnings.push({
@@ -22748,11 +23250,14 @@ async function convertToOpenAIResponsesInput({
             }
             case "reasoning": {
               const providerOptions = await parseProviderOptions({
-                provider: "openai",
+                provider: providerOptionsName,
                 providerOptions: part.providerOptions,
                 schema: openaiResponsesReasoningProviderOptionsSchema
               });
               const reasoningId = providerOptions == null ? void 0 : providerOptions.itemId;
+              if (hasConversation && reasoningId != null) {
+                break;
+              }
               if (reasoningId != null) {
                 const reasoningMessage = reasoningMessages[reasoningId];
                 if (store) {
@@ -22903,6 +23408,12 @@ async function convertToOpenAIResponsesInput({
                     return {
                       type: "input_image",
                       image_url: `data:${item.mediaType};base64,${item.data}`
+                    };
+                  }
+                  case "image-url": {
+                    return {
+                      type: "input_image",
+                      image_url: item.url
                     };
                   }
                   case "file-data": {
@@ -23317,25 +23828,21 @@ var openaiResponsesChunkSchema = lazySchema(
           object$1({
             type: literal("file_citation"),
             file_id: string(),
-            filename: string().nullish(),
-            index: number$1().nullish(),
-            start_index: number$1().nullish(),
-            end_index: number$1().nullish(),
-            quote: string().nullish()
+            filename: string(),
+            index: number$1()
           }),
           object$1({
             type: literal("container_file_citation"),
             container_id: string(),
             file_id: string(),
-            filename: string().nullish(),
-            start_index: number$1().nullish(),
-            end_index: number$1().nullish(),
-            index: number$1().nullish()
+            filename: string(),
+            start_index: number$1(),
+            end_index: number$1()
           }),
           object$1({
             type: literal("file_path"),
             file_id: string(),
-            index: number$1().nullish()
+            index: number$1()
           })
         ])
       }),
@@ -23432,25 +23939,21 @@ var openaiResponsesResponseSchema = lazySchema(
                     object$1({
                       type: literal("file_citation"),
                       file_id: string(),
-                      filename: string().nullish(),
-                      index: number$1().nullish(),
-                      start_index: number$1().nullish(),
-                      end_index: number$1().nullish(),
-                      quote: string().nullish()
+                      filename: string(),
+                      index: number$1()
                     }),
                     object$1({
                       type: literal("container_file_citation"),
                       container_id: string(),
                       file_id: string(),
-                      filename: string().nullish(),
-                      start_index: number$1().nullish(),
-                      end_index: number$1().nullish(),
-                      index: number$1().nullish()
+                      filename: string(),
+                      start_index: number$1(),
+                      end_index: number$1()
                     }),
                     object$1({
                       type: literal("file_path"),
                       file_id: string(),
-                      index: number$1().nullish()
+                      index: number$1()
                     })
                   ])
                 )
@@ -24040,11 +24543,19 @@ var OpenAIResponsesLanguageModel = class {
     if (stopSequences != null) {
       warnings.push({ type: "unsupported", feature: "stopSequences" });
     }
-    const openaiOptions = await parseProviderOptions({
-      provider: "openai",
+    const providerOptionsName = this.config.provider.includes("azure") ? "azure" : "openai";
+    let openaiOptions = await parseProviderOptions({
+      provider: providerOptionsName,
       providerOptions,
       schema: openaiResponsesProviderOptionsSchema
     });
+    if (openaiOptions == null && providerOptionsName !== "openai") {
+      openaiOptions = await parseProviderOptions({
+        provider: "openai",
+        providerOptions,
+        schema: openaiResponsesProviderOptionsSchema
+      });
+    }
     const isReasoningModel = (_a = openaiOptions == null ? void 0 : openaiOptions.forceReasoning) != null ? _a : modelCapabilities.isReasoningModel;
     if ((openaiOptions == null ? void 0 : openaiOptions.conversation) && (openaiOptions == null ? void 0 : openaiOptions.previousResponseId)) {
       warnings.push({
@@ -24071,8 +24582,10 @@ var OpenAIResponsesLanguageModel = class {
       prompt,
       toolNameMapping,
       systemMessageMode: (_b = openaiOptions == null ? void 0 : openaiOptions.systemMessageMode) != null ? _b : isReasoningModel ? "developer" : modelCapabilities.systemMessageMode,
+      providerOptionsName,
       fileIdPrefixes: this.config.fileIdPrefixes,
       store: (_c = openaiOptions == null ? void 0 : openaiOptions.store) != null ? _c : true,
+      hasConversation: (openaiOptions == null ? void 0 : openaiOptions.conversation) != null,
       hasLocalShellTool: hasOpenAITool("openai.local_shell"),
       hasShellTool: hasOpenAITool("openai.shell"),
       hasApplyPatchTool: hasOpenAITool("openai.apply_patch")
@@ -24225,22 +24738,23 @@ var OpenAIResponsesLanguageModel = class {
       },
       warnings: [...warnings, ...toolWarnings],
       store,
-      toolNameMapping
+      toolNameMapping,
+      providerOptionsName
     };
   }
   async doGenerate(options) {
-    var _a, _b, _c, _d, _e, _f, _g, _h, _i, _j, _k, _l, _m, _n, _o, _p, _q, _r, _s, _t, _u, _v, _w, _x, _y, _z, _A, _B, _C, _D, _E;
+    var _a, _b, _c, _d, _e, _f, _g, _h, _i, _j, _k, _l, _m, _n, _o, _p, _q, _r, _s, _t, _u, _v, _w, _x, _y;
     const {
       args: body,
       warnings,
       webSearchToolName,
-      toolNameMapping
+      toolNameMapping,
+      providerOptionsName
     } = await this.getArgs(options);
     const url = this.config.url({
       path: "/responses",
       modelId: this.modelId
     });
-    const providerKey = this.config.provider.replace(".responses", "");
     const approvalRequestIdToDummyToolCallIdFromPrompt = extractApprovalRequestIdToToolCallIdMapping(options.prompt);
     const {
       responseHeaders,
@@ -24282,7 +24796,7 @@ var OpenAIResponsesLanguageModel = class {
               type: "reasoning",
               text: summary.text,
               providerMetadata: {
-                [providerKey]: {
+                [providerOptionsName]: {
                   itemId: part.id,
                   reasoningEncryptedContent: (_a = part.encrypted_content) != null ? _a : null
                 }
@@ -24318,7 +24832,7 @@ var OpenAIResponsesLanguageModel = class {
               action: part.action
             }),
             providerMetadata: {
-              [providerKey]: {
+              [providerOptionsName]: {
                 itemId: part.id
               }
             }
@@ -24336,7 +24850,7 @@ var OpenAIResponsesLanguageModel = class {
               }
             }),
             providerMetadata: {
-              [providerKey]: {
+              [providerOptionsName]: {
                 itemId: part.id
               }
             }
@@ -24345,7 +24859,7 @@ var OpenAIResponsesLanguageModel = class {
         }
         case "message": {
           for (const contentPart of part.content) {
-            if (((_c = (_b = options.providerOptions) == null ? void 0 : _b.openai) == null ? void 0 : _c.logprobs) && contentPart.logprobs) {
+            if (((_c = (_b = options.providerOptions) == null ? void 0 : _b[providerOptionsName]) == null ? void 0 : _c.logprobs) && contentPart.logprobs) {
               logprobs.push(contentPart.logprobs);
             }
             const providerMetadata2 = {
@@ -24358,7 +24872,7 @@ var OpenAIResponsesLanguageModel = class {
               type: "text",
               text: contentPart.text,
               providerMetadata: {
-                [providerKey]: providerMetadata2
+                [providerOptionsName]: providerMetadata2
               }
             });
             for (const annotation of contentPart.annotations) {
@@ -24376,29 +24890,29 @@ var OpenAIResponsesLanguageModel = class {
                   sourceType: "document",
                   id: (_i = (_h = (_g = this.config).generateId) == null ? void 0 : _h.call(_g)) != null ? _i : generateId(),
                   mediaType: "text/plain",
-                  title: (_k = (_j = annotation.quote) != null ? _j : annotation.filename) != null ? _k : "Document",
-                  filename: (_l = annotation.filename) != null ? _l : annotation.file_id,
-                  ...annotation.file_id ? {
-                    providerMetadata: {
-                      [providerKey]: {
-                        fileId: annotation.file_id
-                      }
+                  title: annotation.filename,
+                  filename: annotation.filename,
+                  providerMetadata: {
+                    [providerOptionsName]: {
+                      type: annotation.type,
+                      fileId: annotation.file_id,
+                      index: annotation.index
                     }
-                  } : {}
+                  }
                 });
               } else if (annotation.type === "container_file_citation") {
                 content.push({
                   type: "source",
                   sourceType: "document",
-                  id: (_o = (_n = (_m = this.config).generateId) == null ? void 0 : _n.call(_m)) != null ? _o : generateId(),
+                  id: (_l = (_k = (_j = this.config).generateId) == null ? void 0 : _k.call(_j)) != null ? _l : generateId(),
                   mediaType: "text/plain",
-                  title: (_q = (_p = annotation.filename) != null ? _p : annotation.file_id) != null ? _q : "Document",
-                  filename: (_r = annotation.filename) != null ? _r : annotation.file_id,
+                  title: annotation.filename,
+                  filename: annotation.filename,
                   providerMetadata: {
-                    [providerKey]: {
+                    [providerOptionsName]: {
+                      type: annotation.type,
                       fileId: annotation.file_id,
-                      containerId: annotation.container_id,
-                      ...annotation.index != null ? { index: annotation.index } : {}
+                      containerId: annotation.container_id
                     }
                   }
                 });
@@ -24406,14 +24920,15 @@ var OpenAIResponsesLanguageModel = class {
                 content.push({
                   type: "source",
                   sourceType: "document",
-                  id: (_u = (_t = (_s = this.config).generateId) == null ? void 0 : _t.call(_s)) != null ? _u : generateId(),
+                  id: (_o = (_n = (_m = this.config).generateId) == null ? void 0 : _n.call(_m)) != null ? _o : generateId(),
                   mediaType: "application/octet-stream",
                   title: annotation.file_id,
                   filename: annotation.file_id,
                   providerMetadata: {
-                    [providerKey]: {
+                    [providerOptionsName]: {
+                      type: annotation.type,
                       fileId: annotation.file_id,
-                      ...annotation.index != null ? { index: annotation.index } : {}
+                      index: annotation.index
                     }
                   }
                 });
@@ -24430,7 +24945,7 @@ var OpenAIResponsesLanguageModel = class {
             toolName: part.name,
             input: part.arguments,
             providerMetadata: {
-              [providerKey]: {
+              [providerOptionsName]: {
                 itemId: part.id
               }
             }
@@ -24458,7 +24973,7 @@ var OpenAIResponsesLanguageModel = class {
           break;
         }
         case "mcp_call": {
-          const toolCallId = part.approval_request_id != null ? (_v = approvalRequestIdToDummyToolCallIdFromPrompt[part.approval_request_id]) != null ? _v : part.id : part.id;
+          const toolCallId = part.approval_request_id != null ? (_p = approvalRequestIdToDummyToolCallIdFromPrompt[part.approval_request_id]) != null ? _p : part.id : part.id;
           const toolName = `mcp.${part.name}`;
           content.push({
             type: "tool-call",
@@ -24481,7 +24996,7 @@ var OpenAIResponsesLanguageModel = class {
               ...part.error != null ? { error: part.error } : {}
             },
             providerMetadata: {
-              [providerKey]: {
+              [providerOptionsName]: {
                 itemId: part.id
               }
             }
@@ -24492,8 +25007,8 @@ var OpenAIResponsesLanguageModel = class {
           break;
         }
         case "mcp_approval_request": {
-          const approvalRequestId = (_w = part.approval_request_id) != null ? _w : part.id;
-          const dummyToolCallId = (_z = (_y = (_x = this.config).generateId) == null ? void 0 : _y.call(_x)) != null ? _z : generateId();
+          const approvalRequestId = (_q = part.approval_request_id) != null ? _q : part.id;
+          const dummyToolCallId = (_t = (_s = (_r = this.config).generateId) == null ? void 0 : _s.call(_r)) != null ? _t : generateId();
           const toolName = `mcp.${part.name}`;
           content.push({
             type: "tool-call",
@@ -24543,13 +25058,13 @@ var OpenAIResponsesLanguageModel = class {
             toolName: toolNameMapping.toCustomToolName("file_search"),
             result: {
               queries: part.queries,
-              results: (_B = (_A = part.results) == null ? void 0 : _A.map((result) => ({
+              results: (_v = (_u = part.results) == null ? void 0 : _u.map((result) => ({
                 attributes: result.attributes,
                 fileId: result.file_id,
                 filename: result.filename,
                 score: result.score,
                 text: result.text
-              }))) != null ? _B : null
+              }))) != null ? _v : null
             }
           });
           break;
@@ -24585,7 +25100,7 @@ var OpenAIResponsesLanguageModel = class {
               operation: part.operation
             }),
             providerMetadata: {
-              [providerKey]: {
+              [providerOptionsName]: {
                 itemId: part.id
               }
             }
@@ -24595,23 +25110,23 @@ var OpenAIResponsesLanguageModel = class {
       }
     }
     const providerMetadata = {
-      [providerKey]: { responseId: response.id }
+      [providerOptionsName]: { responseId: response.id }
     };
     if (logprobs.length > 0) {
-      providerMetadata[providerKey].logprobs = logprobs;
+      providerMetadata[providerOptionsName].logprobs = logprobs;
     }
     if (typeof response.service_tier === "string") {
-      providerMetadata[providerKey].serviceTier = response.service_tier;
+      providerMetadata[providerOptionsName].serviceTier = response.service_tier;
     }
     const usage = response.usage;
     return {
       content,
       finishReason: {
         unified: mapOpenAIResponseFinishReason({
-          finishReason: (_C = response.incomplete_details) == null ? void 0 : _C.reason,
+          finishReason: (_w = response.incomplete_details) == null ? void 0 : _w.reason,
           hasFunctionCall
         }),
-        raw: (_E = (_D = response.incomplete_details) == null ? void 0 : _D.reason) != null ? _E : void 0
+        raw: (_y = (_x = response.incomplete_details) == null ? void 0 : _x.reason) != null ? _y : void 0
       },
       usage: convertOpenAIResponsesUsage(usage),
       request: { body },
@@ -24632,7 +25147,8 @@ var OpenAIResponsesLanguageModel = class {
       warnings,
       webSearchToolName,
       toolNameMapping,
-      store
+      store,
+      providerOptionsName
     } = await this.getArgs(options);
     const { responseHeaders, value: response } = await postJsonToApi({
       url: this.config.url({
@@ -24652,7 +25168,6 @@ var OpenAIResponsesLanguageModel = class {
       fetch: this.config.fetch
     });
     const self = this;
-    const providerKey = this.config.provider.replace(".responses", "");
     const approvalRequestIdToDummyToolCallIdFromPrompt = extractApprovalRequestIdToToolCallIdMapping(options.prompt);
     const approvalRequestIdToDummyToolCallIdFromStream = /* @__PURE__ */ new Map();
     let finishReason = {
@@ -24674,7 +25189,7 @@ var OpenAIResponsesLanguageModel = class {
             controller.enqueue({ type: "stream-start", warnings });
           },
           transform(chunk, controller) {
-            var _a, _b, _c, _d, _e, _f, _g, _h, _i, _j, _k, _l, _m, _n, _o, _p, _q, _r, _s, _t, _u, _v, _w, _x, _y, _z, _A, _B, _C, _D, _E, _F, _G, _H, _I, _J;
+            var _a, _b, _c, _d, _e, _f, _g, _h, _i, _j, _k, _l, _m, _n, _o, _p, _q, _r, _s, _t, _u, _v, _w, _x, _y, _z, _A, _B, _C, _D;
             if (options.includeRawChunks) {
               controller.enqueue({ type: "raw", rawValue: chunk.rawValue });
             }
@@ -24817,7 +25332,7 @@ var OpenAIResponsesLanguageModel = class {
                   type: "text-start",
                   id: value.item.id,
                   providerMetadata: {
-                    [providerKey]: {
+                    [providerOptionsName]: {
                       itemId: value.item.id
                     }
                   }
@@ -24831,7 +25346,7 @@ var OpenAIResponsesLanguageModel = class {
                   type: "reasoning-start",
                   id: `${value.item.id}:0`,
                   providerMetadata: {
-                    [providerKey]: {
+                    [providerOptionsName]: {
                       itemId: value.item.id,
                       reasoningEncryptedContent: (_a = value.item.encrypted_content) != null ? _a : null
                     }
@@ -24844,7 +25359,7 @@ var OpenAIResponsesLanguageModel = class {
                   type: "text-end",
                   id: value.item.id,
                   providerMetadata: {
-                    [providerKey]: {
+                    [providerOptionsName]: {
                       itemId: value.item.id,
                       ...ongoingAnnotations.length > 0 && {
                         annotations: ongoingAnnotations
@@ -24865,7 +25380,7 @@ var OpenAIResponsesLanguageModel = class {
                   toolName: value.item.name,
                   input: value.item.arguments,
                   providerMetadata: {
-                    [providerKey]: {
+                    [providerOptionsName]: {
                       itemId: value.item.id
                     }
                   }
@@ -24966,7 +25481,7 @@ var OpenAIResponsesLanguageModel = class {
                     ...value.item.error != null ? { error: value.item.error } : {}
                   },
                   providerMetadata: {
-                    [providerKey]: {
+                    [providerOptionsName]: {
                       itemId: value.item.id
                     }
                   }
@@ -25004,7 +25519,7 @@ var OpenAIResponsesLanguageModel = class {
                       operation: value.item.operation
                     }),
                     providerMetadata: {
-                      [providerKey]: {
+                      [providerOptionsName]: {
                         itemId: value.item.id
                       }
                     }
@@ -25050,7 +25565,7 @@ var OpenAIResponsesLanguageModel = class {
                     }
                   }),
                   providerMetadata: {
-                    [providerKey]: { itemId: value.item.id }
+                    [providerOptionsName]: { itemId: value.item.id }
                   }
                 });
               } else if (value.item.type === "shell_call") {
@@ -25065,7 +25580,7 @@ var OpenAIResponsesLanguageModel = class {
                     }
                   }),
                   providerMetadata: {
-                    [providerKey]: { itemId: value.item.id }
+                    [providerOptionsName]: { itemId: value.item.id }
                   }
                 });
               } else if (value.item.type === "reasoning") {
@@ -25080,7 +25595,7 @@ var OpenAIResponsesLanguageModel = class {
                     type: "reasoning-end",
                     id: `${value.item.id}:${summaryIndex}`,
                     providerMetadata: {
-                      [providerKey]: {
+                      [providerOptionsName]: {
                         itemId: value.item.id,
                         reasoningEncryptedContent: (_k = value.item.encrypted_content) != null ? _k : null
                       }
@@ -25186,7 +25701,7 @@ var OpenAIResponsesLanguageModel = class {
                 id: value.item_id,
                 delta: value.delta
               });
-              if (((_m = (_l = options.providerOptions) == null ? void 0 : _l.openai) == null ? void 0 : _m.logprobs) && value.logprobs) {
+              if (((_m = (_l = options.providerOptions) == null ? void 0 : _l[providerOptionsName]) == null ? void 0 : _m.logprobs) && value.logprobs) {
                 logprobs.push(value.logprobs);
               }
             } else if (value.type === "response.reasoning_summary_part.added") {
@@ -25201,7 +25716,7 @@ var OpenAIResponsesLanguageModel = class {
                       type: "reasoning-end",
                       id: `${value.item_id}:${summaryIndex}`,
                       providerMetadata: {
-                        [providerKey]: { itemId: value.item_id }
+                        [providerOptionsName]: { itemId: value.item_id }
                       }
                     });
                     activeReasoningPart.summaryParts[summaryIndex] = "concluded";
@@ -25211,7 +25726,7 @@ var OpenAIResponsesLanguageModel = class {
                   type: "reasoning-start",
                   id: `${value.item_id}:${value.summary_index}`,
                   providerMetadata: {
-                    [providerKey]: {
+                    [providerOptionsName]: {
                       itemId: value.item_id,
                       reasoningEncryptedContent: (_o = (_n = activeReasoning[value.item_id]) == null ? void 0 : _n.encryptedContent) != null ? _o : null
                     }
@@ -25224,7 +25739,7 @@ var OpenAIResponsesLanguageModel = class {
                 id: `${value.item_id}:${value.summary_index}`,
                 delta: value.delta,
                 providerMetadata: {
-                  [providerKey]: {
+                  [providerOptionsName]: {
                     itemId: value.item_id
                   }
                 }
@@ -25235,7 +25750,7 @@ var OpenAIResponsesLanguageModel = class {
                   type: "reasoning-end",
                   id: `${value.item_id}:${value.summary_index}`,
                   providerMetadata: {
-                    [providerKey]: { itemId: value.item_id }
+                    [providerOptionsName]: { itemId: value.item_id }
                   }
                 });
                 activeReasoning[value.item_id].summaryParts[value.summary_index] = "concluded";
@@ -25270,29 +25785,29 @@ var OpenAIResponsesLanguageModel = class {
                   sourceType: "document",
                   id: (_x = (_w = (_v = self.config).generateId) == null ? void 0 : _w.call(_v)) != null ? _x : generateId(),
                   mediaType: "text/plain",
-                  title: (_z = (_y = value.annotation.quote) != null ? _y : value.annotation.filename) != null ? _z : "Document",
-                  filename: (_A = value.annotation.filename) != null ? _A : value.annotation.file_id,
-                  ...value.annotation.file_id ? {
-                    providerMetadata: {
-                      [providerKey]: {
-                        fileId: value.annotation.file_id
-                      }
+                  title: value.annotation.filename,
+                  filename: value.annotation.filename,
+                  providerMetadata: {
+                    [providerOptionsName]: {
+                      type: value.annotation.type,
+                      fileId: value.annotation.file_id,
+                      index: value.annotation.index
                     }
-                  } : {}
+                  }
                 });
               } else if (value.annotation.type === "container_file_citation") {
                 controller.enqueue({
                   type: "source",
                   sourceType: "document",
-                  id: (_D = (_C = (_B = self.config).generateId) == null ? void 0 : _C.call(_B)) != null ? _D : generateId(),
+                  id: (_A = (_z = (_y = self.config).generateId) == null ? void 0 : _z.call(_y)) != null ? _A : generateId(),
                   mediaType: "text/plain",
-                  title: (_F = (_E = value.annotation.filename) != null ? _E : value.annotation.file_id) != null ? _F : "Document",
-                  filename: (_G = value.annotation.filename) != null ? _G : value.annotation.file_id,
+                  title: value.annotation.filename,
+                  filename: value.annotation.filename,
                   providerMetadata: {
-                    [providerKey]: {
+                    [providerOptionsName]: {
+                      type: value.annotation.type,
                       fileId: value.annotation.file_id,
-                      containerId: value.annotation.container_id,
-                      ...value.annotation.index != null ? { index: value.annotation.index } : {}
+                      containerId: value.annotation.container_id
                     }
                   }
                 });
@@ -25300,14 +25815,15 @@ var OpenAIResponsesLanguageModel = class {
                 controller.enqueue({
                   type: "source",
                   sourceType: "document",
-                  id: (_J = (_I = (_H = self.config).generateId) == null ? void 0 : _I.call(_H)) != null ? _J : generateId(),
+                  id: (_D = (_C = (_B = self.config).generateId) == null ? void 0 : _C.call(_B)) != null ? _D : generateId(),
                   mediaType: "application/octet-stream",
                   title: value.annotation.file_id,
                   filename: value.annotation.file_id,
                   providerMetadata: {
-                    [providerKey]: {
+                    [providerOptionsName]: {
+                      type: value.annotation.type,
                       fileId: value.annotation.file_id,
-                      ...value.annotation.index != null ? { index: value.annotation.index } : {}
+                      index: value.annotation.index
                     }
                   }
                 });
@@ -25318,15 +25834,15 @@ var OpenAIResponsesLanguageModel = class {
           },
           flush(controller) {
             const providerMetadata = {
-              [providerKey]: {
+              [providerOptionsName]: {
                 responseId
               }
             };
             if (logprobs.length > 0) {
-              providerMetadata[providerKey].logprobs = logprobs;
+              providerMetadata[providerOptionsName].logprobs = logprobs;
             }
             if (serviceTier !== void 0) {
-              providerMetadata[providerKey].serviceTier = serviceTier;
+              providerMetadata[providerOptionsName].serviceTier = serviceTier;
             }
             controller.enqueue({
               type: "finish",
@@ -25741,7 +26257,7 @@ var OpenAITranscriptionModel = class {
 };
 
 // src/version.ts
-var VERSION$4 = "3.0.2" ;
+var VERSION$4 = "3.0.18" ;
 
 // src/openai-provider.ts
 function createOpenAI(options = {}) {
@@ -25845,7 +26361,7 @@ createOpenAI();
 // src/anthropic-provider.ts
 
 // src/version.ts
-var VERSION$3 = "3.0.2" ;
+var VERSION$3 = "3.0.23" ;
 var anthropicErrorDataSchema = lazySchema(
   () => zodSchema(
     object$1({
@@ -26487,6 +27003,7 @@ var anthropicMessagesChunkSchema = lazySchema(
           }).nullish()
         }),
         usage: looseObject({
+          input_tokens: number$1().nullish(),
           output_tokens: number$1(),
           cache_creation_input_tokens: number$1().nullish()
         })
@@ -26760,7 +27277,8 @@ var webSearch_20250305InputSchema = lazySchema(
 var factory2 = createProviderToolFactoryWithOutputSchema({
   id: "anthropic.web_search_20250305",
   inputSchema: webSearch_20250305InputSchema,
-  outputSchema: webSearch_20250305OutputSchema
+  outputSchema: webSearch_20250305OutputSchema,
+  supportsDeferredResults: true
 });
 var webSearch_20250305 = (args = {}) => {
   return factory2(args);
@@ -26812,7 +27330,8 @@ var webFetch_20250910InputSchema = lazySchema(
 var factory3 = createProviderToolFactoryWithOutputSchema({
   id: "anthropic.web_fetch_20250910",
   inputSchema: webFetch_20250910InputSchema,
-  outputSchema: webFetch_20250910OutputSchema
+  outputSchema: webFetch_20250910OutputSchema,
+  supportsDeferredResults: true
 });
 var webFetch_20250910 = (args = {}) => {
   return factory3(args);
@@ -27287,7 +27806,8 @@ var toolSearchRegex_20251119InputSchema = lazySchema(
 var factory6 = createProviderToolFactoryWithOutputSchema({
   id: "anthropic.tool_search_regex_20251119",
   inputSchema: toolSearchRegex_20251119InputSchema,
-  outputSchema: toolSearchRegex_20251119OutputSchema
+  outputSchema: toolSearchRegex_20251119OutputSchema,
+  supportsDeferredResults: true
 });
 var toolSearchRegex_20251119 = (args = {}) => {
   return factory6(args);
@@ -27310,6 +27830,15 @@ function convertToString(data) {
     functionality: `unsupported data type for text documents: ${typeof data}`
   });
 }
+function isUrlData(data) {
+  return data instanceof URL || isUrlString(data);
+}
+function isUrlString(data) {
+  return typeof data === "string" && /^https?:\/\//i.test(data);
+}
+function getUrlString(data) {
+  return data instanceof URL ? data.toString() : data;
+}
 async function convertToAnthropicMessagesPrompt({
   prompt,
   sendReasoning,
@@ -27317,7 +27846,7 @@ async function convertToAnthropicMessagesPrompt({
   cacheControlValidator,
   toolNameMapping
 }) {
-  var _a, _b, _c, _d, _e, _f, _g, _h, _i, _j, _k, _l, _m, _n, _o;
+  var _a, _b, _c, _d, _e, _f, _g, _h, _i, _j, _k, _l, _m, _n, _o, _p, _q;
   const betas = /* @__PURE__ */ new Set();
   const blocks = groupIntoBlocks(prompt);
   const validator = cacheControlValidator || new CacheControlValidator();
@@ -27393,9 +27922,9 @@ async function convertToAnthropicMessagesPrompt({
                     if (part.mediaType.startsWith("image/")) {
                       anthropicContent.push({
                         type: "image",
-                        source: part.data instanceof URL ? {
+                        source: isUrlData(part.data) ? {
                           type: "url",
-                          url: part.data.toString()
+                          url: getUrlString(part.data)
                         } : {
                           type: "base64",
                           media_type: part.mediaType === "image/*" ? "image/jpeg" : part.mediaType,
@@ -27413,9 +27942,9 @@ async function convertToAnthropicMessagesPrompt({
                       );
                       anthropicContent.push({
                         type: "document",
-                        source: part.data instanceof URL ? {
+                        source: isUrlData(part.data) ? {
                           type: "url",
-                          url: part.data.toString()
+                          url: getUrlString(part.data)
                         } : {
                           type: "base64",
                           media_type: "application/pdf",
@@ -27437,9 +27966,9 @@ async function convertToAnthropicMessagesPrompt({
                       );
                       anthropicContent.push({
                         type: "document",
-                        source: part.data instanceof URL ? {
+                        source: isUrlData(part.data) ? {
                           type: "url",
-                          url: part.data.toString()
+                          url: getUrlString(part.data)
                         } : {
                           type: "text",
                           media_type: "text/plain",
@@ -27870,13 +28399,25 @@ async function convertToAnthropicMessagesPrompt({
                 if (providerToolName === "web_fetch") {
                   const output = part.output;
                   if (output.type === "error-json") {
-                    const errorValue = JSON.parse(output.value);
+                    let errorValue = {};
+                    try {
+                      if (typeof output.value === "string") {
+                        errorValue = JSON.parse(output.value);
+                      } else if (typeof output.value === "object" && output.value !== null) {
+                        errorValue = output.value;
+                      }
+                    } catch (e) {
+                      const extractedErrorCode = (_p = output.value) == null ? void 0 : _p.errorCode;
+                      errorValue = {
+                        errorCode: typeof extractedErrorCode === "string" ? extractedErrorCode : "unknown"
+                      };
+                    }
                     anthropicContent.push({
                       type: "web_fetch_tool_result",
                       tool_use_id: part.toolCallId,
                       content: {
                         type: "web_fetch_tool_result_error",
-                        error_code: errorValue.errorCode
+                        error_code: (_q = errorValue.errorCode) != null ? _q : "unknown"
                       },
                       cache_control: cacheControl
                     });
@@ -28065,6 +28606,21 @@ function mapAnthropicStopReason({
 // src/anthropic-messages-language-model.ts
 function createCitationSource(citation, citationDocuments, generateId3) {
   var _a;
+  if (citation.type === "web_search_result_location") {
+    return {
+      type: "source",
+      sourceType: "url",
+      id: generateId3(),
+      url: citation.url,
+      title: citation.title,
+      providerMetadata: {
+        anthropic: {
+          citedText: citation.cited_text,
+          encryptedIndex: citation.encrypted_index
+        }
+      }
+    };
+  }
   if (citation.type !== "page_location" && citation.type !== "char_location") {
     return;
   }
@@ -28345,6 +28901,15 @@ var AnthropicMessagesLanguageModel = class {
         });
       }
       baseArgs.max_tokens = maxTokens + (thinkingBudget != null ? thinkingBudget : 0);
+    } else {
+      if (topP != null && temperature != null) {
+        warnings.push({
+          type: "unsupported",
+          feature: "topP",
+          details: `topP is not supported when temperature is set. topP is ignored.`
+        });
+        baseArgs.top_p = void 0;
+      }
     }
     if (isKnownModel && baseArgs.max_tokens > maxOutputTokensForModel) {
       if (maxOutputTokens != null) {
@@ -28396,7 +28961,7 @@ var AnthropicMessagesLanguageModel = class {
         toolChoice: { type: "required" },
         disableParallelToolUse: true,
         cacheControlValidator,
-        supportsStructuredOutput
+        supportsStructuredOutput: false
       } : {
         tools: tools != null ? tools : [],
         toolChoice,
@@ -28474,13 +29039,15 @@ var AnthropicMessagesLanguageModel = class {
     });
   }
   async doGenerate(options) {
-    var _a, _b, _c, _d, _e, _f, _g, _h, _i, _j;
+    var _a, _b, _c, _d, _e, _f, _g, _h, _i, _j, _k;
     const { args, warnings, betas, usesJsonResponseTool, toolNameMapping } = await this.getArgs({
       ...options,
       stream: false,
       userSuppliedBetas: await this.getBetasFromHeaders(options.headers)
     });
-    const citationDocuments = this.extractCitationDocuments(options.prompt);
+    const citationDocuments = [
+      ...this.extractCitationDocuments(options.prompt)
+    ];
     const {
       responseHeaders,
       value: response,
@@ -28498,6 +29065,7 @@ var AnthropicMessagesLanguageModel = class {
     });
     const content = [];
     const mcpToolCalls = {};
+    const serverToolCalls = {};
     let isJsonResponseFromTool = false;
     for (const part of response.content) {
       switch (part.type) {
@@ -28592,6 +29160,7 @@ var AnthropicMessagesLanguageModel = class {
               providerExecuted: true
             });
           } else if (part.name === "tool_search_tool_regex" || part.name === "tool_search_tool_bm25") {
+            serverToolCalls[part.id] = part.name;
             content.push({
               type: "tool-call",
               toolCallId: part.id,
@@ -28634,6 +29203,10 @@ var AnthropicMessagesLanguageModel = class {
         }
         case "web_fetch_tool_result": {
           if (part.content.type === "web_fetch_result") {
+            citationDocuments.push({
+              title: (_a = part.content.content.title) != null ? _a : part.content.url,
+              mediaType: part.content.content.source.media_type
+            });
             content.push({
               type: "tool-result",
               toolCallId: part.tool_use_id,
@@ -28694,7 +29267,7 @@ var AnthropicMessagesLanguageModel = class {
                 title: result.title,
                 providerMetadata: {
                   anthropic: {
-                    pageAge: (_a = result.page_age) != null ? _a : null
+                    pageAge: (_b = result.page_age) != null ? _b : null
                   }
                 }
               });
@@ -28725,7 +29298,7 @@ var AnthropicMessagesLanguageModel = class {
                 stdout: part.content.stdout,
                 stderr: part.content.stderr,
                 return_code: part.content.return_code,
-                content: (_b = part.content.content) != null ? _b : []
+                content: (_c = part.content.content) != null ? _c : []
               }
             });
           } else if (part.content.type === "code_execution_tool_result_error") {
@@ -28755,11 +29328,27 @@ var AnthropicMessagesLanguageModel = class {
         }
         // tool search tool results:
         case "tool_search_tool_result": {
+          let providerToolName = serverToolCalls[part.tool_use_id];
+          if (providerToolName == null) {
+            const bm25CustomName = toolNameMapping.toCustomToolName(
+              "tool_search_tool_bm25"
+            );
+            const regexCustomName = toolNameMapping.toCustomToolName(
+              "tool_search_tool_regex"
+            );
+            if (bm25CustomName !== "tool_search_tool_bm25") {
+              providerToolName = "tool_search_tool_bm25";
+            } else if (regexCustomName !== "tool_search_tool_regex") {
+              providerToolName = "tool_search_tool_regex";
+            } else {
+              providerToolName = "tool_search_tool_regex";
+            }
+          }
           if (part.content.type === "tool_search_tool_search_result") {
             content.push({
               type: "tool-result",
               toolCallId: part.tool_use_id,
-              toolName: toolNameMapping.toCustomToolName("tool_search"),
+              toolName: toolNameMapping.toCustomToolName(providerToolName),
               result: part.content.tool_references.map((ref) => ({
                 type: ref.type,
                 toolName: ref.tool_name
@@ -28769,7 +29358,7 @@ var AnthropicMessagesLanguageModel = class {
             content.push({
               type: "tool-result",
               toolCallId: part.tool_use_id,
-              toolName: toolNameMapping.toCustomToolName("tool_search"),
+              toolName: toolNameMapping.toCustomToolName(providerToolName),
               isError: true,
               result: {
                 type: "tool_search_tool_result_error",
@@ -28788,13 +29377,13 @@ var AnthropicMessagesLanguageModel = class {
           finishReason: response.stop_reason,
           isJsonResponseFromTool
         }),
-        raw: (_c = response.stop_reason) != null ? _c : void 0
+        raw: (_d = response.stop_reason) != null ? _d : void 0
       },
       usage: convertAnthropicMessagesUsage(response.usage),
       request: { body: args },
       response: {
-        id: (_d = response.id) != null ? _d : void 0,
-        modelId: (_e = response.model) != null ? _e : void 0,
+        id: (_e = response.id) != null ? _e : void 0,
+        modelId: (_f = response.model) != null ? _f : void 0,
         headers: responseHeaders,
         body: rawResponse
       },
@@ -28802,20 +29391,20 @@ var AnthropicMessagesLanguageModel = class {
       providerMetadata: {
         anthropic: {
           usage: response.usage,
-          cacheCreationInputTokens: (_f = response.usage.cache_creation_input_tokens) != null ? _f : null,
-          stopSequence: (_g = response.stop_sequence) != null ? _g : null,
+          cacheCreationInputTokens: (_g = response.usage.cache_creation_input_tokens) != null ? _g : null,
+          stopSequence: (_h = response.stop_sequence) != null ? _h : null,
           container: response.container ? {
             expiresAt: response.container.expires_at,
             id: response.container.id,
-            skills: (_i = (_h = response.container.skills) == null ? void 0 : _h.map((skill) => ({
+            skills: (_j = (_i = response.container.skills) == null ? void 0 : _i.map((skill) => ({
               type: skill.type,
               skillId: skill.skill_id,
               version: skill.version
-            }))) != null ? _i : null
+            }))) != null ? _j : null
           } : null,
-          contextManagement: (_j = mapAnthropicResponseContextManagement(
+          contextManagement: (_k = mapAnthropicResponseContextManagement(
             response.context_management
-          )) != null ? _j : null
+          )) != null ? _k : null
         }
       }
     };
@@ -28833,7 +29422,9 @@ var AnthropicMessagesLanguageModel = class {
       stream: true,
       userSuppliedBetas: await this.getBetasFromHeaders(options.headers)
     });
-    const citationDocuments = this.extractCitationDocuments(options.prompt);
+    const citationDocuments = [
+      ...this.extractCitationDocuments(options.prompt)
+    ];
     const url = this.buildRequestUrl(true);
     const { responseHeaders, value: response } = await postJsonToApi({
       url,
@@ -28858,6 +29449,7 @@ var AnthropicMessagesLanguageModel = class {
     };
     const contentBlocks = {};
     const mcpToolCalls = {};
+    const serverToolCalls = {};
     let contextManagement = null;
     let rawUsage = void 0;
     let cacheCreationInputTokens = null;
@@ -28872,7 +29464,7 @@ var AnthropicMessagesLanguageModel = class {
           controller.enqueue({ type: "stream-start", warnings });
         },
         transform(chunk, controller) {
-          var _a2, _b2, _c, _d, _e, _f, _g, _h, _i, _j, _k, _l;
+          var _a2, _b2, _c, _d, _e, _f, _g, _h, _i, _j, _k, _l, _m;
           if (options.includeRawChunks) {
             controller.enqueue({ type: "raw", rawValue: chunk.rawValue });
           }
@@ -28984,6 +29576,7 @@ var AnthropicMessagesLanguageModel = class {
                       providerExecuted: true
                     });
                   } else if (part.name === "tool_search_tool_regex" || part.name === "tool_search_tool_bm25") {
+                    serverToolCalls[part.id] = part.name;
                     const customToolName = toolNameMapping.toCustomToolName(
                       part.name
                     );
@@ -29007,6 +29600,10 @@ var AnthropicMessagesLanguageModel = class {
                 }
                 case "web_fetch_tool_result": {
                   if (part.content.type === "web_fetch_result") {
+                    citationDocuments.push({
+                      title: (_a2 = part.content.content.title) != null ? _a2 : part.content.url,
+                      mediaType: part.content.content.source.media_type
+                    });
                     controller.enqueue({
                       type: "tool-result",
                       toolCallId: part.tool_use_id,
@@ -29067,7 +29664,7 @@ var AnthropicMessagesLanguageModel = class {
                         title: result.title,
                         providerMetadata: {
                           anthropic: {
-                            pageAge: (_a2 = result.page_age) != null ? _a2 : null
+                            pageAge: (_b2 = result.page_age) != null ? _b2 : null
                           }
                         }
                       });
@@ -29098,7 +29695,7 @@ var AnthropicMessagesLanguageModel = class {
                         stdout: part.content.stdout,
                         stderr: part.content.stderr,
                         return_code: part.content.return_code,
-                        content: (_b2 = part.content.content) != null ? _b2 : []
+                        content: (_c = part.content.content) != null ? _c : []
                       }
                     });
                   } else if (part.content.type === "code_execution_tool_result_error") {
@@ -29128,11 +29725,27 @@ var AnthropicMessagesLanguageModel = class {
                 }
                 // tool search tool results:
                 case "tool_search_tool_result": {
+                  let providerToolName = serverToolCalls[part.tool_use_id];
+                  if (providerToolName == null) {
+                    const bm25CustomName = toolNameMapping.toCustomToolName(
+                      "tool_search_tool_bm25"
+                    );
+                    const regexCustomName = toolNameMapping.toCustomToolName(
+                      "tool_search_tool_regex"
+                    );
+                    if (bm25CustomName !== "tool_search_tool_bm25") {
+                      providerToolName = "tool_search_tool_bm25";
+                    } else if (regexCustomName !== "tool_search_tool_regex") {
+                      providerToolName = "tool_search_tool_regex";
+                    } else {
+                      providerToolName = "tool_search_tool_regex";
+                    }
+                  }
                   if (part.content.type === "tool_search_tool_search_result") {
                     controller.enqueue({
                       type: "tool-result",
                       toolCallId: part.tool_use_id,
-                      toolName: toolNameMapping.toCustomToolName("tool_search"),
+                      toolName: toolNameMapping.toCustomToolName(providerToolName),
                       result: part.content.tool_references.map((ref) => ({
                         type: ref.type,
                         toolName: ref.tool_name
@@ -29142,7 +29755,7 @@ var AnthropicMessagesLanguageModel = class {
                     controller.enqueue({
                       type: "tool-result",
                       toolCallId: part.tool_use_id,
-                      toolName: toolNameMapping.toCustomToolName("tool_search"),
+                      toolName: toolNameMapping.toCustomToolName(providerToolName),
                       isError: true,
                       result: {
                         type: "tool_search_tool_result_error",
@@ -29341,12 +29954,12 @@ var AnthropicMessagesLanguageModel = class {
             }
             case "message_start": {
               usage.input_tokens = value.message.usage.input_tokens;
-              usage.cache_read_input_tokens = (_c = value.message.usage.cache_read_input_tokens) != null ? _c : 0;
-              usage.cache_creation_input_tokens = (_d = value.message.usage.cache_creation_input_tokens) != null ? _d : 0;
+              usage.cache_read_input_tokens = (_d = value.message.usage.cache_read_input_tokens) != null ? _d : 0;
+              usage.cache_creation_input_tokens = (_e = value.message.usage.cache_creation_input_tokens) != null ? _e : 0;
               rawUsage = {
                 ...value.message.usage
               };
-              cacheCreationInputTokens = (_e = value.message.usage.cache_creation_input_tokens) != null ? _e : null;
+              cacheCreationInputTokens = (_f = value.message.usage.cache_creation_input_tokens) != null ? _f : null;
               if (value.message.container != null) {
                 container = {
                   expiresAt: value.message.container.expires_at,
@@ -29365,8 +29978,8 @@ var AnthropicMessagesLanguageModel = class {
               }
               controller.enqueue({
                 type: "response-metadata",
-                id: (_f = value.message.id) != null ? _f : void 0,
-                modelId: (_g = value.message.model) != null ? _g : void 0
+                id: (_g = value.message.id) != null ? _g : void 0,
+                modelId: (_h = value.message.model) != null ? _h : void 0
               });
               if (value.message.content != null) {
                 for (let contentIndex = 0; contentIndex < value.message.content.length; contentIndex++) {
@@ -29382,7 +29995,7 @@ var AnthropicMessagesLanguageModel = class {
                       id: part.id,
                       toolName: part.name
                     });
-                    const inputStr = JSON.stringify((_h = part.input) != null ? _h : {});
+                    const inputStr = JSON.stringify((_i = part.input) != null ? _i : {});
                     controller.enqueue({
                       type: "tool-input-delta",
                       id: part.id,
@@ -29411,23 +30024,26 @@ var AnthropicMessagesLanguageModel = class {
               return;
             }
             case "message_delta": {
+              if (value.usage.input_tokens != null && usage.input_tokens !== value.usage.input_tokens) {
+                usage.input_tokens = value.usage.input_tokens;
+              }
               usage.output_tokens = value.usage.output_tokens;
               finishReason = {
                 unified: mapAnthropicStopReason({
                   finishReason: value.delta.stop_reason,
                   isJsonResponseFromTool
                 }),
-                raw: (_i = value.delta.stop_reason) != null ? _i : void 0
+                raw: (_j = value.delta.stop_reason) != null ? _j : void 0
               };
-              stopSequence = (_j = value.delta.stop_sequence) != null ? _j : null;
+              stopSequence = (_k = value.delta.stop_sequence) != null ? _k : null;
               container = value.delta.container != null ? {
                 expiresAt: value.delta.container.expires_at,
                 id: value.delta.container.id,
-                skills: (_l = (_k = value.delta.container.skills) == null ? void 0 : _k.map((skill) => ({
+                skills: (_m = (_l = value.delta.container.skills) == null ? void 0 : _l.map((skill) => ({
                   type: skill.type,
                   skillId: skill.skill_id,
                   version: skill.version
-                }))) != null ? _l : null
+                }))) != null ? _m : null
               } : null;
               if (value.delta.context_management) {
                 contextManagement = mapAnthropicResponseContextManagement(
@@ -29502,7 +30118,7 @@ var AnthropicMessagesLanguageModel = class {
   }
 };
 function getModelCapabilities(modelId) {
-  if (modelId.includes("claude-sonnet-4-5") || modelId.includes("claude-opus-4-5")) {
+  if (modelId.includes("claude-sonnet-4-5") || modelId.includes("claude-opus-4-5") || modelId.includes("claude-haiku-4-5")) {
     return {
       maxOutputTokens: 64e3,
       supportsStructuredOutput: true,
@@ -29514,7 +30130,7 @@ function getModelCapabilities(modelId) {
       supportsStructuredOutput: true,
       isKnownModel: true
     };
-  } else if (modelId.includes("claude-sonnet-4-") || modelId.includes("claude-3-7-sonnet") || modelId.includes("claude-haiku-4-5")) {
+  } else if (modelId.includes("claude-sonnet-4-") || modelId.includes("claude-3-7-sonnet")) {
     return {
       maxOutputTokens: 64e3,
       supportsStructuredOutput: false,
@@ -29769,7 +30385,8 @@ var toolSearchBm25_20251119InputSchema = lazySchema(
 var factory7 = createProviderToolFactoryWithOutputSchema({
   id: "anthropic.tool_search_bm25_20251119",
   inputSchema: toolSearchBm25_20251119InputSchema,
-  outputSchema: toolSearchBm25_20251119OutputSchema
+  outputSchema: toolSearchBm25_20251119OutputSchema,
+  supportsDeferredResults: true
 });
 var toolSearchBm25_20251119 = (args = {}) => {
   return factory7(args);
@@ -29939,18 +30556,29 @@ function createAnthropic(options = {}) {
     })
   )) != null ? _a : "https://api.anthropic.com/v1";
   const providerName = (_b = options.name) != null ? _b : "anthropic.messages";
-  const getHeaders = () => withUserAgentSuffix(
-    {
-      "anthropic-version": "2023-06-01",
+  if (options.apiKey && options.authToken) {
+    throw new InvalidArgumentError$1({
+      argument: "apiKey/authToken",
+      message: "Both apiKey and authToken were provided. Please use only one authentication method."
+    });
+  }
+  const getHeaders = () => {
+    const authHeaders = options.authToken ? { Authorization: `Bearer ${options.authToken}` } : {
       "x-api-key": loadApiKey({
         apiKey: options.apiKey,
         environmentVariableName: "ANTHROPIC_API_KEY",
         description: "Anthropic"
-      }),
-      ...options.headers
-    },
-    `ai-sdk/anthropic/${VERSION$3}`
-  );
+      })
+    };
+    return withUserAgentSuffix(
+      {
+        "anthropic-version": "2023-06-01",
+        ...authHeaders,
+        ...options.headers
+      },
+      `ai-sdk/anthropic/${VERSION$3}`
+    );
+  };
   const createChatModel = (modelId) => {
     var _a2;
     return new AnthropicMessagesLanguageModel(modelId, {
@@ -29960,7 +30588,8 @@ function createAnthropic(options = {}) {
       fetch: options.fetch,
       generateId: (_a2 = options.generateId) != null ? _a2 : generateId,
       supportedUrls: () => ({
-        "image/*": [/^https?:\/\/.*$/]
+        "image/*": [/^https?:\/\/.*$/],
+        "application/pdf": [/^https?:\/\/.*$/]
       })
     });
   };
@@ -30047,8 +30676,19 @@ function getOpenAIMetadata(message) {
   var _a, _b;
   return (_b = (_a = message == null ? void 0 : message.providerOptions) == null ? void 0 : _a.openaiCompatible) != null ? _b : {};
 }
+function getAudioFormat(mediaType) {
+  switch (mediaType) {
+    case "audio/wav":
+      return "wav";
+    case "audio/mp3":
+    case "audio/mpeg":
+      return "mp3";
+    default:
+      return null;
+  }
+}
 function convertToOpenAICompatibleChatMessages(prompt) {
-  var _a;
+  var _a, _b, _c;
   const messages = [];
   for (const { role, content, ...message } of prompt) {
     const metadata = getOpenAIMetadata({ ...message });
@@ -30069,6 +30709,7 @@ function convertToOpenAICompatibleChatMessages(prompt) {
         messages.push({
           role: "user",
           content: content.map((part) => {
+            var _a2;
             const partMetadata = getOpenAIMetadata(part);
             switch (part.type) {
               case "text": {
@@ -30084,11 +30725,54 @@ function convertToOpenAICompatibleChatMessages(prompt) {
                     },
                     ...partMetadata
                   };
-                } else {
-                  throw new UnsupportedFunctionalityError({
-                    functionality: `file part media type ${part.mediaType}`
-                  });
                 }
+                if (part.mediaType.startsWith("audio/")) {
+                  if (part.data instanceof URL) {
+                    throw new UnsupportedFunctionalityError({
+                      functionality: "audio file parts with URLs"
+                    });
+                  }
+                  const format = getAudioFormat(part.mediaType);
+                  if (format === null) {
+                    throw new UnsupportedFunctionalityError({
+                      functionality: `audio media type ${part.mediaType}`
+                    });
+                  }
+                  return {
+                    type: "input_audio",
+                    input_audio: {
+                      data: convertToBase64(part.data),
+                      format
+                    },
+                    ...partMetadata
+                  };
+                }
+                if (part.mediaType === "application/pdf") {
+                  if (part.data instanceof URL) {
+                    throw new UnsupportedFunctionalityError({
+                      functionality: "PDF file parts with URLs"
+                    });
+                  }
+                  return {
+                    type: "file",
+                    file: {
+                      filename: (_a2 = part.filename) != null ? _a2 : "document.pdf",
+                      file_data: `data:application/pdf;base64,${convertToBase64(part.data)}`
+                    },
+                    ...partMetadata
+                  };
+                }
+                if (part.mediaType.startsWith("text/")) {
+                  const textContent = part.data instanceof URL ? part.data.toString() : typeof part.data === "string" ? part.data : new TextDecoder().decode(part.data);
+                  return {
+                    type: "text",
+                    text: textContent,
+                    ...partMetadata
+                  };
+                }
+                throw new UnsupportedFunctionalityError({
+                  functionality: `file part media type ${part.mediaType}`
+                });
               }
             }
           }),
@@ -30107,6 +30791,7 @@ function convertToOpenAICompatibleChatMessages(prompt) {
               break;
             }
             case "tool-call": {
+              const thoughtSignature = (_b = (_a = part.providerOptions) == null ? void 0 : _a.google) == null ? void 0 : _b.thoughtSignature;
               toolCalls.push({
                 id: part.toolCallId,
                 type: "function",
@@ -30114,7 +30799,15 @@ function convertToOpenAICompatibleChatMessages(prompt) {
                   name: part.toolName,
                   arguments: JSON.stringify(part.input)
                 },
-                ...partMetadata
+                ...partMetadata,
+                // Include extra_content for Google Gemini thought signatures
+                ...thoughtSignature ? {
+                  extra_content: {
+                    google: {
+                      thought_signature: String(thoughtSignature)
+                    }
+                  }
+                } : {}
               });
               break;
             }
@@ -30141,7 +30834,7 @@ function convertToOpenAICompatibleChatMessages(prompt) {
               contentValue = output.value;
               break;
             case "execution-denied":
-              contentValue = (_a = output.reason) != null ? _a : "Tool execution denied.";
+              contentValue = (_c = output.reason) != null ? _c : "Tool execution denied.";
               break;
             case "content":
             case "json":
@@ -30210,7 +30903,15 @@ var openaiCompatibleProviderOptions = object$1({
   /**
    * Controls the verbosity of the generated text. Defaults to `medium`.
    */
-  textVerbosity: string().optional()
+  textVerbosity: string().optional(),
+  /**
+   * Whether to use strict JSON schema validation.
+   * When true, the model uses constrained decoding to guarantee schema compliance.
+   * Only used when the provider supports structured outputs and a schema is provided.
+   *
+   * @default true
+   */
+  strictJsonSchema: boolean().optional()
 });
 function prepareTools$1({
   tools,
@@ -30292,6 +30993,10 @@ var OpenAICompatibleChatLanguageModel = class {
     var _a, _b, _c;
     return (_c = (_b = (_a = this.config).supportedUrls) == null ? void 0 : _b.call(_a)) != null ? _c : {};
   }
+  transformRequestBody(args) {
+    var _a, _b, _c;
+    return (_c = (_b = (_a = this.config).transformRequestBody) == null ? void 0 : _b.call(_a, args)) != null ? _c : args;
+  }
   async getArgs({
     prompt,
     maxOutputTokens,
@@ -30307,11 +31012,23 @@ var OpenAICompatibleChatLanguageModel = class {
     toolChoice,
     tools
   }) {
-    var _a, _b, _c, _d;
+    var _a, _b, _c, _d, _e;
     const warnings = [];
+    const deprecatedOptions = await parseProviderOptions({
+      provider: "openai-compatible",
+      providerOptions,
+      schema: openaiCompatibleProviderOptions
+    });
+    if (deprecatedOptions != null) {
+      warnings.push({
+        type: "other",
+        message: `The 'openai-compatible' key in providerOptions is deprecated. Use 'openaiCompatible' instead.`
+      });
+    }
     const compatibleOptions = Object.assign(
+      deprecatedOptions != null ? deprecatedOptions : {},
       (_a = await parseProviderOptions({
-        provider: "openai-compatible",
+        provider: "openaiCompatible",
         providerOptions,
         schema: openaiCompatibleProviderOptions
       })) != null ? _a : {},
@@ -30321,6 +31038,7 @@ var OpenAICompatibleChatLanguageModel = class {
         schema: openaiCompatibleProviderOptions
       })) != null ? _b : {}
     );
+    const strictJsonSchema = (_c = compatibleOptions == null ? void 0 : compatibleOptions.strictJsonSchema) != null ? _c : true;
     if (topK != null) {
       warnings.push({ type: "unsupported", feature: "topK" });
     }
@@ -30355,7 +31073,8 @@ var OpenAICompatibleChatLanguageModel = class {
           type: "json_schema",
           json_schema: {
             schema: responseFormat.schema,
-            name: (_c = responseFormat.name) != null ? _c : "response",
+            strict: strictJsonSchema,
+            name: (_d = responseFormat.name) != null ? _d : "response",
             description: responseFormat.description
           }
         } : { type: "json_object" } : void 0,
@@ -30363,7 +31082,7 @@ var OpenAICompatibleChatLanguageModel = class {
         seed,
         ...Object.fromEntries(
           Object.entries(
-            (_d = providerOptions == null ? void 0 : providerOptions[this.providerOptionsName]) != null ? _d : {}
+            (_e = providerOptions == null ? void 0 : providerOptions[this.providerOptionsName]) != null ? _e : {}
           ).filter(
             ([key]) => !Object.keys(openaiCompatibleProviderOptions.shape).includes(key)
           )
@@ -30380,9 +31099,10 @@ var OpenAICompatibleChatLanguageModel = class {
     };
   }
   async doGenerate(options) {
-    var _a, _b, _c, _d, _e, _f;
+    var _a, _b, _c, _d, _e, _f, _g, _h;
     const { args, warnings } = await this.getArgs({ ...options });
-    const body = JSON.stringify(args);
+    const transformedBody = this.transformRequestBody(args);
+    const body = JSON.stringify(transformedBody);
     const {
       responseHeaders,
       value: responseBody,
@@ -30393,7 +31113,7 @@ var OpenAICompatibleChatLanguageModel = class {
         modelId: this.modelId
       }),
       headers: combineHeaders(this.config.headers(), options.headers),
-      body: args,
+      body: transformedBody,
       failedResponseHandler: this.failedResponseHandler,
       successfulResponseHandler: createJsonResponseHandler(
         OpenAICompatibleChatResponseSchema
@@ -30416,21 +31136,27 @@ var OpenAICompatibleChatLanguageModel = class {
     }
     if (choice.message.tool_calls != null) {
       for (const toolCall of choice.message.tool_calls) {
+        const thoughtSignature = (_c = (_b = toolCall.extra_content) == null ? void 0 : _b.google) == null ? void 0 : _c.thought_signature;
         content.push({
           type: "tool-call",
-          toolCallId: (_b = toolCall.id) != null ? _b : generateId(),
+          toolCallId: (_d = toolCall.id) != null ? _d : generateId(),
           toolName: toolCall.function.name,
-          input: toolCall.function.arguments
+          input: toolCall.function.arguments,
+          ...thoughtSignature ? {
+            providerMetadata: {
+              [this.providerOptionsName]: { thoughtSignature }
+            }
+          } : {}
         });
       }
     }
     const providerMetadata = {
       [this.providerOptionsName]: {},
-      ...await ((_d = (_c = this.config.metadataExtractor) == null ? void 0 : _c.extractMetadata) == null ? void 0 : _d.call(_c, {
+      ...await ((_f = (_e = this.config.metadataExtractor) == null ? void 0 : _e.extractMetadata) == null ? void 0 : _f.call(_e, {
         parsedBody: rawResponse
       }))
     };
-    const completionTokenDetails = (_e = responseBody.usage) == null ? void 0 : _e.completion_tokens_details;
+    const completionTokenDetails = (_g = responseBody.usage) == null ? void 0 : _g.completion_tokens_details;
     if ((completionTokenDetails == null ? void 0 : completionTokenDetails.accepted_prediction_tokens) != null) {
       providerMetadata[this.providerOptionsName].acceptedPredictionTokens = completionTokenDetails == null ? void 0 : completionTokenDetails.accepted_prediction_tokens;
     }
@@ -30441,7 +31167,7 @@ var OpenAICompatibleChatLanguageModel = class {
       content,
       finishReason: {
         unified: mapOpenAICompatibleFinishReason(choice.finish_reason),
-        raw: (_f = choice.finish_reason) != null ? _f : void 0
+        raw: (_h = choice.finish_reason) != null ? _h : void 0
       },
       usage: convertOpenAICompatibleChatUsage(responseBody.usage),
       providerMetadata,
@@ -30457,12 +31183,12 @@ var OpenAICompatibleChatLanguageModel = class {
   async doStream(options) {
     var _a;
     const { args, warnings } = await this.getArgs({ ...options });
-    const body = {
+    const body = this.transformRequestBody({
       ...args,
       stream: true,
       // only include stream_options when in strict compatibility mode:
       stream_options: this.config.includeUsage ? { include_usage: true } : void 0
-    };
+    });
     const metadataExtractor = (_a = this.config.metadataExtractor) == null ? void 0 : _a.createStreamExtractor();
     const { responseHeaders, value: response } = await postJsonToApi({
       url: this.config.url({
@@ -30495,7 +31221,7 @@ var OpenAICompatibleChatLanguageModel = class {
             controller.enqueue({ type: "stream-start", warnings });
           },
           transform(chunk, controller) {
-            var _a2, _b, _c, _d, _e, _f, _g, _h, _i, _j, _k, _l, _m, _n;
+            var _a2, _b, _c, _d, _e, _f, _g, _h, _i, _j, _k, _l, _m, _n, _o, _p, _q, _r;
             if (options.includeRawChunks) {
               controller.enqueue({ type: "raw", rawValue: chunk.rawValue });
             }
@@ -30551,6 +31277,13 @@ var OpenAICompatibleChatLanguageModel = class {
               });
             }
             if (delta.content) {
+              if (isActiveReasoning) {
+                controller.enqueue({
+                  type: "reasoning-end",
+                  id: "reasoning-0"
+                });
+                isActiveReasoning = false;
+              }
               if (!isActiveText) {
                 controller.enqueue({ type: "text-start", id: "txt-0" });
                 isActiveText = true;
@@ -30562,8 +31295,15 @@ var OpenAICompatibleChatLanguageModel = class {
               });
             }
             if (delta.tool_calls != null) {
+              if (isActiveReasoning) {
+                controller.enqueue({
+                  type: "reasoning-end",
+                  id: "reasoning-0"
+                });
+                isActiveReasoning = false;
+              }
               for (const toolCallDelta of delta.tool_calls) {
-                const index = toolCallDelta.index;
+                const index = (_c = toolCallDelta.index) != null ? _c : toolCalls.length;
                 if (toolCalls[index] == null) {
                   if (toolCallDelta.id == null) {
                     throw new InvalidResponseDataError({
@@ -30571,7 +31311,7 @@ var OpenAICompatibleChatLanguageModel = class {
                       message: `Expected 'id' to be a string.`
                     });
                   }
-                  if (((_c = toolCallDelta.function) == null ? void 0 : _c.name) == null) {
+                  if (((_d = toolCallDelta.function) == null ? void 0 : _d.name) == null) {
                     throw new InvalidResponseDataError({
                       data: toolCallDelta,
                       message: `Expected 'function.name' to be a string.`
@@ -30587,12 +31327,13 @@ var OpenAICompatibleChatLanguageModel = class {
                     type: "function",
                     function: {
                       name: toolCallDelta.function.name,
-                      arguments: (_d = toolCallDelta.function.arguments) != null ? _d : ""
+                      arguments: (_e = toolCallDelta.function.arguments) != null ? _e : ""
                     },
-                    hasFinished: false
+                    hasFinished: false,
+                    thoughtSignature: (_h = (_g = (_f = toolCallDelta.extra_content) == null ? void 0 : _f.google) == null ? void 0 : _g.thought_signature) != null ? _h : void 0
                   };
                   const toolCall2 = toolCalls[index];
-                  if (((_e = toolCall2.function) == null ? void 0 : _e.name) != null && ((_f = toolCall2.function) == null ? void 0 : _f.arguments) != null) {
+                  if (((_i = toolCall2.function) == null ? void 0 : _i.name) != null && ((_j = toolCall2.function) == null ? void 0 : _j.arguments) != null) {
                     if (toolCall2.function.arguments.length > 0) {
                       controller.enqueue({
                         type: "tool-input-delta",
@@ -30607,9 +31348,16 @@ var OpenAICompatibleChatLanguageModel = class {
                       });
                       controller.enqueue({
                         type: "tool-call",
-                        toolCallId: (_g = toolCall2.id) != null ? _g : generateId(),
+                        toolCallId: (_k = toolCall2.id) != null ? _k : generateId(),
                         toolName: toolCall2.function.name,
-                        input: toolCall2.function.arguments
+                        input: toolCall2.function.arguments,
+                        ...toolCall2.thoughtSignature ? {
+                          providerMetadata: {
+                            [providerOptionsName]: {
+                              thoughtSignature: toolCall2.thoughtSignature
+                            }
+                          }
+                        } : {}
                       });
                       toolCall2.hasFinished = true;
                     }
@@ -30620,24 +31368,31 @@ var OpenAICompatibleChatLanguageModel = class {
                 if (toolCall.hasFinished) {
                   continue;
                 }
-                if (((_h = toolCallDelta.function) == null ? void 0 : _h.arguments) != null) {
-                  toolCall.function.arguments += (_j = (_i = toolCallDelta.function) == null ? void 0 : _i.arguments) != null ? _j : "";
+                if (((_l = toolCallDelta.function) == null ? void 0 : _l.arguments) != null) {
+                  toolCall.function.arguments += (_n = (_m = toolCallDelta.function) == null ? void 0 : _m.arguments) != null ? _n : "";
                 }
                 controller.enqueue({
                   type: "tool-input-delta",
                   id: toolCall.id,
-                  delta: (_k = toolCallDelta.function.arguments) != null ? _k : ""
+                  delta: (_o = toolCallDelta.function.arguments) != null ? _o : ""
                 });
-                if (((_l = toolCall.function) == null ? void 0 : _l.name) != null && ((_m = toolCall.function) == null ? void 0 : _m.arguments) != null && isParsableJson(toolCall.function.arguments)) {
+                if (((_p = toolCall.function) == null ? void 0 : _p.name) != null && ((_q = toolCall.function) == null ? void 0 : _q.arguments) != null && isParsableJson(toolCall.function.arguments)) {
                   controller.enqueue({
                     type: "tool-input-end",
                     id: toolCall.id
                   });
                   controller.enqueue({
                     type: "tool-call",
-                    toolCallId: (_n = toolCall.id) != null ? _n : generateId(),
+                    toolCallId: (_r = toolCall.id) != null ? _r : generateId(),
                     toolName: toolCall.function.name,
-                    input: toolCall.function.arguments
+                    input: toolCall.function.arguments,
+                    ...toolCall.thoughtSignature ? {
+                      providerMetadata: {
+                        [providerOptionsName]: {
+                          thoughtSignature: toolCall.thoughtSignature
+                        }
+                      }
+                    } : {}
                   });
                   toolCall.hasFinished = true;
                 }
@@ -30663,7 +31418,14 @@ var OpenAICompatibleChatLanguageModel = class {
                 type: "tool-call",
                 toolCallId: (_a2 = toolCall.id) != null ? _a2 : generateId(),
                 toolName: toolCall.function.name,
-                input: toolCall.function.arguments
+                input: toolCall.function.arguments,
+                ...toolCall.thoughtSignature ? {
+                  providerMetadata: {
+                    [providerOptionsName]: {
+                      thoughtSignature: toolCall.thoughtSignature
+                    }
+                  }
+                } : {}
               });
             }
             const providerMetadata = {
@@ -30703,7 +31465,7 @@ var openaiCompatibleTokenUsageSchema = object$1({
     rejected_prediction_tokens: number$1().nullish()
   }).nullish()
 }).nullish();
-var OpenAICompatibleChatResponseSchema = object$1({
+var OpenAICompatibleChatResponseSchema = looseObject({
   id: string().nullish(),
   created: number$1().nullish(),
   model: string().nullish(),
@@ -30720,7 +31482,13 @@ var OpenAICompatibleChatResponseSchema = object$1({
             function: object$1({
               name: string(),
               arguments: string()
-            })
+            }),
+            // Support for Google Gemini thought signatures via OpenAI compatibility
+            extra_content: object$1({
+              google: object$1({
+                thought_signature: string().nullish()
+              }).nullish()
+            }).nullish()
           })
         ).nullish()
       }),
@@ -30729,7 +31497,7 @@ var OpenAICompatibleChatResponseSchema = object$1({
   ),
   usage: openaiCompatibleTokenUsageSchema
 });
-var chunkBaseSchema = object$1({
+var chunkBaseSchema = looseObject({
   id: string().nullish(),
   created: number$1().nullish(),
   model: string().nullish(),
@@ -30744,12 +31512,19 @@ var chunkBaseSchema = object$1({
         reasoning: string().nullish(),
         tool_calls: array$1(
           object$1({
-            index: number$1(),
+            index: number$1().nullish(),
+            //google does not send index
             id: string().nullish(),
             function: object$1({
               name: string().nullish(),
               arguments: string().nullish()
-            })
+            }),
+            // Support for Google Gemini thought signatures via OpenAI compatibility
+            extra_content: object$1({
+              google: object$1({
+                thought_signature: string().nullish()
+              }).nullish()
+            }).nullish()
           })
         ).nullish()
       }).nullish(),
@@ -30825,6 +31600,19 @@ var OpenAICompatibleImageModel = class {
   get provider() {
     return this.config.provider;
   }
+  /**
+   * The provider options key used to extract provider-specific options.
+   */
+  get providerOptionsKey() {
+    return this.config.provider.split(".")[0].trim();
+  }
+  // TODO: deprecate non-camelCase keys and remove in future major version
+  getArgs(providerOptions) {
+    return {
+      ...providerOptions[this.providerOptionsKey],
+      ...providerOptions[toCamelCase(this.providerOptionsKey)]
+    };
+  }
   async doGenerate({
     prompt,
     n,
@@ -30837,7 +31625,7 @@ var OpenAICompatibleImageModel = class {
     files,
     mask
   }) {
-    var _a, _b, _c, _d, _e, _f, _g;
+    var _a, _b, _c, _d, _e;
     const warnings = [];
     if (aspectRatio != null) {
       warnings.push({
@@ -30850,6 +31638,7 @@ var OpenAICompatibleImageModel = class {
       warnings.push({ type: "unsupported", feature: "seed" });
     }
     const currentDate = (_c = (_b = (_a = this.config._internal) == null ? void 0 : _a.currentDate) == null ? void 0 : _b.call(_a)) != null ? _c : /* @__PURE__ */ new Date();
+    const args = this.getArgs(providerOptions);
     if (files != null && files.length > 0) {
       const { value: response2, responseHeaders: responseHeaders2 } = await postFormDataToApi({
         url: this.config.url({
@@ -30864,10 +31653,10 @@ var OpenAICompatibleImageModel = class {
           mask: mask != null ? await fileToBlob(mask) : void 0,
           n,
           size,
-          ...(_d = providerOptions.openai) != null ? _d : {}
+          ...args
         }),
         failedResponseHandler: createJsonErrorResponseHandler(
-          (_e = this.config.errorStructure) != null ? _e : defaultOpenAICompatibleErrorStructure
+          (_d = this.config.errorStructure) != null ? _d : defaultOpenAICompatibleErrorStructure
         ),
         successfulResponseHandler: createJsonResponseHandler(
           openaiCompatibleImageResponseSchema
@@ -30896,11 +31685,11 @@ var OpenAICompatibleImageModel = class {
         prompt,
         n,
         size,
-        ...(_f = providerOptions.openai) != null ? _f : {},
+        ...args,
         response_format: "b64_json"
       },
       failedResponseHandler: createJsonErrorResponseHandler(
-        (_g = this.config.errorStructure) != null ? _g : defaultOpenAICompatibleErrorStructure
+        (_e = this.config.errorStructure) != null ? _e : defaultOpenAICompatibleErrorStructure
       ),
       successfulResponseHandler: createJsonResponseHandler(
         openaiCompatibleImageResponseSchema
@@ -30928,6 +31717,9 @@ async function fileToBlob(file) {
   }
   const data = file.data instanceof Uint8Array ? file.data : convertBase64ToUint8Array(file.data);
   return new Blob([data], { type: file.mediaType });
+}
+function toCamelCase(str) {
+  return str.replace(/[_-]([a-z])/g, (g) => g[1].toUpperCase());
 }
 
 // src/xai-provider.ts
@@ -31053,8 +31845,8 @@ function convertXaiChatUsage(usage) {
       cacheWrite: void 0
     },
     outputTokens: {
-      total: usage.completion_tokens + reasoningTokens,
-      text: usage.completion_tokens,
+      total: usage.completion_tokens,
+      text: usage.completion_tokens - reasoningTokens,
       reasoning: reasoningTokens
     },
     raw: usage
@@ -31365,12 +32157,13 @@ var XaiChatLanguageModel = class {
   async doGenerate(options) {
     var _a, _b;
     const { args: body, warnings } = await this.getArgs(options);
+    const url = `${(_a = this.config.baseURL) != null ? _a : "https://api.x.ai/v1"}/chat/completions`;
     const {
       responseHeaders,
       value: response,
       rawValue: rawResponse
     } = await postJsonToApi({
-      url: `${(_a = this.config.baseURL) != null ? _a : "https://api.x.ai/v1"}/chat/completions`,
+      url,
       headers: combineHeaders(this.config.headers(), options.headers),
       body,
       failedResponseHandler: xaiFailedResponseHandler,
@@ -31380,6 +32173,17 @@ var XaiChatLanguageModel = class {
       abortSignal: options.abortSignal,
       fetch: this.config.fetch
     });
+    if (response.error != null) {
+      throw new APICallError({
+        message: response.error,
+        url,
+        requestBodyValues: body,
+        statusCode: 200,
+        responseHeaders,
+        responseBody: JSON.stringify(rawResponse),
+        isRetryable: response.code === "The service is currently unavailable"
+      });
+    }
     const choice = response.choices[0];
     const content = [];
     if (choice.message.content != null && choice.message.content.length > 0) {
@@ -31409,12 +32213,12 @@ var XaiChatLanguageModel = class {
       }
     }
     if (response.citations != null) {
-      for (const url of response.citations) {
+      for (const url2 of response.citations) {
         content.push({
           type: "source",
           sourceType: "url",
           id: this.config.generateId(),
-          url
+          url: url2
         });
       }
     }
@@ -31425,6 +32229,7 @@ var XaiChatLanguageModel = class {
         raw: (_b = choice.finish_reason) != null ? _b : void 0
       },
       usage: convertXaiChatUsage(response.usage),
+      // defined when there is no error
       request: { body },
       response: {
         ...getResponseMetadata$2(response),
@@ -31444,12 +32249,47 @@ var XaiChatLanguageModel = class {
         include_usage: true
       }
     };
+    const url = `${(_a = this.config.baseURL) != null ? _a : "https://api.x.ai/v1"}/chat/completions`;
     const { responseHeaders, value: response } = await postJsonToApi({
-      url: `${(_a = this.config.baseURL) != null ? _a : "https://api.x.ai/v1"}/chat/completions`,
+      url,
       headers: combineHeaders(this.config.headers(), options.headers),
       body,
       failedResponseHandler: xaiFailedResponseHandler,
-      successfulResponseHandler: createEventSourceResponseHandler(xaiChatChunkSchema),
+      successfulResponseHandler: async ({ response: response2 }) => {
+        const responseHeaders2 = extractResponseHeaders(response2);
+        const contentType = response2.headers.get("content-type");
+        if (contentType == null ? void 0 : contentType.includes("application/json")) {
+          const responseBody = await response2.text();
+          const parsedError = await safeParseJSON({
+            text: responseBody,
+            schema: xaiStreamErrorSchema
+          });
+          if (parsedError.success) {
+            throw new APICallError({
+              message: parsedError.value.error,
+              url,
+              requestBodyValues: body,
+              statusCode: 200,
+              responseHeaders: responseHeaders2,
+              responseBody,
+              isRetryable: parsedError.value.code === "The service is currently unavailable"
+            });
+          }
+          throw new APICallError({
+            message: "Invalid JSON response",
+            url,
+            requestBodyValues: body,
+            statusCode: 200,
+            responseHeaders: responseHeaders2,
+            responseBody
+          });
+        }
+        return createEventSourceResponseHandler(xaiChatChunkSchema)({
+          response: response2,
+          url,
+          requestBodyValues: body
+        });
+      },
       abortSignal: options.abortSignal,
       fetch: this.config.fetch
     });
@@ -31461,6 +32301,7 @@ var XaiChatLanguageModel = class {
     let isFirstChunk = true;
     const contentBlocks = {};
     const lastReasoningDeltas = {};
+    let activeReasoningBlockId = void 0;
     const self = this;
     return {
       stream: response.pipeThrough(
@@ -31485,12 +32326,12 @@ var XaiChatLanguageModel = class {
               isFirstChunk = false;
             }
             if (value.citations != null) {
-              for (const url of value.citations) {
+              for (const url2 of value.citations) {
                 controller.enqueue({
                   type: "source",
                   sourceType: "url",
                   id: self.config.generateId(),
-                  url
+                  url: url2
                 });
               }
             }
@@ -31511,13 +32352,21 @@ var XaiChatLanguageModel = class {
             const choiceIndex = choice.index;
             if (delta.content != null && delta.content.length > 0) {
               const textContent = delta.content;
+              if (activeReasoningBlockId != null && !contentBlocks[activeReasoningBlockId].ended) {
+                controller.enqueue({
+                  type: "reasoning-end",
+                  id: activeReasoningBlockId
+                });
+                contentBlocks[activeReasoningBlockId].ended = true;
+                activeReasoningBlockId = void 0;
+              }
               const lastMessage = body.messages[body.messages.length - 1];
               if ((lastMessage == null ? void 0 : lastMessage.role) === "assistant" && textContent === lastMessage.content) {
                 return;
               }
               const blockId = `text-${value.id || choiceIndex}`;
               if (contentBlocks[blockId] == null) {
-                contentBlocks[blockId] = { type: "text" };
+                contentBlocks[blockId] = { type: "text", ended: false };
                 controller.enqueue({
                   type: "text-start",
                   id: blockId
@@ -31536,7 +32385,8 @@ var XaiChatLanguageModel = class {
               }
               lastReasoningDeltas[blockId] = delta.reasoning_content;
               if (contentBlocks[blockId] == null) {
-                contentBlocks[blockId] = { type: "reasoning" };
+                contentBlocks[blockId] = { type: "reasoning", ended: false };
+                activeReasoningBlockId = blockId;
                 controller.enqueue({
                   type: "reasoning-start",
                   id: blockId
@@ -31549,6 +32399,14 @@ var XaiChatLanguageModel = class {
               });
             }
             if (delta.tool_calls != null) {
+              if (activeReasoningBlockId != null && !contentBlocks[activeReasoningBlockId].ended) {
+                controller.enqueue({
+                  type: "reasoning-end",
+                  id: activeReasoningBlockId
+                });
+                contentBlocks[activeReasoningBlockId].ended = true;
+                activeReasoningBlockId = void 0;
+              }
               for (const toolCall of delta.tool_calls) {
                 const toolCallId = toolCall.id;
                 controller.enqueue({
@@ -31576,10 +32434,12 @@ var XaiChatLanguageModel = class {
           },
           flush(controller) {
             for (const [blockId, block] of Object.entries(contentBlocks)) {
-              controller.enqueue({
-                type: block.type === "text" ? "text-end" : "reasoning-end",
-                id: blockId
-              });
+              if (!block.ended) {
+                controller.enqueue({
+                  type: block.type === "text" ? "text-end" : "reasoning-end",
+                  id: blockId
+                });
+              }
             }
             controller.enqueue({ type: "finish", finishReason, usage });
           }
@@ -31631,10 +32491,12 @@ var xaiChatResponseSchema = object$1({
       index: number$1(),
       finish_reason: string().nullish()
     })
-  ),
-  object: literal("chat.completion"),
-  usage: xaiUsageSchema,
-  citations: array$1(string().url()).nullish()
+  ).nullish(),
+  object: literal("chat.completion").nullish(),
+  usage: xaiUsageSchema.nullish(),
+  citations: array$1(string().url()).nullish(),
+  code: string().nullish(),
+  error: string().nullish()
 });
 var xaiChatChunkSchema = object$1({
   id: string().nullish(),
@@ -31664,8 +32526,10 @@ var xaiChatChunkSchema = object$1({
   usage: xaiUsageSchema.nullish(),
   citations: array$1(string().url()).nullish()
 });
-
-// src/responses/convert-to-xai-responses-input.ts
+var xaiStreamErrorSchema = object$1({
+  code: string(),
+  error: string()
+});
 async function convertToXaiResponsesInput({
   prompt
 }) {
@@ -31682,18 +32546,23 @@ async function convertToXaiResponsesInput({
         break;
       }
       case "user": {
-        let userContent = "";
+        const contentParts = [];
         for (const block of message.content) {
           switch (block.type) {
             case "text": {
-              userContent += block.text;
+              contentParts.push({ type: "input_text", text: block.text });
               break;
             }
             case "file": {
-              inputWarnings.push({
-                type: "other",
-                message: `xAI Responses API does not support ${block.type} in user messages`
-              });
+              if (block.mediaType.startsWith("image/")) {
+                const mediaType = block.mediaType === "image/*" ? "image/jpeg" : block.mediaType;
+                const imageUrl = block.data instanceof URL ? block.data.toString() : `data:${mediaType};base64,${convertToBase64(block.data)}`;
+                contentParts.push({ type: "input_image", image_url: imageUrl });
+              } else {
+                throw new UnsupportedFunctionalityError({
+                  functionality: `file part media type ${block.mediaType}`
+                });
+              }
               break;
             }
             default: {
@@ -31706,7 +32575,7 @@ async function convertToXaiResponsesInput({
         }
         input.push({
           role: "user",
-          content: userContent
+          content: contentParts
         });
         break;
       }
@@ -31875,6 +32744,15 @@ var toolCallSchema = object$1({
   status: string(),
   action: any().optional()
 });
+var mcpCallSchema = object$1({
+  name: string().optional(),
+  arguments: string().optional(),
+  output: string().optional(),
+  error: string().optional(),
+  id: string(),
+  status: string(),
+  server_label: string().optional()
+});
 var outputItemSchema = discriminatedUnion("type", [
   object$1({
     type: literal("web_search_call"),
@@ -31905,6 +32783,10 @@ var outputItemSchema = discriminatedUnion("type", [
     ...toolCallSchema.shape
   }),
   object$1({
+    type: literal("mcp_call"),
+    ...mcpCallSchema.shape
+  }),
+  object$1({
     type: literal("message"),
     role: string(),
     content: array$1(messageContentPartSchema),
@@ -31922,7 +32804,8 @@ var outputItemSchema = discriminatedUnion("type", [
     type: literal("reasoning"),
     id: string(),
     summary: array$1(reasoningSummaryPartSchema),
-    status: string()
+    status: string(),
+    encrypted_content: string().nullish()
   })
 ]);
 var xaiResponsesUsageSchema = object$1({
@@ -31944,7 +32827,7 @@ var xaiResponsesResponseSchema = object$1({
   model: string().nullish(),
   object: literal("response"),
   output: array$1(outputItemSchema),
-  usage: xaiResponsesUsageSchema,
+  usage: xaiResponsesUsageSchema.nullish(),
   status: string()
 });
 var xaiResponsesChunkSchema = union([
@@ -32064,6 +32947,16 @@ var xaiResponsesChunkSchema = union([
     output_index: number$1()
   }),
   object$1({
+    type: literal("response.custom_tool_call_input.done"),
+    item_id: string(),
+    output_index: number$1()
+  }),
+  object$1({
+    type: literal("response.custom_tool_call_input.delta"),
+    item_id: string(),
+    output_index: number$1()
+  }),
+  object$1({
     type: literal("response.code_execution_call.in_progress"),
     item_id: string(),
     output_index: number$1()
@@ -32089,9 +32982,83 @@ var xaiResponsesChunkSchema = union([
     output_index: number$1()
   }),
   object$1({
+    type: literal("response.code_interpreter_call.interpreting"),
+    item_id: string(),
+    output_index: number$1()
+  }),
+  object$1({
     type: literal("response.code_interpreter_call.completed"),
     item_id: string(),
     output_index: number$1()
+  }),
+  // Code interpreter code streaming events
+  object$1({
+    type: literal("response.code_interpreter_call_code.delta"),
+    item_id: string(),
+    output_index: number$1(),
+    delta: string()
+  }),
+  object$1({
+    type: literal("response.code_interpreter_call_code.done"),
+    item_id: string(),
+    output_index: number$1(),
+    code: string()
+  }),
+  object$1({
+    type: literal("response.custom_tool_call_input.delta"),
+    item_id: string(),
+    output_index: number$1(),
+    delta: string()
+  }),
+  object$1({
+    type: literal("response.custom_tool_call_input.done"),
+    item_id: string(),
+    output_index: number$1(),
+    input: string()
+  }),
+  object$1({
+    type: literal("response.mcp_call.in_progress"),
+    item_id: string(),
+    output_index: number$1()
+  }),
+  object$1({
+    type: literal("response.mcp_call.executing"),
+    item_id: string(),
+    output_index: number$1()
+  }),
+  object$1({
+    type: literal("response.mcp_call.completed"),
+    item_id: string(),
+    output_index: number$1()
+  }),
+  object$1({
+    type: literal("response.mcp_call.failed"),
+    item_id: string(),
+    output_index: number$1()
+  }),
+  object$1({
+    type: literal("response.mcp_call_arguments.delta"),
+    item_id: string(),
+    output_index: number$1(),
+    delta: string()
+  }),
+  object$1({
+    type: literal("response.mcp_call_arguments.done"),
+    item_id: string(),
+    output_index: number$1(),
+    arguments: string().optional()
+  }),
+  object$1({
+    type: literal("response.mcp_call_output.delta"),
+    item_id: string(),
+    output_index: number$1(),
+    delta: string()
+  }),
+  object$1({
+    type: literal("response.mcp_call_output.done"),
+    item_id: string(),
+    output_index: number$1(),
+    output: string().optional()
   }),
   object$1({
     type: literal("response.done"),
@@ -32118,6 +33085,33 @@ var xaiResponsesProviderOptions = object$1({
    */
   previousResponseId: string().optional()
 });
+var mcpServerArgsSchema = lazySchema(
+  () => zodSchema(
+    object$1({
+      serverUrl: string().describe("The URL of the MCP server"),
+      serverLabel: string().optional().describe("A label for the MCP server"),
+      serverDescription: string().optional().describe("Description of the MCP server"),
+      allowedTools: array$1(string()).optional().describe("List of allowed tool names"),
+      headers: record(string(), string()).optional().describe("Custom headers to send"),
+      authorization: string().optional().describe("Authorization header value")
+    })
+  )
+);
+var mcpServerOutputSchema = lazySchema(
+  () => zodSchema(
+    object$1({
+      name: string(),
+      arguments: string(),
+      result: unknown()
+    })
+  )
+);
+var mcpServerToolFactory = createProviderToolFactoryWithOutputSchema({
+  id: "xai.mcp",
+  inputSchema: lazySchema(() => zodSchema(object$1({}))),
+  outputSchema: mcpServerOutputSchema
+});
+var mcpServer = (args) => mcpServerToolFactory(args);
 var webSearchArgsSchema = lazySchema(
   () => zodSchema(
     object$1({
@@ -32251,8 +33245,18 @@ async function prepareResponsesTools$1({
           break;
         }
         case "xai.mcp": {
+          const args = await validateTypes({
+            value: tool.args,
+            schema: mcpServerArgsSchema
+          });
           xaiTools2.push({
-            type: "mcp"
+            type: "mcp",
+            server_url: args.serverUrl,
+            server_label: args.serverLabel,
+            server_description: args.serverDescription,
+            allowed_tools: args.allowedTools,
+            headers: args.headers,
+            authorization: args.authorization
           });
           break;
         }
@@ -32267,11 +33271,9 @@ async function prepareResponsesTools$1({
     } else {
       xaiTools2.push({
         type: "function",
-        function: {
-          name: tool.name,
-          description: tool.description,
-          parameters: tool.inputSchema
-        }
+        name: tool.name,
+        description: tool.description,
+        parameters: tool.inputSchema
       });
     }
   }
@@ -32381,11 +33383,12 @@ var XaiResponsesLanguageModel = class {
     topP,
     stopSequences,
     seed,
+    responseFormat,
     providerOptions,
     tools,
     toolChoice
   }) {
-    var _a, _b, _c, _d;
+    var _a, _b, _c, _d, _e, _f;
     const warnings = [];
     const options = (_a = await parseProviderOptions({
       provider: "xai",
@@ -32404,6 +33407,9 @@ var XaiResponsesLanguageModel = class {
     const codeExecutionToolName = (_d = tools == null ? void 0 : tools.find(
       (tool) => tool.type === "provider" && tool.id === "xai.code_execution"
     )) == null ? void 0 : _d.name;
+    const mcpToolName = (_e = tools == null ? void 0 : tools.find(
+      (tool) => tool.type === "provider" && tool.id === "xai.mcp"
+    )) == null ? void 0 : _e.name;
     const { input, inputWarnings } = await convertToXaiResponsesInput({
       prompt});
     warnings.push(...inputWarnings);
@@ -32423,6 +33429,17 @@ var XaiResponsesLanguageModel = class {
       temperature,
       top_p: topP,
       seed,
+      ...(responseFormat == null ? void 0 : responseFormat.type) === "json" && {
+        text: {
+          format: responseFormat.schema != null ? {
+            type: "json_schema",
+            strict: true,
+            name: (_f = responseFormat.name) != null ? _f : "response",
+            description: responseFormat.description,
+            schema: responseFormat.schema
+          } : { type: "json_object" }
+        }
+      },
       ...options.reasoningEffort != null && {
         reasoning: { effort: options.reasoningEffort }
       },
@@ -32445,17 +33462,19 @@ var XaiResponsesLanguageModel = class {
       warnings,
       webSearchToolName,
       xSearchToolName,
-      codeExecutionToolName
+      codeExecutionToolName,
+      mcpToolName
     };
   }
   async doGenerate(options) {
-    var _a, _b, _c, _d, _e, _f, _g, _h;
+    var _a, _b, _c, _d, _e, _f, _g, _h, _i, _j;
     const {
       args: body,
       warnings,
       webSearchToolName,
       xSearchToolName,
-      codeExecutionToolName
+      codeExecutionToolName,
+      mcpToolName
     } = await this.getArgs(options);
     const {
       responseHeaders,
@@ -32485,16 +33504,18 @@ var XaiResponsesLanguageModel = class {
       "x_thread_fetch"
     ];
     for (const part of response.output) {
-      if (part.type === "web_search_call" || part.type === "x_search_call" || part.type === "code_interpreter_call" || part.type === "code_execution_call" || part.type === "view_image_call" || part.type === "view_x_video_call" || part.type === "custom_tool_call") {
+      if (part.type === "web_search_call" || part.type === "x_search_call" || part.type === "code_interpreter_call" || part.type === "code_execution_call" || part.type === "view_image_call" || part.type === "view_x_video_call" || part.type === "custom_tool_call" || part.type === "mcp_call") {
         let toolName = (_b = part.name) != null ? _b : "";
-        if (webSearchSubTools.includes((_c = part.name) != null ? _c : "")) {
+        if (webSearchSubTools.includes((_c = part.name) != null ? _c : "") || part.type === "web_search_call") {
           toolName = webSearchToolName != null ? webSearchToolName : "web_search";
-        } else if (xSearchSubTools.includes((_d = part.name) != null ? _d : "")) {
+        } else if (xSearchSubTools.includes((_d = part.name) != null ? _d : "") || part.type === "x_search_call") {
           toolName = xSearchToolName != null ? xSearchToolName : "x_search";
-        } else if (part.name === "code_execution") {
+        } else if (part.name === "code_execution" || part.type === "code_interpreter_call" || part.type === "code_execution_call") {
           toolName = codeExecutionToolName != null ? codeExecutionToolName : "code_execution";
+        } else if (part.type === "mcp_call") {
+          toolName = (_e = mcpToolName != null ? mcpToolName : part.name) != null ? _e : "mcp";
         }
-        const toolInput = part.type === "custom_tool_call" ? (_e = part.input) != null ? _e : "" : (_f = part.arguments) != null ? _f : "";
+        const toolInput = part.type === "custom_tool_call" ? (_f = part.input) != null ? _f : "" : part.type === "mcp_call" ? (_g = part.arguments) != null ? _g : "" : (_h = part.arguments) != null ? _h : "";
         content.push({
           type: "tool-call",
           toolCallId: part.id,
@@ -32521,7 +33542,7 @@ var XaiResponsesLanguageModel = class {
                     sourceType: "url",
                     id: this.config.generateId(),
                     url: annotation.url,
-                    title: (_g = annotation.title) != null ? _g : annotation.url
+                    title: (_i = annotation.title) != null ? _i : annotation.url
                   });
                 }
               }
@@ -32538,15 +33559,44 @@ var XaiResponsesLanguageModel = class {
           });
           break;
         }
+        case "reasoning": {
+          const summaryTexts = part.summary.map((s) => s.text).filter((text) => text && text.length > 0);
+          if (summaryTexts.length > 0) {
+            const reasoningText = summaryTexts.join("");
+            if (part.encrypted_content || part.id) {
+              content.push({
+                type: "reasoning",
+                text: reasoningText,
+                providerMetadata: {
+                  xai: {
+                    ...part.encrypted_content && {
+                      reasoningEncryptedContent: part.encrypted_content
+                    },
+                    ...part.id && { itemId: part.id }
+                  }
+                }
+              });
+            } else {
+              content.push({
+                type: "reasoning",
+                text: reasoningText
+              });
+            }
+          }
+          break;
+        }
       }
     }
     return {
       content,
       finishReason: {
         unified: mapXaiResponsesFinishReason(response.status),
-        raw: (_h = response.status) != null ? _h : void 0
+        raw: (_j = response.status) != null ? _j : void 0
       },
-      usage: convertXaiResponsesUsage(response.usage),
+      usage: response.usage ? convertXaiResponsesUsage(response.usage) : {
+        inputTokens: { total: 0, noCache: 0, cacheRead: 0, cacheWrite: 0 },
+        outputTokens: { total: 0, text: 0, reasoning: 0 }
+      },
       request: { body },
       response: {
         ...getResponseMetadata$2(response),
@@ -32563,7 +33613,8 @@ var XaiResponsesLanguageModel = class {
       warnings,
       webSearchToolName,
       xSearchToolName,
-      codeExecutionToolName
+      codeExecutionToolName,
+      mcpToolName
     } = await this.getArgs(options);
     const body = {
       ...args,
@@ -32588,6 +33639,7 @@ var XaiResponsesLanguageModel = class {
     let isFirstChunk = true;
     const contentBlocks = {};
     const seenToolCalls = /* @__PURE__ */ new Set();
+    const activeReasoning = {};
     const self = this;
     return {
       stream: response.pipeThrough(
@@ -32596,7 +33648,7 @@ var XaiResponsesLanguageModel = class {
             controller.enqueue({ type: "stream-start", warnings });
           },
           transform(chunk, controller) {
-            var _a2, _b, _c, _d, _e, _f, _g, _h;
+            var _a2, _b, _c, _d, _e, _f, _g, _h, _i, _j;
             if (options.includeRawChunks) {
               controller.enqueue({ type: "raw", rawValue: chunk.rawValue });
             }
@@ -32619,7 +33671,12 @@ var XaiResponsesLanguageModel = class {
               const blockId = `reasoning-${event.item_id}`;
               controller.enqueue({
                 type: "reasoning-start",
-                id: blockId
+                id: blockId,
+                providerMetadata: {
+                  xai: {
+                    itemId: event.item_id
+                  }
+                }
               });
             }
             if (event.type === "response.reasoning_summary_text.delta") {
@@ -32627,16 +33684,17 @@ var XaiResponsesLanguageModel = class {
               controller.enqueue({
                 type: "reasoning-delta",
                 id: blockId,
-                delta: event.delta
+                delta: event.delta,
+                providerMetadata: {
+                  xai: {
+                    itemId: event.item_id
+                  }
+                }
               });
               return;
             }
             if (event.type === "response.reasoning_summary_text.done") {
-              const blockId = `reasoning-${event.item_id}`;
-              controller.enqueue({
-                type: "reasoning-end",
-                id: blockId
-              });
+              return;
             }
             if (event.type === "response.output_text.delta") {
               const blockId = `text-${event.item_id}`;
@@ -32696,31 +33754,55 @@ var XaiResponsesLanguageModel = class {
               }
               return;
             }
+            if (event.type === "response.custom_tool_call_input.delta" || event.type === "response.custom_tool_call_input.done") {
+              return;
+            }
             if (event.type === "response.output_item.added" || event.type === "response.output_item.done") {
               const part = event.item;
-              if (part.type === "web_search_call" || part.type === "x_search_call" || part.type === "code_interpreter_call" || part.type === "code_execution_call" || part.type === "view_image_call" || part.type === "view_x_video_call" || part.type === "custom_tool_call") {
-                if (!seenToolCalls.has(part.id)) {
+              if (part.type === "reasoning") {
+                if (event.type === "response.output_item.done") {
+                  controller.enqueue({
+                    type: "reasoning-end",
+                    id: `reasoning-${part.id}`,
+                    providerMetadata: {
+                      xai: {
+                        ...part.encrypted_content && {
+                          reasoningEncryptedContent: part.encrypted_content
+                        },
+                        ...part.id && { itemId: part.id }
+                      }
+                    }
+                  });
+                  delete activeReasoning[part.id];
+                }
+                return;
+              }
+              if (part.type === "web_search_call" || part.type === "x_search_call" || part.type === "code_interpreter_call" || part.type === "code_execution_call" || part.type === "view_image_call" || part.type === "view_x_video_call" || part.type === "custom_tool_call" || part.type === "mcp_call") {
+                const webSearchSubTools = [
+                  "web_search",
+                  "web_search_with_snippets",
+                  "browse_page"
+                ];
+                const xSearchSubTools = [
+                  "x_user_search",
+                  "x_keyword_search",
+                  "x_semantic_search",
+                  "x_thread_fetch"
+                ];
+                let toolName = (_c = part.name) != null ? _c : "";
+                if (webSearchSubTools.includes((_d = part.name) != null ? _d : "") || part.type === "web_search_call") {
+                  toolName = webSearchToolName != null ? webSearchToolName : "web_search";
+                } else if (xSearchSubTools.includes((_e = part.name) != null ? _e : "") || part.type === "x_search_call") {
+                  toolName = xSearchToolName != null ? xSearchToolName : "x_search";
+                } else if (part.name === "code_execution" || part.type === "code_interpreter_call" || part.type === "code_execution_call") {
+                  toolName = codeExecutionToolName != null ? codeExecutionToolName : "code_execution";
+                } else if (part.type === "mcp_call") {
+                  toolName = (_f = mcpToolName != null ? mcpToolName : part.name) != null ? _f : "mcp";
+                }
+                const toolInput = part.type === "custom_tool_call" ? (_g = part.input) != null ? _g : "" : part.type === "mcp_call" ? (_h = part.arguments) != null ? _h : "" : (_i = part.arguments) != null ? _i : "";
+                const shouldEmit = part.type === "custom_tool_call" ? event.type === "response.output_item.done" : !seenToolCalls.has(part.id);
+                if (shouldEmit && !seenToolCalls.has(part.id)) {
                   seenToolCalls.add(part.id);
-                  const webSearchSubTools = [
-                    "web_search",
-                    "web_search_with_snippets",
-                    "browse_page"
-                  ];
-                  const xSearchSubTools = [
-                    "x_user_search",
-                    "x_keyword_search",
-                    "x_semantic_search",
-                    "x_thread_fetch"
-                  ];
-                  let toolName = (_c = part.name) != null ? _c : "";
-                  if (webSearchSubTools.includes((_d = part.name) != null ? _d : "")) {
-                    toolName = webSearchToolName != null ? webSearchToolName : "web_search";
-                  } else if (xSearchSubTools.includes((_e = part.name) != null ? _e : "")) {
-                    toolName = xSearchToolName != null ? xSearchToolName : "x_search";
-                  } else if (part.name === "code_execution") {
-                    toolName = codeExecutionToolName != null ? codeExecutionToolName : "code_execution";
-                  }
-                  const toolInput = part.type === "custom_tool_call" ? (_f = part.input) != null ? _f : "" : (_g = part.arguments) != null ? _g : "";
                   controller.enqueue({
                     type: "tool-input-start",
                     id: part.id,
@@ -32755,12 +33837,12 @@ var XaiResponsesLanguageModel = class {
                         type: "text-start",
                         id: blockId
                       });
+                      controller.enqueue({
+                        type: "text-delta",
+                        id: blockId,
+                        delta: contentPart.text
+                      });
                     }
-                    controller.enqueue({
-                      type: "text-delta",
-                      id: blockId,
-                      delta: contentPart.text
-                    });
                   }
                   if (contentPart.annotations) {
                     for (const annotation of contentPart.annotations) {
@@ -32770,7 +33852,7 @@ var XaiResponsesLanguageModel = class {
                           sourceType: "url",
                           id: self.config.generateId(),
                           url: annotation.url,
-                          title: (_h = annotation.title) != null ? _h : annotation.url
+                          title: (_j = annotation.title) != null ? _j : annotation.url
                         });
                       }
                     }
@@ -32856,6 +33938,7 @@ var viewXVideo = (args = {}) => viewXVideoToolFactory(args);
 // src/tool/index.ts
 var xaiTools = {
   codeExecution,
+  mcpServer,
   viewImage,
   viewXVideo,
   webSearch,
@@ -32863,7 +33946,7 @@ var xaiTools = {
 };
 
 // src/version.ts
-var VERSION$2 = "3.0.3" ;
+var VERSION$2 = "3.0.34" ;
 
 // src/xai-provider.ts
 var xaiErrorStructure = {
@@ -33372,7 +34455,7 @@ var errorToMessage = (data) => {
 };
 
 // src/version.ts
-var VERSION$1 = "3.0.2" ;
+var VERSION$1 = "3.0.11" ;
 
 // src/perplexity-provider.ts
 function createPerplexity(options = {}) {
@@ -33415,7 +34498,7 @@ createPerplexity();
 // src/cerebras-provider.ts
 
 // src/version.ts
-var VERSION = "2.0.3" ;
+var VERSION = "2.0.20" ;
 
 // src/cerebras-provider.ts
 var cerebrasErrorSchema = object$1({
