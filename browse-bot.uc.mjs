@@ -2,8 +2,8 @@
 // @name            Browse Bot
 // @description     Transforms the standard Zen Browser findbar into a modern, floating, AI-powered chat interface. Inspired by Arc Browser.
 // @author          Bibek Bhusal
-// @version         2.5.6
-// @lastUpdated     2026-01-26
+// @version         2.5.7
+// @lastUpdated     2026-01-27
 // @ignorecache
 // @homepage        https://github.com/Vertex-Mods/Browse-Bot
 // ==/UserScript==
@@ -1681,14 +1681,7 @@ const SettingsModal = {
 // Toast API based on sine toast
 
 
-/**
- * Debug logging function
- * @param {...any} args - Arguments to log
- */
 function debugLog(...args) {
-  {
-    console.log("[Toast API]", ...args);
-  }
 }
 
 /**
@@ -1703,10 +1696,8 @@ function debugLog(...args) {
  * @param {string} [options.id] - Unique toast ID for duplicate prevention
  */
 function showToast(options = {}) {
-  debugLog("showToast called with options:", options);
 
   const { title, description, preset = 0, onClick, buttonText, timeout = 3000, id } = options;
-  debugLog("Parsed options:", { title, description, preset, buttonText, timeout, id });
 
   if (!title) {
     console.error("Toast: title is required");
@@ -1715,7 +1706,6 @@ function showToast(options = {}) {
 
   // Generate unique ID if not provided
   const toastId = id || `custom-${Date.now()}-${Math.random().toString(36).substring(2, 11)}`;
-  debugLog("Generated toast ID:", toastId);
 
   try {
     // Import the uc_api module
@@ -1846,7 +1836,6 @@ function showToast(options = {}) {
       debugLog("No browser window found for setTimeout");
     }
   } catch (error) {
-    debugLog("Error in showToast:", error);
     console.error("Toast API error:", error);
   }
 }
