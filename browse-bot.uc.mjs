@@ -2,8 +2,8 @@
 // @name            Browse Bot
 // @description     Transforms the standard Zen Browser findbar into a modern, floating, AI-powered chat interface. Inspired by Arc Browser.
 // @author          Bibek Bhusal
-// @version         2.5.7
-// @lastUpdated     2026-01-27
+// @version         2.5.8
+// @lastUpdated     2026-01-29
 // @ignorecache
 // @homepage        https://github.com/Vertex-Mods/Browse-Bot
 // ==/UserScript==
@@ -872,6 +872,101 @@ const escapeXmlAttribute = (str) => {
     .replace(/'/g, "&apos;");
 };
 
+/**
+ * Creates a unique signature for a keyboard shortcut.
+ * @param {KeyboardEvent} event - The keyboard event.
+ * @returns {string} A unique signature string.
+ */
+function eventToShortcutSignature(event) {
+  const modifiers = [];
+  if (event.ctrlKey || event.metaKey) modifiers.push("ctrl");
+  if (event.altKey) modifiers.push("alt");
+  if (event.shiftKey) modifiers.push("shift");
+  modifiers.push(normalizeKeyName(event.key));
+  return modifiers.join("+");
+}
+
+function normalizeKeyName(key) {
+  if (!key) return "";
+  const k = key.toLowerCase();
+  if (k === " " || k === "space" || k === "spacebar") return "space";
+  return k;
+}
+
+/**
+ * Creates a unique signature for a shortcut string.
+ * @param {string} shortcutStr - The shortcut string (e.g., "Ctrl+K").
+ * @returns {string} A unique signature string.
+ */
+function shortcutStringToSignature(shortcutStr) {
+  if (!shortcutStr) return "";
+  return shortcutStr
+    .toLowerCase()
+    .replace(/control/g, "ctrl")
+    .replace(/option/g, "alt")
+    .split("+")
+    .map((s) => normalizeKeyName(s.trim()))
+    .join("+");
+}
+
+let _shortcuts = new Map();
+
+/**
+ * Handles keydown events and executes matching shortcuts.
+ * @param {KeyboardEvent} event - The keyboard event.
+ */
+function handleKeyDown(event) {
+  const signature = eventToShortcutSignature(event);
+  const shortcut = _shortcuts.get(signature);
+
+  if (shortcut) {
+    event.preventDefault();
+    event.stopPropagation();
+    shortcut.callback(event);
+  }
+}
+
+/**
+ * Initializes the registry and starts listening for keyboard events.
+ */
+function initShortcutRegistry() {
+  window.addEventListener("keydown", handleKeyDown, true);
+}
+
+/**
+ * Registers a new keyboard shortcut.
+ * @param {string} shortcutStr - The shortcut string (e.g., "Ctrl+Shift+K").
+ * @param {string} id - A unique identifier for this shortcut.
+ * @param {Function} callback - The function to execute when the shortcut is triggered.
+ * @returns {boolean} True if registration was successful, false otherwise.
+ */
+function registerShortcut(shortcutStr, id, callback) {
+  if (!shortcutStr || !id || typeof callback !== "function") {
+    console.error("registerShortcutInRegistry: Invalid arguments", { shortcutStr, id, callback });
+    return false;
+  }
+  unregisterShortcutById(id);
+
+  const signature = shortcutStringToSignature(shortcutStr);
+  _shortcuts.set(signature, { id, callback, shortcutStr });
+  return true;
+}
+
+/**
+ * Unregisters a shortcut by its ID.
+ * @param {string} id - The ID of the shortcut to unregister.
+ * @returns {boolean} True if unregistration was successful, false otherwise.
+ */
+function unregisterShortcutById(id) {
+  for (const [signature, shortcut] of _shortcuts.entries()) {
+    if (shortcut.id === id) {
+      _shortcuts.delete(signature);
+      return true;
+    }
+  }
+  return false;
+}
+
 const SettingsModal = {
   _modalElement: null,
   _currentPrefValues: {},
@@ -918,12 +1013,7 @@ const SettingsModal = {
       return;
     }
 
-    let shortcutString = "";
-    if (event.ctrlKey || event.metaKey) shortcutString += "Ctrl+";
-    if (event.altKey) shortcutString += "Alt+";
-    if (event.shiftKey) shortcutString += "Shift+";
-    shortcutString += event.key.toUpperCase();
-
+    const shortcutString = eventToShortcutSignature(event);
     targetInput.value = shortcutString;
     this._currentPrefValues[prefKey] = shortcutString;
     PREFS.debugLog(`Shortcut for ${prefKey} set to: ${shortcutString}`);
@@ -3251,33 +3341,6 @@ ${toolExamples.join("\n\n")}
   }
 };
 
-/**
- * Creates a unique signature for a keyboard shortcut.
- * @param {KeyboardEvent} event - The keyboard event.
- * @returns {string} A unique signature string.
- */
-function eventToShortcutSignature(event) {
-  const modifiers = [];
-  if (event.ctrlKey || event.metaKey) modifiers.push("ctrl");
-  if (event.altKey) modifiers.push("alt");
-  if (event.shiftKey) modifiers.push("shift");
-  modifiers.push(event.key.toLowerCase());
-  return modifiers.join("+");
-}
-
-/**
- * Creates a unique signature for a shortcut string.
- * @param {string} shortcutStr - The shortcut string (e.g., "Ctrl+K").
- * @returns {string} A unique signature string.
- */
-function shortcutStringToSignature(shortcutStr) {
-  if (!shortcutStr) return "";
-  return shortcutStr
-    .toLowerCase()
-    .replace(/control/g, "ctrl")
-    .replace(/option/g, "alt");
-}
-
 const icons = {
   loading: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="var(--browse-bot-muted)" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" width="100%" height="100%"><path d="M21 12a9 9 0 1 1-6.219-8.56"/></svg>`,
   success: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="var(--browse-bot-success)" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" width="100%" height="100%"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>`,
@@ -4605,17 +4668,6 @@ const browseBotFindbar = {
   },
 
   addKeymaps: function (e) {
-    const currentShortcut = shortcutStringToSignature(PREFS.shortcutFindbar);
-    const eventSignature = eventToShortcutSignature(e);
-
-    if (eventSignature === currentShortcut) {
-      e.preventDefault();
-      e.stopPropagation();
-      this.expanded = true;
-      this.show();
-      this.focusPrompt();
-      this.setPromptTextFromSelection();
-    }
     if (e.key?.toLowerCase() === "escape") {
       if (SettingsModal._modalElement && SettingsModal._modalElement.parentNode) {
         e.preventDefault();
@@ -5578,7 +5630,6 @@ const urlbarAI = {
   _originalHeight: null,
   _initialized: false,
   _enabled: false,
-  _prefListener: null,
 
   get enabled() {
     return PREFS.getPref(PREFS.URLBAR_AI_ENABLED);
@@ -5656,7 +5707,7 @@ const urlbarAI = {
       return false;
     }
     try {
-      const textbox = gURLBar.textbox;
+      const textbox = gURLBar;
       if (!textbox) return false;
       if (!gURLBar.view.isOpen) {
         this._hideSuggestions();
@@ -5688,7 +5739,7 @@ const urlbarAI = {
       return false;
     }
     try {
-      const textbox = gURLBar.textbox;
+      const textbox = gURLBar;
       if (!textbox) return false;
       if (!gURLBar.view.isOpen) {
         this._resetHideSuggestions();
@@ -5717,7 +5768,7 @@ const urlbarAI = {
 
   clearAnimationPropertiesInUrlBar() {
     try {
-      const textbox = gURLBar.textbox;
+      const textbox = gURLBar;
       if (!textbox) return;
       textbox.style.removeProperty("transition");
       textbox.style.removeProperty("overflow");
@@ -5740,6 +5791,7 @@ const urlbarAI = {
       gURLBar.inputField.setAttribute("placeholder", "Command to AI");
       this.animateAIOn();
       gURLBar.startQuery();
+      gURLBar.focus();
     } else {
       if (forceClose) this._closeUrlBar();
       else this.animateAIOff();
@@ -5749,19 +5801,6 @@ const urlbarAI = {
       gURLBar.value = "";
     }
     PREFS.debugLog(`urlbarAI: AI mode is now ${this._isAIMode ? "ON" : "OFF"}`);
-  },
-
-  handleGlobalKeyDown(e) {
-    const currentShortcut = shortcutStringToSignature(PREFS.shortcutUrlbar);
-    const eventSignature = eventToShortcutSignature(e);
-
-    if (eventSignature === currentShortcut) {
-      PREFS.debugLog("urlbarAI: Custom shortcut detected");
-      e.preventDefault();
-      e.stopPropagation();
-      gURLBar.focus();
-      setTimeout(() => this.toggleAIMode(), 0);
-    }
   },
 
   handleUrlbarKeyDown(e) {
@@ -5785,7 +5824,6 @@ const urlbarAI = {
 
   addListeners() {
     PREFS.debugLog("urlbarAI: Adding event listeners");
-    this._boundHandleGlobalKeyDown = this.handleGlobalKeyDown.bind(this);
     this._boundHandleUrlbarKeyDown = this.handleUrlbarKeyDown.bind(this);
     this._boundDisableAIMode = () => {
       gURLBar.inputField.setAttribute("placeholder", this._originalPlaceholder);
@@ -5797,7 +5835,6 @@ const urlbarAI = {
       }
     };
 
-    document.addEventListener("keydown", this._boundHandleGlobalKeyDown, true);
     gURLBar.inputField.addEventListener("keydown", this._boundHandleUrlbarKeyDown, true);
     gURLBar.inputField.addEventListener("blur", this._boundDisableAIMode);
     gURLBar.view.panel.addEventListener("popuphiding", this._boundDisableAIMode);
@@ -5805,10 +5842,6 @@ const urlbarAI = {
 
   removeListeners() {
     PREFS.debugLog("urlbarAI: Removing event listeners");
-    if (this._boundHandleGlobalKeyDown) {
-      document.removeEventListener("keydown", this._boundHandleGlobalKeyDown, true);
-      this._boundHandleGlobalKeyDown = null;
-    }
     if (this._boundHandleUrlbarKeyDown) {
       gURLBar.inputField.removeEventListener("keydown", this._boundHandleUrlbarKeyDown, true);
       this._boundHandleUrlbarKeyDown = null;
@@ -5950,19 +5983,44 @@ function setupCommandPaletteIntegration(retryCount = 0) {
   }
 }
 
+function registerUrlBarShortcut(value = PREFS.shortcutUrlbar) {
+  if (!urlbarAI.enabled) return;
+  registerShortcut(value, "toggle-url-bar-ai", () => {
+    urlbarAI.toggleAIMode();
+  });
+}
+function registerFindbarShortcut(value = PREFS.shortcutFindbar) {
+  if (!browseBotFindbar.enabled) return;
+  registerShortcut(value, "toggle-findbar-ai-bar", () => {
+    browseBotFindbar.expanded = !browseBotFindbar.expanded;
+  });
+  initShortcutRegistry();
+}
+
+function setupShortcuts() {
+  registerFindbarShortcut();
+  registerUrlBarShortcut();
+  addPrefListener(PREFS.SHORTCUT_URLBAR, (val) => registerUrlBarShortcut(val.value));
+  addPrefListener(PREFS.SHORTCUT_FINDBAR, (val) => registerFindbarShortcut(val.value));
+}
+
 function init() {
   // Init findbar-AI
   browseBotFindbar.init();
-  addPrefListener(PREFS.ENABLED, browseBotFindbar.handleEnabledChange.bind(browseBotFindbar));
+  addPrefListener(PREFS.ENABLED, (val) => {
+    browseBotFindbar.handleEnabledChange(val);
+    registerFindbarShortcut();
+  });
   window.browseBotFindbar = browseBotFindbar;
 
   // Init URL bar-AI
   urlbarAI.init();
-  urlbarAI._prefListener = addPrefListener(
-    PREFS.URLBAR_AI_ENABLED,
-    urlbarAI.handlePrefChange.bind(urlbarAI)
-  );
+  addPrefListener(PREFS.URLBAR_AI_ENABLED, (val) => {
+    urlbarAI.handlePrefChange();
+    registerUrlBarShortcut(val);
+  });
 
+  setupShortcuts();
   setupCommandPaletteIntegration();
 }
 
