@@ -1,8 +1,8 @@
 // ==UserScript==
 // @name            Browse Bot
-// @description     Transforms the standard Zen Browser findbar into a modern, floating, AI-powered chat interface. Inspired by Arc Browser.
+// @description     Findbar-only AI chat for Zen Browser — page-aware Q&A without URL bar or agentic tools.
 // @author          Bibek Bhusal
-// @version         2.5.82
+// @version         3.0.0-findbar-only
 // @lastUpdated     2026-02-05
 // @ignorecache
 // @homepage        https://github.com/Vertex-Mods/Browse-Bot
@@ -13,7 +13,7 @@
 // To make changes, please edit the source files in the repository:
 // https://github.com/BibekBhusal0/zen-custom-js
 
-import { n as number, t as tool, o as object, s as string, a as array, c as createCerebras, b as createPerplexity, d as createOpenAI, e as createOllama, f as createMistral, x as xai, g as createGoogleGenerativeAI, h as createAnthropic, i as stepCountIs, j as generateText, k as streamText, l as output_exports } from './vercel-ai-sdk.uc.mjs';
+import { n as number, o as object, s as string, a as array, c as createCerebras, b as createPerplexity, d as createOpenAI, e as createOllama, f as createMistral, x as xai, g as createGoogleGenerativeAI, h as createAnthropic, j as generateText, k as streamText, l as output_exports } from './vercel-ai-sdk.uc.mjs';
 
 function setPref(key, value) {
   try {
@@ -131,10 +131,7 @@ class BrowseBotPREFS extends PREFS$1 {
   static REMEMBER_DIMENSIONS = "extension.browse-bot.findbar-ai.remember-dimensions";
   static WIDTH = "extension.browse-bot.findbar-ai.width";
   static STREAM_ENABLED = "extension.browse-bot.findbar-ai.stream-enabled";
-  static AGENTIC_MODE = "extension.browse-bot.findbar-ai.agentic-mode";
   static CITATIONS_ENABLED = "extension.browse-bot.findbar-ai.citations-enabled";
-  static MAX_TOOL_CALLS = "extension.browse-bot.findbar-ai.max-tool-calls";
-  static CONFORMATION = "extension.browse-bot.findbar-ai.conform-before-tool-call";
   static CONTEXT_MENU_ENABLED = "extension.browse-bot.findbar-ai.context-menu-enabled";
   static CONTEXT_MENU_AUTOSEND = "extension.browse-bot.findbar-ai.context-menu-autosend";
   static CONTEXT_MENU_COMMAND_WITH_SELECTION =
@@ -145,11 +142,6 @@ class BrowseBotPREFS extends PREFS$1 {
   static CUSTOM_SYSTEM_PROMPT = "extension.browse-bot.custom-system-prompt";
 
   static SHORTCUT_FINDBAR = "extension.browse-bot.findbar-ai.shortcut-findbar";
-  static SHORTCUT_URLBAR = "extension.browse-bot.urlbar-ai.shortcut-urlbar";
-
-  static URLBAR_AI_ENABLED = "extension.browse-bot.urlbar-ai-enabled";
-  static URLBAR_AI_HIDE_SUGGESTIONS = "extension.browse-bot.urlbar-ai.hide-suggestions";
-  static URLBAR_AI_ANIMATIONS_ENABLED = "extension.browse-bot.urlbar-ai.animations-enabled";
 
   static SOLID_BG = "extension.browse-bot.solid-bg";
 
@@ -184,11 +176,7 @@ class BrowseBotPREFS extends PREFS$1 {
 
   static defaultValues = {
     [BrowseBotPREFS.ENABLED]: true,
-    [BrowseBotPREFS.URLBAR_AI_ENABLED]: true,
-    [BrowseBotPREFS.URLBAR_AI_HIDE_SUGGESTIONS]: true,
-    [BrowseBotPREFS.URLBAR_AI_ANIMATIONS_ENABLED]: true,
     [BrowseBotPREFS.MINIMAL]: true,
-    [BrowseBotPREFS.AGENTIC_MODE]: false,
     [BrowseBotPREFS.DEBUG_MODE]: false,
     [BrowseBotPREFS.PERSIST]: false,
     [BrowseBotPREFS.STREAM_ENABLED]: true,
@@ -219,11 +207,8 @@ class BrowseBotPREFS extends PREFS$1 {
     [BrowseBotPREFS.POSITION]: "top-right",
     [BrowseBotPREFS.REMEMBER_DIMENSIONS]: true,
     [BrowseBotPREFS.WIDTH]: 500,
-    [BrowseBotPREFS.MAX_TOOL_CALLS]: 5,
-    [BrowseBotPREFS.CONFORMATION]: true,
     [BrowseBotPREFS.BACKGROUND_STYLE]: "solid",
     [BrowseBotPREFS.SHORTCUT_FINDBAR]: "ctrl+shift+f",
-    [BrowseBotPREFS.SHORTCUT_URLBAR]: "ctrl+space",
     [BrowseBotPREFS.CUSTOM_SYSTEM_PROMPT]: "",
     [BrowseBotPREFS.LLM_TEMPERATURE]: 0.7,
     [BrowseBotPREFS.LLM_TOP_P]: 1.0,
@@ -246,11 +231,7 @@ class BrowseBotPREFS extends PREFS$1 {
       "extension.browse-bot.dnd-enabled": this.DND_ENABLED,
       "extension.browse-bot.position": this.POSITION,
       "extension.browse-bot.stream-enabled": this.STREAM_ENABLED,
-      "extension.browse-bot.god-mode": this.AGENTIC_MODE,
-      "extension.browse-bot.findbar-god-mode": this.AGENTIC_MODE,
       "extension.browse-bot.citations-enabled": this.CITATIONS_ENABLED,
-      "extension.browse-bot.max-tool-calls": this.MAX_TOOL_CALLS,
-      "extension.browse-bot.conform-before-tool-call": this.CONFORMATION,
       "extension.browse-bot.context-menu-enabled": this.CONTEXT_MENU_ENABLED,
       "extension.browse-bot.context-menu-autosend": this.CONTEXT_MENU_AUTOSEND,
     };
@@ -292,14 +273,6 @@ class BrowseBotPREFS extends PREFS$1 {
 
   static set streamEnabled(value) {
     this.setPref(this.STREAM_ENABLED, value);
-  }
-
-  static set agenticMode(value) {
-    this.setPref(this.AGENTIC_MODE, value);
-  }
-
-  static get agenticMode() {
-    return this.getPref(this.AGENTIC_MODE);
   }
 
   static get citationsEnabled() {
@@ -366,14 +339,6 @@ class BrowseBotPREFS extends PREFS$1 {
     return this.backgroundStyle === "pseudo";
   }
 
-  static get maxToolCalls() {
-    return this.getPref(this.MAX_TOOL_CALLS);
-  }
-
-  static set maxToolCalls(value) {
-    this.setPref(this.MAX_TOOL_CALLS, value);
-  }
-
   // static get copyBtnEnabled() {
   //   return this.getPref(this.COPY_BTN_ENABLED);
   // }
@@ -389,14 +354,6 @@ class BrowseBotPREFS extends PREFS$1 {
   // static set markdownEnabled(value) {
   //   this.setPref(this.MARKDOWN_ENABLED, value);
   // }
-
-  static get conformation() {
-    return this.getPref(this.CONFORMATION);
-  }
-
-  static set conformation(value) {
-    this.setPref(this.CONFORMATION, value);
-  }
 
   // static get showToolCall() {
   //   return this.getPref(this.SHOW_TOOL_CALL);
@@ -502,14 +459,6 @@ class BrowseBotPREFS extends PREFS$1 {
     this.setPref(this.SHORTCUT_FINDBAR, value);
   }
 
-  static get shortcutUrlbar() {
-    return this.getPref(this.SHORTCUT_URLBAR);
-  }
-
-  static set shortcutUrlbar(value) {
-    this.setPref(this.SHORTCUT_URLBAR, value);
-  }
-
   static get customSystemPrompt() {
     return this.getPref(this.CUSTOM_SYSTEM_PROMPT);
   }
@@ -527,15 +476,6 @@ async function frameScript() {
       url: content.location.href,
       title: content.document.title,
     };
-  };
-
-  const extractRelevantContent = () => {
-    const clonedBody = content.document.body.cloneNode(true);
-    const elementsToRemove = clonedBody.querySelectorAll(
-      "script, style, meta, noscript, iframe, svg, canvas, img, video, audio, object, embed, applet, link, head"
-    );
-    elementsToRemove.forEach((el) => el.remove());
-    return clonedBody.innerHTML;
   };
 
   const extractTextContent = (trimWhiteSpace = true) => {
@@ -568,111 +508,7 @@ async function frameScript() {
       .trim();
   };
 
-  async function getYouTubeTranscript() {
-    const win = content;
-    const doc = content.document;
-
-    async function ensureBodyAvailable() {
-      if (doc.body) return;
-      await new Promise((resolve) => {
-        const check = () => {
-          if (doc.body) resolve();
-          else win.setTimeout(check, 50);
-        };
-        check();
-      });
-    }
-
-    function waitForSelectorWithObserver(selector, timeout = 5000) {
-      return new Promise((resolve, reject) => {
-        ensureBodyAvailable()
-          .then(() => {
-            const el = doc.querySelector(selector);
-            if (el) return resolve(el);
-
-            const observer = new win.MutationObserver(() => {
-              const el = doc.querySelector(selector);
-              if (el) {
-                observer.disconnect();
-                resolve(el);
-              }
-            });
-
-            observer.observe(doc.body, {
-              childList: true,
-              subtree: true,
-            });
-
-            win.setTimeout(() => {
-              observer.disconnect();
-              reject(new Error(`Timeout waiting for ${selector}`));
-            }, timeout);
-          })
-          .catch((e) => {
-            reject(new Error(`waitForSelectorWithObserver failed: ${e.message}`));
-          });
-      });
-    }
-
-    if (!doc.querySelector("ytd-transcript-renderer")) {
-      const button = doc.querySelector('button[aria-label="Show transcript"]');
-      if (!button)
-        throw new Error('"Show transcript" button not found — transcript may not be available.');
-      button.click();
-      await waitForSelectorWithObserver("ytd-transcript-renderer", 5000);
-    }
-
-    await waitForSelectorWithObserver("ytd-transcript-segment-renderer .segment-text", 5000);
-
-    const segments = Array.from(
-      doc.querySelectorAll("ytd-transcript-segment-renderer .segment-text")
-    );
-    if (!segments.length) throw new Error("Transcript segments found, but all are empty.");
-
-    const transcript = segments
-      .map((el) => el.textContent.trim())
-      .filter(Boolean)
-      .join("\n");
-    return transcript;
-  }
-
-  const getYoutubeDescription = async () => {
-    const descriptionContainer = content.document.querySelector("#description-inline-expander");
-    if (descriptionContainer) {
-      const expandButton =
-        descriptionContainer.querySelector("#expand") ||
-        descriptionContainer.querySelector("#expand-button") ||
-        descriptionContainer.querySelector("tp-yt-paper-button#more");
-      // Check if button is visible, as it's hidden when expanded
-      if (expandButton && expandButton.offsetParent !== null) {
-        expandButton.click();
-        await new Promise((resolve) => setTimeout(resolve, 0));
-      }
-    }
-
-    const desc = content.document.querySelector(
-      "#description-inline-expander .yt-core-attributed-string, #description .content, .ytd-expandable-video-description-body-renderer .yt-core-attributed-string"
-    );
-    return desc ? desc.textContent.trim() : "Description not found.";
-  };
-
-  const getYoutubeComments = (count = 10) => {
-    const comments = Array.from(
-      content.document.querySelectorAll("ytd-comment-thread-renderer #content-text")
-    ).slice(0, count);
-    if (comments.length === 0) return ["No comments found or they are not loaded yet."];
-    return comments.map((c) => c.textContent.trim());
-  };
-
   const handlers = {
-    GetPageHTMLContent: () => {
-      return {
-        content: extractRelevantContent(),
-        url: getUrlAndTitle().url,
-        title: getUrlAndTitle().title,
-      };
-    },
-
     GetSelectedText: () => {
       const selection = content.getSelection();
       return {
@@ -687,41 +523,6 @@ async function frameScript() {
         textContent: extractTextContent(trimWhiteSpace),
         ...getUrlAndTitle(),
       };
-    },
-
-    ClickElement: ({ selector }) => {
-      const element = content.document.querySelector(selector);
-      if (!element) {
-        throw new Error(`Element with selector "${selector}" not found.`);
-      }
-      element.click();
-      return { result: `Clicked element with selector "${selector}".` };
-    },
-
-    FillForm: ({ selector, value }) => {
-      const element = content.document.querySelector(selector);
-      if (!element) {
-        throw new Error(`Element with selector "${selector}" not found.`);
-      }
-      element.value = value;
-      element.dispatchEvent(new Event("input", { bubbles: true }));
-      return {
-        result: `Filled element with selector "${selector}" with value "${value}".`,
-      };
-    },
-
-    GetYoutubeTranscript: async () => {
-      const transcript = await getYouTubeTranscript();
-      return { transcript };
-    },
-
-    GetYoutubeDescription: async () => {
-      const description = await getYoutubeDescription();
-      return { description };
-    },
-
-    GetYoutubeComments: ({ count }) => {
-      return { comments: getYoutubeComments(count) };
     },
   };
 
@@ -787,13 +588,6 @@ const messageManagerAPI = {
     };
   },
 
-  async getHTMLContent() {
-    return this.send("GetPageHTMLContent").catch((error) => {
-      PREFS.debugError("Failed to get page HTML content:", error);
-      return {};
-    });
-  },
-
   async getSelectedText() {
     return this.send("GetSelectedText")
       .then((result) => {
@@ -812,41 +606,6 @@ const messageManagerAPI = {
     return this.send("GetPageTextContent", { trimWhiteSpace }).catch((error) => {
       PREFS.debugError("Failed to get page text content:", error);
       return this.getUrlAndTitle();
-    });
-  },
-
-  async clickElement(selector) {
-    return this.send("ClickElement", { selector }).catch((error) => {
-      PREFS.debugError(`Failed to click element with selector "${selector}":`, error);
-      return { error: `Failed to click element with selector "${selector}".` };
-    });
-  },
-
-  async fillForm(selector, value) {
-    return this.send("FillForm", { selector, value }).catch((error) => {
-      PREFS.debugError(`Failed to fill form with selector "${selector}":`, error);
-      return { error: `Failed to fill form with selector "${selector}".` };
-    });
-  },
-
-  async getYoutubeTranscript() {
-    return this.send("GetYoutubeTranscript").catch((error) => {
-      PREFS.debugError("Failed to get youtube transcript:", error);
-      return { error: `Failed to get youtube transcript: ${error.message}` };
-    });
-  },
-
-  async getYoutubeDescription() {
-    return this.send("GetYoutubeDescription").catch((error) => {
-      PREFS.debugError("Failed to get youtube description:", error);
-      return { error: `Failed to get youtube description: ${error.message}` };
-    });
-  },
-
-  async getYoutubeComments(count) {
-    return this.send("GetYoutubeComments", { count }).catch((error) => {
-      PREFS.debugError("Failed to get youtube comments:", error);
-      return { error: `Failed to get youtube comments: ${error.message}` };
     });
   },
 };
@@ -1472,63 +1231,35 @@ const SettingsModal = {
       findbarResetPrefs
     );
 
-    // Section 2: URLBar AI
-    const urlbarSettings = [
-      { label: "Enable URLBar AI", pref: PREFS.URLBAR_AI_ENABLED },
-      { label: "Enable Animations", pref: PREFS.URLBAR_AI_ANIMATIONS_ENABLED },
-      { label: "Hide Suggestions", pref: PREFS.URLBAR_AI_HIDE_SUGGESTIONS },
-    ];
-    const urlbarSectionHtml = this._createCheckboxSectionHtml(
-      "URLBar AI",
-      urlbarSettings,
-      false,
-      "",
-      "",
-      urlbarSettings.map((s) => s.pref)
-    );
-
-    // Section 3: Keyboard Shortcuts
+    // Section 2: Keyboard Shortcuts
     const shortcutFindbarHtml = this._generateShortcutInputHtml(
       PREFS.SHORTCUT_FINDBAR,
       "Open Findbar AI"
-    );
-    const shortcutUrlbarHtml = this._generateShortcutInputHtml(
-      PREFS.SHORTCUT_URLBAR,
-      "Toggle URLBar AI"
     );
     const shortcutsSectionHtml = `
       <section class="settings-section settings-accordion" data-expanded="true">
         <h4 class="accordion-header">
           Keyboard Shortcuts
-          <div class="reset-section-btn" data-reset-prefs="${PREFS.SHORTCUT_FINDBAR},${PREFS.SHORTCUT_URLBAR}" title="Reset Section" role="button">
+          <div class="reset-section-btn" data-reset-prefs="${PREFS.SHORTCUT_FINDBAR}" title="Reset Section" role="button">
             <img src="chrome://global/skin/icons/reload.svg" />
           </div>
         </h4>
         <div class="accordion-content">
           ${shortcutFindbarHtml}
-          ${shortcutUrlbarHtml}
         </div>
       </section>
     `;
 
-    // Section 4: AI Behavior
+    // Section 3: AI Behavior
     const aiBehaviorSettings = [
       { label: "Enable Citations", pref: PREFS.CITATIONS_ENABLED },
       { label: "Stream Response", pref: PREFS.STREAM_ENABLED },
-      { label: "Agentic Mode (AI can use tool calls)", pref: PREFS.AGENTIC_MODE },
-      { label: "Conformation before tool call", pref: PREFS.CONFORMATION },
     ];
     const aiBehaviorWarningHtml = `
-      <div id="citations-agentic-mode-warning" class="warning-message" >
-        Warning: Enabling both Citations and Agentic Mode may lead to unexpected behavior or errors.
+      <div id="citations-stream-warning" class="warning-message">
+        Citations and streaming cannot be enabled at the same time.
       </div>
     `;
-    const maxToolCallsHtml = `
-   <div class="setting-item">
-     <label for="pref-max-tool-calls">Max Tool Calls (Maximum number of messages to send AI back to back)</label>
-     <input type="number" id="pref-max-tool-calls" data-pref="${PREFS.MAX_TOOL_CALLS}" />
-   </div>
- `;
     const customSystemPromptHtml = `
    <div class="setting-item">
      <label for="pref-custom-system-prompt">Custom System Prompt</label>
@@ -1538,7 +1269,6 @@ const SettingsModal = {
 
     const aiBehaviorResetPrefs = [
       ...aiBehaviorSettings.map((s) => s.pref),
-      PREFS.MAX_TOOL_CALLS,
       PREFS.CUSTOM_SYSTEM_PROMPT,
     ];
     const aiBehaviorSectionHtml = this._createCheckboxSectionHtml(
@@ -1546,7 +1276,7 @@ const SettingsModal = {
       aiBehaviorSettings,
       true,
       aiBehaviorWarningHtml,
-      maxToolCallsHtml + customSystemPromptHtml,
+      customSystemPromptHtml,
       aiBehaviorResetPrefs
     );
 
@@ -1759,7 +1489,6 @@ const SettingsModal = {
           </div>
           <div class="ai-settings-content">
             ${findbarSectionHtml}
-            ${urlbarSectionHtml}
             ${shortcutsSectionHtml}
             ${aiBehaviorSectionHtml}
             ${contextMenuSectionHtml}
@@ -1773,1628 +1502,6 @@ const SettingsModal = {
     `;
   },
 };
-
-// Toast API based on sine toast
-
-
-function debugLog(...args) {
-}
-
-/**
- * Shows a toast notification with custom text and optional button.
- * @param {Object} options - Toast options
- * @param {string} options.title - Main toast message
- * @param {string} [options.description] - Optional description text
- * @param {number} [options.preset=0] - Button preset (0=no button, 1=restart, 2=custom action)
- * @param {Function} [options.onClick] - Custom click handler for preset 2
- * @param {string} [options.buttonText] - Custom button text (overrides preset)
- * @param {number} [options.timeout=3000] - Auto-dismiss timeout in milliseconds
- * @param {string} [options.id] - Unique toast ID for duplicate prevention
- */
-function showToast(options = {}) {
-
-  const { title, description, preset = 0, onClick, buttonText, timeout = 3000, id } = options;
-
-  if (!title) {
-    console.error("Toast: title is required");
-    return;
-  }
-
-  // Generate unique ID if not provided
-  const toastId = id || `custom-${Date.now()}-${Math.random().toString(36).substring(2, 11)}`;
-
-  try {
-    // Import the uc_api module
-    debugLog("Importing uc_api module...");
-    const ucAPI = ChromeUtils.importESModule(
-      "chrome://userscripts/content/engine/utils/uc_api.sys.mjs"
-    ).default;
-    debugLog("uc_api module imported successfully:", !!ucAPI);
-
-    // Call the existing showToast function
-    const showToastOptions = {
-      id: toastId,
-      preset,
-      clickEvent: onClick,
-      name: description ? description.replace(/\s+/g, " ").trim() : undefined,
-      timeout,
-    };
-    debugLog("Calling ucAPI.showToast with:", showToastOptions);
-
-    ucAPI.showToast(showToastOptions);
-    debugLog("ucAPI.showToast called successfully");
-
-    let retryCount = 0;
-    const maxRetries = 10;
-    const retryInterval = 50;
-
-    const tryReplaceText = () => {
-      debugLog(`Starting text replacement attempt ${retryCount + 1}/${maxRetries}...`);
-
-      // Get all browser windows
-      const windows = Services.wm.getEnumerator("navigator:browser");
-      let windowCount = 0;
-      let foundToast = false;
-
-      while (windows.hasMoreElements()) {
-        const win = windows.getNext();
-        windowCount++;
-        debugLog(`Checking window ${windowCount}:`, !!win);
-
-        const toast = win.document.querySelector(`.sineToast[data-id="${toastId}"]`);
-        debugLog(`Toast found in window ${windowCount}:`, !!toast);
-
-        if (toast) {
-          foundToast = true;
-          debugLog("Toast element found, starting text replacement...");
-
-          // Replace title text
-          const titleElement = toast.querySelector("span[data-l10n-id]");
-          debugLog("Title element found:", !!titleElement);
-          if (titleElement) {
-            titleElement.removeAttribute("data-l10n-id");
-            titleElement.removeAttribute("data-l10n-args");
-            titleElement.textContent = title;
-            debugLog("Title text replaced with:", title);
-          } else {
-            debugLog("Title element not found, trying alternative selectors...");
-            const altTitleElement = toast.querySelector("span");
-            if (altTitleElement) {
-              altTitleElement.textContent = title;
-              debugLog("Title text replaced using alternative selector");
-            }
-          }
-
-          // Replace description text if provided
-          if (description) {
-            const descElement = toast.querySelector(".description");
-            debugLog("Description element found:", !!descElement);
-            if (descElement) {
-              descElement.removeAttribute("data-l10n-id");
-              descElement.textContent = description;
-              debugLog("Description text replaced with:", description);
-            } else {
-              debugLog("Description element not found");
-            }
-          }
-
-          // Replace button text if custom text provided
-          if (buttonText) {
-            const button = toast.querySelector("button");
-            debugLog("Button element found:", !!button);
-            if (button) {
-              button.removeAttribute("data-l10n-id");
-              button.textContent = buttonText;
-              debugLog("Button text replaced with:", buttonText);
-            } else {
-              debugLog("Button element not found");
-            }
-          }
-
-          // Hide button if preset is 0
-          if (preset === 0) {
-            const button = toast.querySelector("button");
-            debugLog("Button element for hiding found:", !!button);
-            if (button) {
-              button.style.display = "none";
-              debugLog("Button hidden due to preset=0");
-            } else {
-              debugLog("No button found to hide");
-            }
-          }
-
-          debugLog("Text replacement completed for this toast");
-          return; // Success, exit function
-        }
-      }
-
-      debugLog(`Checked ${windowCount} windows, found toast: ${foundToast}`);
-
-      if (!foundToast && retryCount < maxRetries) {
-        retryCount++;
-        debugLog("Toast not found, retrying...");
-        // Get most recent browser window for retry
-        const browserWindow = Services.wm.getMostRecentWindow("navigator:browser");
-        if (browserWindow) {
-          browserWindow.setTimeout(tryReplaceText, retryInterval);
-        } else {
-          debugLog("No browser window found for retry");
-        }
-      } else if (!foundToast) {
-        debugLog("Max retries reached or no toast found with ID:", toastId);
-      }
-    };
-
-    const browserWindow = Services.wm.getMostRecentWindow("navigator:browser");
-    if (browserWindow) {
-      browserWindow.setTimeout(tryReplaceText, 50);
-    } else {
-      debugLog("No browser window found for setTimeout");
-    }
-  } catch (error) {
-    console.error("Toast API error:", error);
-  }
-}
-
-// ╭─────────────────────────────────────────────────────────╮
-// │                 TAB ID MANAGEMENT                       │
-// ╰─────────────────────────────────────────────────────────╯
-/**
- * Manages unique, session-only IDs for tab objects.
- * This is necessary because no built-in tab property is consistently
- * available and unique for all tabs (e.g., background/unloaded tabs).
- */
-const TabIdManager = new (class {
-  #tabIdMap = new WeakMap();
-  #idTabMap = new Map();
-  #nextId = 1;
-
-  _getOrCreateId(tab) {
-    if (!this.#tabIdMap.has(tab)) {
-      const id = this.#nextId++;
-      this.#tabIdMap.set(tab, id);
-      this.#idTabMap.set(id, tab);
-    }
-    return this.#tabIdMap.get(tab);
-  }
-
-  getTabById(id) {
-    const numericId = Number(id);
-    const tab = this.#idTabMap.get(numericId);
-    // Ensure the tab still exists in the browser before returning it.
-    if (tab && tab.ownerGlobal && !tab.ownerGlobal.closed && gBrowser.tabs.includes(tab)) {
-      return tab;
-    }
-    // Clean up the map if the tab is gone.
-    this.#idTabMap.delete(numericId);
-    return null;
-  }
-
-  mapTab(tab) {
-    if (!tab) return null;
-
-    const id = this._getOrCreateId(tab);
-    const splitGroup = tab.group?.hasAttribute("split-view-group") ? tab.group : null;
-    const workspaceId = tab.getAttribute("zen-workspace-id");
-    const workspace = workspaceId ? gZenWorkspaces.getWorkspaceFromId(workspaceId) : null;
-    const activeWorkspaceId = gZenWorkspaces.activeWorkspace;
-    const isEssential = tab.hasAttribute("zen-essential");
-    const workspaceInfos = {
-      workspaceId,
-      workspaceName: workspace?.name || null,
-      workspaceIcon: workspace?.icon || null,
-    };
-
-    return {
-      id: String(id),
-      title: tab.label,
-      url: tab.linkedBrowser?.currentURI?.spec,
-      isCurrent: tab === gBrowser.selectedTab,
-      inCurrentWorkspace: workspaceId === activeWorkspaceId,
-      pinned: tab.pinned,
-      isGroup: gBrowser.isTabGroup(tab),
-      isEssential,
-      parentFolderId: tab.group && !splitGroup ? tab.group.id : null,
-      parentFolderName: tab.group && !splitGroup ? tab.group.label : null,
-      isSplitView: !!splitGroup,
-      splitViewId: splitGroup ? splitGroup.id : null,
-      ...(isEssential ? {} : workspaceInfos),
-    };
-  }
-})();
-
-// Helper function to create Zod string parameters
-const createStringParameter = (description, isOptional = false) => {
-  let schema = string().describe(description);
-  return isOptional ? schema.optional() : schema;
-};
-
-// Helper function for array of strings parameter
-const createStringArrayParameter = (description, isOptional = false) => {
-  let schema = array(string()).describe(description);
-  return isOptional ? schema.optional() : schema;
-};
-
-// Helper function to create tools with consistent structure
-const createTool = (description, parameters, executeFn) => {
-  return tool({
-    description,
-    inputSchema: object(parameters),
-    execute: executeFn,
-  });
-};
-
-// ╭─────────────────────────────────────────────────────────╮
-// │                      HELPERS                            │
-// ╰─────────────────────────────────────────────────────────╯
-/**
- * Retrieves tab objects based on their session IDs.
- * @param {string[]} tabIds - An array of session IDs for the tabs to retrieve.
- * @returns {Array<object>} An array of tab browser elements.
- */
-function getTabsByIds(tabIds) {
-  if (!Array.isArray(tabIds)) tabIds = [tabIds];
-  return tabIds.map((id) => TabIdManager.getTabById(id)).filter(Boolean);
-}
-
-/**
- * Maps a tab element to a simplified object for AI consumption.
- * @param {object} tab - The tab browser element.
- * @returns {object|null} A simplified tab object, or null if the tab is invalid.
- */
-function mapTabToObject(tab) {
-  return TabIdManager.mapTab(tab);
-}
-
-// ╭─────────────────────────────────────────────────────────╮
-// │                         SEARCH                          │
-// ╰─────────────────────────────────────────────────────────╯
-async function getSearchURL(engineName, searchTerm) {
-  try {
-    const engine = await Services.search.getEngineByName(engineName);
-    if (!engine) {
-      PREFS.debugError(`No search engine found with name: ${engineName}`);
-      return null;
-    }
-    const submission = engine.getSubmission(searchTerm.trim());
-    if (!submission) {
-      PREFS.debugError(`No submission found for term: ${searchTerm} and engine: ${engineName}`);
-      return null;
-    }
-    return submission.uri.spec;
-  } catch (e) {
-    PREFS.debugError(`Error getting search URL for engine "${engineName}".`, e);
-    return null;
-  }
-}
-
-async function search(args) {
-  const { searchTerm, engineName, where } = args;
-  const defaultEngineName = Services.search.defaultEngine.name;
-  const searchEngineName = engineName || defaultEngineName;
-  if (!searchTerm) return { error: "Search tool requires a searchTerm." };
-
-  const url = await getSearchURL(searchEngineName, searchTerm);
-  if (url) {
-    return await openLink({ link: url, where });
-  } else {
-    return {
-      error: `Could not find search engine named '${searchEngineName}'.`,
-    };
-  }
-}
-
-// ╭─────────────────────────────────────────────────────────╮
-// │                          TABS                           │
-// ╰─────────────────────────────────────────────────────────╯
-async function openLink(args) {
-  const { link, where = "new tab" } = args;
-  if (!link) return { error: "openLink requires a link." };
-  const whereNormalized = where?.toLowerCase()?.trim();
-  try {
-    switch (whereNormalized) {
-      case "current tab":
-        openTrustedLinkIn(link, "current");
-        break;
-      case "new tab":
-        openTrustedLinkIn(link, "tab");
-        break;
-      case "new window":
-        openTrustedLinkIn(link, "window");
-        break;
-      case "incognito":
-      case "private":
-        window.openTrustedLinkIn(link, "window", { private: true });
-        break;
-      case "glance":
-        if (window.gZenGlanceManager) {
-          window.gZenGlanceManager.openGlance({
-            url: link,
-          });
-        } else {
-          openTrustedLinkIn(link, "tab");
-          return { result: `Glance not available. Opened in a new tab.` };
-        }
-        break;
-      case "vsplit":
-      case "hsplit":
-        if (window.gZenViewSplitter) {
-          const sep = whereNormalized === "vsplit" ? "vsep" : "hsep";
-          const tab1 = gBrowser.selectedTab;
-          await openTrustedLinkIn(link, "tab");
-          const tab2 = gBrowser.selectedTab;
-          gZenViewSplitter.splitTabs([tab1, tab2], sep, 1);
-        } else return { error: "Split view is not available." };
-        break;
-      default:
-        openTrustedLinkIn(link, "tab");
-        return {
-          result: `Unknown location "${where}". Opened in a new tab as fallback.`,
-        };
-    }
-    return { result: `Successfully opened ${link} in ${where}.` };
-  } catch (e) {
-    PREFS.debugError(`Failed to open link "${link}" in "${where}".`, e);
-    return { error: `Failed to open link.` };
-  }
-}
-
-async function newSplit(args) {
-  const { links, type = "vertical" } = args;
-  if (!window.gZenViewSplitter) return { error: "Split view function is not available." };
-  if (!links || !Array.isArray(links) || links.length < 2)
-    return { error: "newSplit requires an array of at least two links." };
-
-  try {
-    const tabs = [];
-    for (const link of links) {
-      // openTrustedLinkIn seems to always select the new tab
-      await openTrustedLinkIn(link, "tab");
-      tabs.push(gBrowser.selectedTab);
-    }
-
-    let gridType;
-    const lowerType = type.toLowerCase();
-    if (lowerType === "grid") {
-      gridType = "grid";
-    } else if (lowerType === "horizontal") {
-      gridType = "hsep";
-    } else {
-      // "vertical" or default
-      gridType = "vsep";
-    }
-
-    gZenViewSplitter.splitTabs(tabs, gridType);
-    return {
-      result: `Successfully created split view with ${links.length} tabs.`,
-    };
-  } catch (e) {
-    PREFS.debugError("Failed to create split view.", e);
-    return { error: "Failed to create split view." };
-  }
-}
-
-/**
- * Retrieves all open tabs across all workspaces.
- * @returns {Promise<object>} A promise that resolves with an object containing an array of all tabs.
- */
-async function getAllTabs() {
-  try {
-    const allTabs = gZenWorkspaces.allStoredTabs.map(mapTabToObject).filter(Boolean);
-    return { tabs: allTabs };
-  } catch (e) {
-    PREFS.debugError("Failed to get all tabs:", e);
-    return { error: "Failed to retrieve tabs." };
-  }
-}
-
-/**
- * Closes specified tabs.
- * @param {object} args - The arguments object.
- * @param {string[]} args.tabIds - An array of session IDs for the tabs to close.
- * @returns {Promise<object>} A promise that resolves with a success message or an error.
- */
-async function closeTabs(args) {
-  const { tabIds } = args;
-  if (!tabIds || tabIds.length === 0) return { error: "closeTabs requires an array of tabIds." };
-  try {
-    const tabsToClose = getTabsByIds(tabIds);
-    if (tabsToClose.length === 0) return { error: "No matching tabs found to close." };
-
-    gBrowser.removeTabs(tabsToClose);
-    return { result: `Successfully closed ${tabsToClose.length} tab(s).` };
-  } catch (e) {
-    PREFS.debugError("Failed to close tabs:", e);
-    return { error: "An error occurred while closing tabs." };
-  }
-}
-
-/**
- * Splits existing tabs into a view.
- * @param {object} args - The arguments object.
- * @param {string[]} args.tabIds - An array of session IDs for the tabs to split.
- * @param {string} [args.type="vertical"] - The split type: 'horizontal', 'vertical', or 'grid'. Defaults to 'vertical'.
- * @returns {Promise<object>} A promise that resolves with a success message or an error.
- */
-async function splitExistingTabs(args) {
-  const { tabIds, type = "vertical" } = args;
-  if (!window.gZenViewSplitter) return { error: "Split view function is not available." };
-  if (!tabIds || tabIds.length < 2)
-    return { error: "splitExistingTabs requires at least two tabIds." };
-
-  try {
-    const tabs = getTabsByIds(tabIds);
-    if (tabs.length < 2) return { error: "Could not find at least two tabs to split." };
-
-    let gridType;
-    const lowerType = type.toLowerCase();
-    if (lowerType === "grid") {
-      gridType = "grid";
-    } else if (lowerType === "horizontal") {
-      gridType = "hsep";
-    } else {
-      // "vertical" or default
-      gridType = "vsep";
-    }
-
-    gZenViewSplitter.splitTabs(tabs, gridType);
-    return { result: `Successfully created split view with ${tabs.length} tabs.` };
-  } catch (e) {
-    PREFS.debugError("Failed to split existing tabs.", e);
-    return { error: "Failed to create split view." };
-  }
-}
-
-/**
- * Searches tabs based on a query.
- * @param {object} args - The arguments object.
- * @param {string} args.query - The search term for tabs.
- * @returns {Promise<object>} A promise that resolves with an object containing an array of tab results or an error.
- */
-async function searchTabs(args) {
-  const { query } = args;
-  if (!query) return { error: "searchTabs requires a query." };
-  const lowerCaseQuery = query.toLowerCase();
-
-  try {
-    const allTabs = gZenWorkspaces.allStoredTabs;
-    const results = allTabs
-      .filter((tab) => {
-        const title = tab.label?.toLowerCase() || "";
-        const url = tab.linkedBrowser?.currentURI?.spec?.toLowerCase() || "";
-        return title.includes(lowerCaseQuery) || url.includes(lowerCaseQuery);
-      })
-      .map(mapTabToObject)
-      .filter(Boolean);
-
-    return { tabs: results };
-  } catch (e) {
-    PREFS.debugError(`Error searching tabs for query "${query}":`, e);
-    return { error: `Failed to search tabs.` };
-  }
-}
-
-/**
- * Adds tabs to a folder (tab group).
- * @param {object} args - The arguments object.
- * @param {string[]} args.tabIds - The session IDs of the tabs to add.
- * @param {string} args.folderId - The ID of the folder to add the tabs to.
- * @returns {Promise<object>} A promise that resolves with a success message or an error.
- */
-async function addTabsToFolder(args) {
-  const { tabIds, folderId } = args;
-  if (!tabIds || !folderId) return { error: "addTabsToFolder requires tabIds and a folderId." };
-
-  try {
-    const tabs = getTabsByIds(tabIds);
-    const folder = document.getElementById(folderId);
-
-    if (!folder || !folder.isZenFolder) {
-      return { error: `Folder with ID "${folderId}" not found or is not a valid folder.` };
-    }
-    if (tabs.length === 0) return { error: "No valid tabs found to add to the folder." };
-
-    for (const tab of tabs) {
-      if (!tab.pinned) gBrowser.pinTab(tab);
-    }
-
-    folder.addTabs(tabs);
-    return { result: `Successfully added ${tabs.length} tab(s) to folder "${folder.label}".` };
-  } catch (e) {
-    PREFS.debugError("Failed to add tabs to folder:", e);
-    return { error: "Failed to add tabs to folder." };
-  }
-}
-
-/**
- * Removes tabs from their current folder.
- * @param {object} args - The arguments object.
- * @param {string[]} args.tabIds - The session IDs of the tabs to remove from their folder.
- * @returns {Promise<object>} A promise that resolves with a success message or an error.
- */
-async function removeTabsFromFolder(args) {
-  const { tabIds } = args;
-  if (!tabIds) return { error: "removeTabsFromFolder requires tabIds." };
-
-  try {
-    const tabs = getTabsByIds(tabIds);
-    if (tabs.length === 0) return { error: "No valid tabs found." };
-
-    let ungroupedCount = 0;
-    tabs.forEach((tab) => {
-      if (tab.group) {
-        gBrowser.ungroupTab(tab);
-        ungroupedCount++;
-      }
-    });
-    return { result: `Successfully ungrouped ${ungroupedCount} tab(s).` };
-  } catch (e) {
-    PREFS.debugError("Failed to remove tabs from folder:", e);
-    return { error: "Failed to remove tabs from folder." };
-  }
-}
-
-/**
- * Creates a new, empty tab folder.
- * @param {object} args - The arguments object.
- * @param {string} args.name - The name for the new folder.
- * @returns {Promise<object>} A promise that resolves with the new folder's information or an error.
- */
-async function createTabFolder(args) {
-  const { name } = args;
-  if (!name) return { error: "createTabFolder requires a name." };
-  try {
-    const folder = gZenFolders.createFolder([], { label: name, renameFolder: false });
-    return {
-      result: `Successfully created folder "${folder.label}".`,
-      folder: {
-        id: folder.id,
-        name: folder.label,
-      },
-    };
-  } catch (e) {
-    PREFS.debugError("Failed to create tab folder:", e);
-    return { error: "Failed to create tab folder." };
-  }
-}
-
-/**
- * Reorders a tab to a new index.
- * @param {object} args - The arguments object.
- * @param {string} args.tabId - The session ID of the tab to reorder.
- * @param {number} args.newIndex - The new index for the tab.
- * @returns {Promise<object>} A promise that resolves with a success message or an error.
- */
-async function reorderTab(args) {
-  const { tabId, newIndex } = args;
-  if (!tabId || typeof newIndex !== "number") {
-    return { error: "reorderTab requires a tabId and a newIndex." };
-  }
-  try {
-    const tab = TabIdManager.getTabById(tabId);
-    if (!tab) return { error: `Tab with id ${tabId} not found.` };
-    gBrowser.moveTabTo(tab, { tabIndex: newIndex });
-    return { result: `Successfully moved tab to index ${newIndex}.` };
-  } catch (e) {
-    PREFS.debugError("Failed to reorder tab:", e);
-    return { error: "Failed to reorder tab." };
-  }
-}
-
-/**
- * Adds one or more tabs to the essentials.
- * @param {object} args - The arguments object.
- * @param {string[]} args.tabIds - An array of session IDs for the tabs to add to essentials.
- * @returns {Promise<object>} A promise that resolves with a success message or an error.
- */
-async function addTabsToEssentials(args) {
-  const { tabIds } = args;
-  if (!tabIds || tabIds.length === 0)
-    return { error: "addTabsToEssentials requires at least one tabId." };
-  try {
-    const tabs = getTabsByIds(tabIds);
-    if (tabs.length === 0) return { error: "No matching tabs found." };
-    if (window.gZenPinnedTabManager) {
-      gZenPinnedTabManager.addToEssentials(tabs);
-      return { result: `Successfully added ${tabs.length} tab(s) to essentials.` };
-    } else {
-      return { error: "Essentials manager is not available." };
-    }
-  } catch (e) {
-    PREFS.debugError("Failed to add tabs to essentials:", e);
-    return { error: "An error occurred while adding tabs to essentials." };
-  }
-}
-
-/**
- * Removes one or more tabs from the essentials.
- * @param {object} args - The arguments object.
- * @param {string[]} args.tabIds - An array of session IDs for the tabs to remove from essentials.
- * @returns {Promise<object>} A promise that resolves with a success message or an error.
- */
-async function removeTabsFromEssentials(args) {
-  const { tabIds } = args;
-  if (!tabIds || tabIds.length === 0)
-    return { error: "removeTabsFromEssentials requires at least one tabId." };
-  try {
-    const tabs = getTabsByIds(tabIds);
-    if (tabs.length === 0) return { error: "No matching tabs found." };
-    if (window.gZenPinnedTabManager) {
-      tabs.forEach((tab) => gZenPinnedTabManager.removeFromEssentials(tab));
-      return { result: `Successfully removed ${tabs.length} tab(s) from essentials.` };
-    } else {
-      return { error: "Essentials manager is not available." };
-    }
-  } catch (e) {
-    PREFS.debugError("Failed to remove tabs from essentials:", e);
-    return { error: "An error occurred while removing tabs from essentials." };
-  }
-}
-
-// ╭─────────────────────────────────────────────────────────╮
-// │                        BOOKMARKS                        │
-// ╰─────────────────────────────────────────────────────────╯
-
-/**
- * Searches bookmarks based on a query.
- * @param {object} args - The arguments object.
- * @param {string} args.query - The search term for bookmarks.
- * @returns {Promise<object>} A promise that resolves with an object containing an array of bookmark results or an error.
- */
-async function searchBookmarks(args) {
-  const { query } = args;
-  if (!query) return { error: "searchBookmarks requires a query." };
-
-  try {
-    const searchParams = { query };
-    const bookmarks = await PlacesUtils.bookmarks.search(searchParams);
-
-    // Map to a simpler format to save tokens for the AI model
-    const results = bookmarks.map((bookmark) => ({
-      id: bookmark.guid,
-      title: bookmark.title,
-      url: bookmark?.url?.href,
-      parentID: bookmark.parentGuid,
-    }));
-
-    PREFS.debugLog(`Found ${results.length} bookmarks for query "${query}":`, results);
-    return { bookmarks: results };
-  } catch (e) {
-    PREFS.debugError(`Error searching bookmarks for query "${query}":`, e);
-    return { error: `Failed to search bookmarks.` };
-  }
-}
-
-/**
- * Reads all bookmarks.
- * @returns {Promise<object>} A promise that resolves with an object containing an array of all bookmark results or an error.
- */
-
-async function getAllBookmarks() {
-  try {
-    const bookmarks = await PlacesUtils.bookmarks.search({});
-
-    const results = bookmarks.map((bookmark) => ({
-      id: bookmark.guid,
-      title: bookmark.title,
-      url: bookmark?.url?.href,
-      parentID: bookmark.parentGuid,
-    }));
-
-    PREFS.debugLog(`Read ${results.length} total bookmarks.`);
-    return { bookmarks: results };
-  } catch (e) {
-    PREFS.debugError(`Error reading all bookmarks:`, e);
-    return { error: `Failed to read all bookmarks.` };
-  }
-}
-
-/**
- * Creates a new bookmark.
- * @param {object} args - The arguments object.
- * @param {string} args.url - The URL to bookmark.
- * @param {string} [args.title] - The title for the bookmark. If not provided, the URL is used.
- * @param {string} [args.parentID] - The GUID of the parent folder. Defaults to the "Other Bookmarks" folder.
- * @returns {Promise<object>} A promise that resolves with a success message or an error.
- */
-async function createBookmark(args) {
-  const { url, title, parentID } = args;
-  if (!url) return { error: "createBookmark requires a URL." };
-
-  try {
-    const bookmarkInfo = {
-      parentGuid: parentID || PlacesUtils.bookmarks.toolbarGuid,
-      url: new URL(url),
-      title: title || url,
-    };
-
-    const bm = await PlacesUtils.bookmarks.insert(bookmarkInfo);
-
-    PREFS.debugLog(`Bookmark created successfully:`, JSON.stringify(bm));
-    return { result: `Successfully bookmarked "${bm.title}".` };
-  } catch (e) {
-    PREFS.debugError(`Error creating bookmark for URL "${url}":`, e);
-    return { error: `Failed to create bookmark.` };
-  }
-}
-
-/**
- * Creates a new bookmark folder.
- * @param {object} args - The arguments object.
- * @param {string} args.title - The title for the new folder.
- * @param {string} [args.parentID] - The GUID of the parent folder. Defaults to the "Other Bookmarks" folder.
- * @returns {Promise<object>} A promise that resolves with a success message or an error.
- */
-async function addBookmarkFolder(args) {
-  const { title, parentID } = args;
-  if (!title) return { error: "addBookmarkFolder requires a title." };
-
-  try {
-    const folderInfo = {
-      parentGuid: parentID || PlacesUtils.bookmarks.toolbarGuid,
-      type: PlacesUtils.bookmarks.TYPE_FOLDER,
-      title: title,
-    };
-
-    const folder = await PlacesUtils.bookmarks.insert(folderInfo);
-
-    PREFS.debugLog(`Bookmark folder created successfully:`, JSON.stringify(folderInfo));
-    return { result: `Successfully created folder "${folder.title}".` };
-  } catch (e) {
-    PREFS.debugError(`Error creating bookmark folder "${title}":`, e);
-    return { error: `Failed to create folder.` };
-  }
-}
-
-/**
- * Updates an existing bookmark.
- * @param {object} args - The arguments object.
- * @param {string} args.id - The GUID of the bookmark to update.
- * @param {string} [args.url] - The new URL for the bookmark.
- * @param {string} [args.parentID] - parent id
- *
- * @param {string} [args.title] - The new title for the bookmark.
- * @returns {Promise<object>} A promise that resolves with a success message or an error.
- */
-async function updateBookmark(args) {
-  const { id, url, title, parentID } = args;
-  if (!id) return { error: "updateBookmark requires a bookmark id (guid)." };
-  if (!url && !title && !parentID)
-    return {
-      error: "updateBookmark requires either a new url, title, or parentID.",
-    };
-
-  try {
-    const oldBookmark = await PlacesUtils.bookmarks.fetch(id);
-    if (!oldBookmark) {
-      return { error: `No bookmark found with id "${id}".` };
-    }
-
-    const bm = await PlacesUtils.bookmarks.update({
-      guid: id,
-      url: url ? new URL(url) : oldBookmark.url,
-      title: title || oldBookmark.title,
-      parentGuid: parentID || oldBookmark.parentGuid,
-    });
-
-    PREFS.debugLog(`Bookmark updated successfully:`, JSON.stringify(bm));
-    return { result: `Successfully updated bookmark to "${bm.title}".` };
-  } catch (e) {
-    PREFS.debugError(`Error updating bookmark with id "${id}":`, e);
-    return { error: `Failed to update bookmark.` };
-  }
-}
-
-/**
- * Deletes a bookmark.
- * @param {object} args - The arguments object.
- * @param {string} args.id - The GUID of the bookmark to delete.
- * @returns {Promise<object>} A promise that resolves with a success message or an error.
- */
-
-async function deleteBookmark(args) {
-  const { id } = args;
-  if (!id) return { error: "deleteBookmark requires a bookmark id (guid)." };
-  try {
-    await PlacesUtils.bookmarks.remove(id);
-    PREFS.debugLog(`Bookmark with id "${id}" deleted successfully.`);
-    return { result: `Successfully deleted bookmark.` };
-  } catch (e) {
-    PREFS.debugError(`Error deleting bookmark with id "${id}":`, e);
-    return { error: `Failed to delete bookmark.` };
-  }
-}
-
-// ╭─────────────────────────────────────────────────────────╮
-// │                        WORKSPACES                       │
-// ╰─────────────────────────────────────────────────────────╯
-/**
- * Retrieves all workspaces.
- * @returns {Promise<object>} A promise that resolves with an object containing an array of all workspaces.
- */
-async function getAllWorkspaces() {
-  try {
-    const { workspaces } = await gZenWorkspaces._workspaces();
-    const activeWorkspaceId = gZenWorkspaces.activeWorkspace;
-    const result = workspaces.map((ws) => ({
-      id: ws.uuid,
-      name: ws.name,
-      icon: ws.icon,
-      position: ws.position,
-      isActive: ws.uuid === activeWorkspaceId,
-    }));
-    return { workspaces: result };
-  } catch (e) {
-    PREFS.debugError("Failed to get all workspaces:", e);
-    return { error: "Failed to retrieve workspaces." };
-  }
-}
-
-/**
- * Creates a new workspace.
- * @param {object} args - The arguments object.
- * @param {string} args.name - The name for the new workspace.
- * @param {string} [args.icon] - The icon (emoji or URL) for the new workspace.
- * @returns {Promise<object>} A promise that resolves with the new workspace information.
- */
-async function createWorkspace(args) {
-  const { name, icon } = args;
-  if (!name) return { error: "createWorkspace requires a name." };
-  try {
-    const ws = await gZenWorkspaces.createAndSaveWorkspace(name, icon, false);
-    return {
-      result: `Successfully created workspace "${name}".`,
-      workspace: { id: ws.uuid, name: ws.name, icon: ws.icon },
-    };
-  } catch (e) {
-    PREFS.debugError("Failed to create workspace:", e);
-    return { error: "Failed to create workspace." };
-  }
-}
-
-/**
- * Updates an existing workspace.
- * @param {object} args - The arguments object.
- * @param {string} args.id - The ID of the workspace to update.
- * @param {string} [args.name] - The new name for the workspace.
- * @param {string} [args.icon] - The new icon for the workspace.
- * @returns {Promise<object>} A promise that resolves with a success message.
- */
-async function updateWorkspace(args) {
-  const { id, name, icon } = args;
-  if (!id) return { error: "updateWorkspace requires a workspace id." };
-  if (!name && !icon) return { error: "updateWorkspace requires a new name or icon." };
-  try {
-    const workspace = gZenWorkspaces.getWorkspaceFromId(id);
-    if (!workspace) return { error: `Workspace with id ${id} not found.` };
-    if (name) workspace.name = name;
-    if (icon) workspace.icon = icon;
-    await gZenWorkspaces.saveWorkspace(workspace);
-    return { result: `Successfully updated workspace.` };
-  } catch (e) {
-    PREFS.debugError("Failed to update workspace:", e);
-    return { error: "Failed to update workspace." };
-  }
-}
-
-/**
- * Deletes a workspace.
- * @param {object} args - The arguments object.
- * @param {string} args.id - The ID of the workspace to delete.
- * @returns {Promise<object>} A promise that resolves with a success message.
- */
-async function deleteWorkspace(args) {
-  const { id } = args;
-  if (!id) return { error: "deleteWorkspace requires a workspace id." };
-  try {
-    await gZenWorkspaces.removeWorkspace(id);
-    return { result: "Successfully deleted workspace." };
-  } catch (e) {
-    PREFS.debugError("Failed to delete workspace:", e);
-    return { error: "Failed to delete workspace." };
-  }
-}
-
-/**
- * Moves tabs to a specified workspace.
- * @param {object} args - The arguments object.
- * @param {string[]} args.tabIds - The session IDs of the tabs to move.
- * @param {string} args.workspaceId - The ID of the target workspace.
- * @returns {Promise<object>} A promise that resolves with a success message.
- */
-async function moveTabsToWorkspace(args) {
-  const { tabIds, workspaceId } = args;
-  if (!tabIds || !workspaceId)
-    return { error: "moveTabsToWorkspace requires tabIds and a workspaceId." };
-  try {
-    const tabs = getTabsByIds(tabIds);
-    if (tabs.length === 0) return { error: "No valid tabs found to move." };
-    gZenWorkspaces.moveTabsToWorkspace(tabs, workspaceId);
-    return { result: `Successfully moved ${tabs.length} tab(s) to workspace.` };
-  } catch (e) {
-    PREFS.debugError("Failed to move tabs to workspace:", e);
-    return { error: "Failed to move tabs to workspace." };
-  }
-}
-
-/**
- * Reorders a workspace to a new position.
- * @param {object} args - The arguments object.
- * @param {string} args.id - The ID of the workspace to reorder.
- * @param {number} args.newPosition - The new zero-based index for the workspace.
- * @returns {Promise<object>} A promise that resolves with a success message.
- */
-async function reorderWorkspace(args) {
-  const { id, newPosition } = args;
-  if (!id || typeof newPosition !== "number") {
-    return { error: "reorderWorkspace requires a workspace id and a newPosition." };
-  }
-  try {
-    await gZenWorkspaces.reorderWorkspace(id, newPosition);
-    return { result: "Successfully reordered workspace." };
-  } catch (e) {
-    PREFS.debugError("Failed to reorder workspace:", e);
-    return { error: "Failed to reorder workspace." };
-  }
-}
-
-// ╭─────────────────────────────────────────────────────────╮
-// │                         ELEMENTS                        │
-// ╰─────────────────────────────────────────────────────────╯
-
-/**
- * Clicks an element on the page.
- * @param {object} args - The arguments object.
- * @param {string} args.selector - The CSS selector of the element to click.
- * @returns {Promise<object>} A promise that resolves with a success message or an error.
- */
-async function clickElement(args) {
-  const { selector } = args;
-  if (!selector) return { error: "clickElement requires a selector." };
-  return messageManagerAPI.clickElement(selector);
-}
-
-/**
- * Fills a form input on the page.
- * @param {object} args - The arguments object.
- * @param {string} args.selector - The CSS selector of the input element to fill.
- * @param {string} args.value - The value to fill the input with.
- * @returns {Promise<object>} A promise that resolves with a success message or an error.
- */
-async function fillForm(args) {
-  const { selector, value } = args;
-  if (!selector) return { error: "fillForm requires a selector." };
-  if (value === undefined) return { error: "fillForm requires a value." };
-  return messageManagerAPI.fillForm(selector, value);
-}
-
-// ╭─────────────────────────────────────────────────────────╮
-// │                        UI FEEDBACK                      │
-// ╰─────────────────────────────────────────────────────────╯
-
-/**
- * Shows a temporary toast message to the user.
- * @param {object} args - The arguments object.
- * @param {string} args.title - The main title of the toast message.
- * @param {string} [args.description] - Optional secondary text for the toast.
- * @returns {Promise<object>} A promise that resolves with a success message or an error.
- */
-async function showCustomToast(args) {
-  const { title, description } = args;
-  if (!title) return { error: "showToast requires a title." };
-
-  try {
-    showToast({
-      title,
-      description,
-      preset: 0,
-    });
-    return { result: "Toast displayed successfully." };
-  } catch (e) {
-    PREFS.debugError("Failed to show toast:", e);
-    return { error: "An error occurred while displaying the toast." };
-  }
-}
-// ╭─────────────────────────────────────────────────────────╮
-// │                         YOUTUBE                         │
-// ╰─────────────────────────────────────────────────────────╯
-/**
- * Wrapper for messageManagerAPI.getYoutubeComments to handle arguments.
- * @param {object} args - The arguments object.
- * @param {number} [args.count] - The number of comments to retrieve.
- * @returns {Promise<object>} A promise that resolves with the comments.
- */
-async function getYoutubeComments(args) {
-  return messageManagerAPI.getYoutubeComments(args.count);
-}
-
-const toolNameMapping = {
-  search: "Searching the web",
-  openLink: "Opening a link",
-  newSplit: "Creating a split view",
-  splitExistingTabs: "Splitting existing tabs",
-  getAllTabs: "Reading tabs",
-  searchTabs: "Searching tabs",
-  closeTabs: "Closing tabs",
-  reorderTab: "Reordering a tab",
-  addTabsToFolder: "Adding tabs to a folder",
-  removeTabsFromFolder: "Removing tabs from a folder",
-  createTabFolder: "Creating a tab folder",
-  addTabsToEssentials: "Adding tabs to Essentials",
-  removeTabsFromEssentials: "Removing tabs from Essentials",
-  getPageTextContent: "Reading page content",
-  getHTMLContent: "Reading page source code",
-  clickElement: "Clicking an element",
-  fillForm: "Filling a form",
-  getYoutubeTranscript: "Getting YouTube transcript",
-  getYoutubeDescription: "Getting YouTube description",
-  getYoutubeComments: "Getting YouTube comments",
-  searchBookmarks: "Searching bookmarks",
-  getAllBookmarks: "Reading bookmarks",
-  createBookmark: "Creating a bookmark",
-  addBookmarkFolder: "Creating a bookmark folder",
-  updateBookmark: "Updating a bookmark",
-  deleteBookmark: "Deleting a bookmark",
-  getAllWorkspaces: "Reading workspaces",
-  createWorkspace: "Creating a workspace",
-  updateWorkspace: "Updating a workspace",
-  deleteWorkspace: "Deleting a workspace",
-  moveTabsToWorkspace: "Moving tabs to a workspace",
-  reorderWorkspace: "Reordering a workspace",
-  showToast: "Showing a notification",
-};
-
-const tabsInstructions = `If you open tab in glace it will create new small popup window to show the tab, vsplit and hsplit means it will open new tab in vertical and horizontal split with current tab respectively.`;
-const toolGroups = {
-  search: {
-    moreInstructions: async () => {
-      const searchEngines = await Services.search.getVisibleEngines();
-      const engineNames = searchEngines.map((e) => e.name).join(", ");
-      const defaultEngineName = Services.search.defaultEngine.name;
-      return (
-        `For the search tool, available engines are: ${engineNames}. The default is '${defaultEngineName}'.` +
-        "\n" +
-        tabsInstructions
-      );
-    },
-    tools: {
-      search: createTool(
-        "Performs a web search using a specified search engine and opens the results.",
-        {
-          searchTerm: createStringParameter("The term to search for."),
-          engineName: createStringParameter("The name of the search engine to use.", true),
-          where: createStringParameter(
-            "Where to open results. Options: 'current tab', 'new tab', 'new window', 'incognito', 'glance', 'vsplit', 'hsplit'. Default: 'new tab'.",
-            true
-          ),
-        },
-        search
-      ),
-    },
-    example: async () => {
-      return `#### Searching and Spliting: 
--   **User Prompt:** "search cat in google and dog in youtube open them in vertical split"
--   **Your first Tool Call:** \`{"functionCall": {"name": "search", "args": {"searchTerm": "cat", "engineName": "google", where: "new tab"}}}\`
--   **Your second Tool Call:** \`{"functionCall": {"name": "search", "args": {"searchTerm": "dog", "engineName": "youtube", where: "vsplit"}}}\`
-Note: Only second search is open in split (vertial by default), this will make it split with first search.
-`;
-    },
-  },
-  navigation: {
-    moreInstructions: tabsInstructions + "While opening tab make sure it has valid URL.",
-    tools: {
-      openLink: createTool(
-        "Opens a given URL in a specified location. Can also create a split view with the current tab.",
-        {
-          link: createStringParameter("The URL to open."),
-          where: createStringParameter(
-            "Where to open the link. Options: 'current tab', 'new tab', 'new window', 'incognito', 'glance', 'vsplit', 'hsplit'. Default: 'new tab'.",
-            true
-          ),
-        },
-        openLink
-      ),
-      newSplit: createTool(
-        "Creates a split view by opening multiple new URLs in new tabs, then arranging them side-by-side.",
-        {
-          links: createStringArrayParameter("An array of URLs for the new tabs."),
-          type: createStringParameter(
-            "The split type: 'vertical', 'horizontal', or 'grid'. Defaults to 'vertical'.",
-            true
-          ),
-        },
-        newSplit
-      ),
-      splitExistingTabs: createTool(
-        "Creates a split view from existing open tabs.",
-        {
-          tabIds: createStringArrayParameter("An array of tab session IDs to split."),
-          type: createStringParameter(
-            "The split type: 'vertical', 'horizontal', or 'grid'. Defaults to 'vertical'.",
-            true
-          ),
-        },
-        splitExistingTabs
-      ),
-    },
-    example: async () => `#### Opening a Single Link:
--   **User Prompt:** "open github"
--   **Your Tool Call:** \`{"functionCall": {"name": "openLink", "args": {"link": "https://github.com", "where": "new tab"}}}\`
-
-#### Creating a Split View with New Pages:
--   **User Prompt:** "show me youtube and twitch side by side"
--   **Your Tool Call:** \`{"functionCall": {"name": "newSplit", "args": {"links": ["https://youtube.com", "https://twitch.tv"], "type": "vertical"}}}\`
-
-#### Splitting Existing Tabs:
--   **User Prompt:** "Make all my open youtube tabs in grid"
--   **Your First Tool Call:** \`{"functionCall": {"name": "getAllTabs", "args": {}}}\`
--   **Your Second Tool Call (after getting tab IDs):** \`{"functionCall": {"name": "splitExistingTabs", "args": {"tabIds": ["x", "y", ...]}, "type": "grid"}}\``,
-  },
-  tabs: {
-    moreInstructions: `Zen browser has advanced tab management features they are:
-- Workspaces: Different workspace can contain different tabs (pinned and unpinned).
-- Essential: Essential tabs are not workspace specific, they are most important tabs and they are always shown dispite of current workspace.
-- Tab folders: Similar tabs can be made in folders to organize it in better way (it is also called tab group).
-- Split tabs: Zen allows to view multiple tabs at same time by splitting.
-
-The tool getAllTabs is super super useful, tool you can use it in multiple case for tab/workspace management. Don't ask conformative questions to user like when user's input is clear. Like when user asks you to close tabs don't ask them "Do you really want to close those tabs ... ".
-More importantly, please don't use IDs of folder/tabs/workspace while talking to user, refere them by name not id. User might not know the ids of tabs.
-**Never** mention tabId or groupId with the user. Don't ask for Id if you need Id to filfill user's request you have to read it yourself.
-`,
-    tools: {
-      getAllTabs: createTool(
-        "Retrieves all open tabs. Also provides more information about tabs like id, title, url, isCurrent, inCurrentWorkspace, workspace, workspaceName, workspaceIcon, pinned, isGroup, isEssential, parentFolderId, parentFolderName, isSplitView, splitViewId.",
-        {},
-        getAllTabs
-      ),
-      searchTabs: createTool(
-        "Searches open tabs by title or URL. Similar to `getAllTabs` this will also provide more information about tab.",
-        { query: createStringParameter("The search term for tabs.") },
-        searchTabs
-      ),
-      closeTabs: createTool(
-        "Closes one or more tabs.",
-        { tabIds: createStringArrayParameter("An array of tab session IDs to close.") },
-        closeTabs
-      ),
-      reorderTab: createTool(
-        "Reorders a tab to a new index.",
-        {
-          tabId: createStringParameter("The session ID of the tab to reorder."),
-          newIndex: number().describe("The new index for the tab."),
-        },
-        reorderTab
-      ),
-      addTabsToFolder: createTool(
-        "Adds one or more tabs to a folder.",
-        {
-          tabIds: createStringArrayParameter("The session IDs of the tabs to add."),
-          folderId: createStringParameter("The ID of the folder to add the tabs to."),
-        },
-        addTabsToFolder
-      ),
-      removeTabsFromFolder: createTool(
-        "Removes one or more tabs from their folder.",
-        {
-          tabIds: createStringArrayParameter(
-            "The session IDs of the tabs to remove from their folder."
-          ),
-        },
-        removeTabsFromFolder
-      ),
-      createTabFolder: createTool(
-        "Creates a new, empty tab folder.",
-        {
-          name: createStringParameter("The name for the new folder."),
-        },
-        createTabFolder
-      ),
-      addTabsToEssentials: createTool(
-        "Adds one or more tabs to the essentials.",
-        { tabIds: createStringArrayParameter("An array of session IDs to add to essentials.") },
-        addTabsToEssentials
-      ),
-      removeTabsFromEssentials: createTool(
-        "Removes one or more tabs from the essentials.",
-        {
-          tabIds: createStringArrayParameter("An array of session IDs to remove from essentials."),
-        },
-        removeTabsFromEssentials
-      ),
-    },
-    example: async () => `#### Finding and Closing Tabs:
--   **User Prompt:** "close all youtube tabs"
--   **Your First Tool Call:** \`{"functionCall": {"name": "searchTabs", "args": {"query": "youtube.com"}}}\`
--   **Your Second Tool Call (after receiving tab IDs):** \`{"functionCall": {"name": "closeTabs", "args": {"tabIds": ["1", "2"]}}}\`
-
-#### Creating a Folder and Adding Tabs:
--   **User Prompt:** "create a new folder called 'Social Media' and add all my facebook tab to it"
--   **Your First Tool Call (to get tab ID):** \`{"functionCall": {"name": "searchTabs", "args": {"query": "facebook.com"}}}\`
--   **Your Second Tool Call (to create folder):** \`{"functionCall": {"name": "createTabFolder", "args": {"name": "Social Media"}}}\`
--   **Your Third Tool Call (after getting IDs):** \`{"functionCall": {"name": "addTabsToFolder", "args": {"tabIds": ["3", ...], "folderId": "folder-123"}}}\`
-
-#### Making a Tab Essential:
--   **User Prompt:** "make my current tab essential"
--   **Your First Tool Call:** \`{"functionCall": {"name": "getAllTabs", "args": {}}}\`
--   **Your Second Tool Call (after finding the current tab ID):** \`{"functionCall": {"name": "addTabsToEssentials", "args": {"tabIds": ["5"]}}}\``,
-  },
-  pageInteraction: {
-    tools: {
-      getPageTextContent: createTool(
-        "Retrieves the text content of the current web page to answer questions. Only use if the initial context is insufficient to answer user's question or fulfill user's command.",
-        {},
-        messageManagerAPI.getPageTextContent.bind(messageManagerAPI)
-      ),
-      getHTMLContent: createTool(
-        "Retrieves the full HTML source of the current web page for detailed analysis. Use this tool very rarely, only when text content is insufficient.",
-        {},
-        messageManagerAPI.getHTMLContent.bind(messageManagerAPI)
-      ),
-      clickElement: createTool(
-        "Clicks an element on the page.",
-        {
-          selector: createStringParameter("The CSS selector of the element to click."),
-        },
-        clickElement
-      ),
-      fillForm: createTool(
-        "Fills a form input on the page.",
-        {
-          selector: createStringParameter("The CSS selector of the input element to fill."),
-          value: createStringParameter("The value to fill the input with."),
-        },
-        fillForm
-      ),
-    },
-    example: async () => `#### Reading the Current Page for Context
--   **User Prompt:** "summarize this page for me"
--   **Your Tool Call:** \`{"functionCall": {"name": "getPageTextContent", "args": {}}}\`
--   And you summarize the page as per user's requirements.
-
-#### Finding and Clicking a Link on the Current Page
--   **User Prompt:** "click on the contact link"
--   **Your First Tool Call:** \`{"functionCall": {"name": "getHTMLContent", "args": {}}}\`
--   **Your Second Tool Call (after receiving HTML and finding the link):** \`{"functionCall": {"name": "clickElement", "args": {"selector": "#contact-link"}}}\`
-
-#### Filling a form:
--   **User Prompt:** "Fill the name with John and submit"
--   **Your First Tool Call:** \`{"functionCall": {"name": "getHTMLContent", "args": {}}}\`
--   **Your Second Tool Call:** \`{"functionCall": {"name": "fillForm", "args": {"selector": "#name", "value": "John"}}}\`
--   **Your Third Tool Call:** \`{"functionCall": {"name": "clickElement", "args": {"selector": "#submit-button"}}}\`
-Note: you must run tool getHTMLContent before clicking button or filling form to make sure element exists.
-`,
-  },
-  youtube: {
-    tools: {
-      getYoutubeTranscript: createTool(
-        "Retrieves the transcript of the current YouTube video. Only use if the current page is a YouTube video.",
-        {},
-        messageManagerAPI.getYoutubeTranscript.bind(messageManagerAPI)
-      ),
-      getYoutubeDescription: createTool(
-        "Retrieves the description of the current YouTube video. Only use if the current page is a YouTube video.",
-        {},
-        messageManagerAPI.getYoutubeDescription.bind(messageManagerAPI)
-      ),
-      getYoutubeComments: createTool(
-        "Retrieves top-level comments from the current YouTube video. Only use if the current page is a YouTube video.",
-        {
-          count: number()
-            .optional()
-            .describe("The maximum number of comments to retrieve. Defaults to 10."),
-        },
-        getYoutubeComments
-      ),
-    },
-    example: async () => `#### Getting YouTube Video Details:
--   **User Prompt:** "Summarize this Youtube Video in 5 bullet points"
--   **Your Tool Call:** \`{"functionCall": {"name": "getYoutubeTranscript"}}\`
--   And you summarize the video as per user's requirements.
-
-#### Reading Youtube Comments:
--   **User Prompt:** "What are the user's feedback on this video"
--   **Your Tool Call:** \`{"functionCall": {"name": "getYoutubeComments", count: 20}}\`
--   And Based on comments you tell user about the user's feedback on video.
-`,
-  },
-  bookmarks: {
-    tools: {
-      searchBookmarks: createTool(
-        "Searches bookmarks based on a query.",
-        {
-          query: createStringParameter("The search term for bookmarks."),
-        },
-        searchBookmarks
-      ),
-      getAllBookmarks: createTool("Retrieves all bookmarks.", {}, getAllBookmarks),
-      createBookmark: createTool(
-        "Creates a new bookmark.",
-        {
-          url: createStringParameter("The URL to bookmark."),
-          title: createStringParameter("The title for the bookmark.", true),
-          parentID: createStringParameter("The GUID of the parent folder.", true),
-        },
-        createBookmark
-      ),
-      addBookmarkFolder: createTool(
-        "Creates a new bookmark folder.",
-        {
-          title: createStringParameter("The title for the new folder."),
-          parentID: createStringParameter("The GUID of the parent folder.", true),
-        },
-        addBookmarkFolder
-      ),
-      updateBookmark: createTool(
-        "Updates an existing bookmark.",
-        {
-          id: createStringParameter("The GUID of the bookmark to update."),
-          url: createStringParameter("The new URL for the bookmark.", true),
-          title: createStringParameter("The new title for the bookmark.", true),
-          parentID: createStringParameter("The GUID of the parent folder.", true),
-        },
-        updateBookmark
-      ),
-      deleteBookmark: createTool(
-        "Deletes a bookmark.",
-        {
-          id: createStringParameter("The GUID of the bookmark to delete."),
-        },
-        deleteBookmark
-      ),
-    },
-    example: async () => `#### Finding and Editing a bookmark by folder name:
--   **User Prompt:** "Move bookmark titled 'Example' to folder 'MyFolder'"
--   **Your First Tool Call:** \`{"functionCall": {"name": "searchBookmarks", "args": {"query": "Example"}}}\`
--   **Your Second Tool Call:** \`{"functionCall": {"name": "searchBookmarks", "args": {"query": "MyFolder"}}}\`
--   **Your Third Tool Call (after receiving the bookmark and folder ids):** \`{"functionCall": {"name": "updateBookmark", "args": {"id": "xxxxxxxxxxxx", "parentID": "yyyyyyyyyyyy"}}}\`
-Note that first and second tool clls can be made in parallel, but the third tool call needs output from the first and second tool calls so it must be made after first and second.`,
-  },
-  workspaces: {
-    moreInstructions: `Zen browser has advanced tab management features and one of them is workspace.
-Different workspace can contain different tabs (pinned and unpinned). A workspace has it's own icon (most likely a emoji sometimes even URL), name and it has tabs inside workspace. While creating new workspace if user don't specify icon use most logical emoji you could find but don't use text make sure to use emoji.
-If tab is essential which means does not belong to any specific workspace.
-
-**Never** mention worksapceId with the user. Don't ask for Id if you need Id to filfill user's request you have to read it yourself.
-`,
-    tools: {
-      getAllWorkspaces: createTool(
-        "Retrieves all workspaces with id, name, icon, position and isActive.",
-        {},
-        getAllWorkspaces
-      ),
-      createWorkspace: createTool(
-        "Creates a new workspace.",
-        {
-          name: createStringParameter("The name for the new workspace."),
-          icon: createStringParameter("The icon (emoji or URL) for the new workspace.", true),
-        },
-        createWorkspace
-      ),
-      updateWorkspace: createTool(
-        "Updates an existing workspace (name and icon).",
-        {
-          id: createStringParameter("The ID of the workspace to update."),
-          name: createStringParameter("The new name for the workspace.", true),
-          icon: createStringParameter("The new icon for the workspace.", true),
-        },
-        updateWorkspace
-      ),
-      deleteWorkspace: createTool(
-        "Deletes a workspace.",
-        { id: createStringParameter("The ID of the workspace to delete.") },
-        deleteWorkspace
-      ),
-      moveTabsToWorkspace: createTool(
-        "Moves tabs to a specified workspace.",
-        {
-          tabIds: createStringArrayParameter("The session IDs of the tabs to move."),
-          workspaceId: createStringParameter("The ID of the target workspace."),
-        },
-        moveTabsToWorkspace
-      ),
-      reorderWorkspace: createTool(
-        "Reorders a workspace to a new position.",
-        {
-          id: createStringParameter("The ID of the workspace to reorder."),
-          newPosition: number().describe("The new zero-based index for the workspace."),
-        },
-        reorderWorkspace
-      ),
-    },
-    // example: async () =>
-  },
-  uiFeedback: {
-    tools: {
-      showToast: createTool(
-        "Shows a temporary toast message to the user.",
-        {
-          title: createStringParameter("The main title of the toast message."),
-          description: createStringParameter("Optional secondary text for the toast.", true),
-        },
-        showCustomToast
-      ),
-    },
-    example: async () => `#### Showing a Toast Notification:
--   **User Prompt:** "let me know when the download is complete"
--   **Your Tool Call (after a long-running task):** \`{"functionCall": {"name": "showToast", "args": {"title": "Download Complete", "description": "The file has been saved to your downloads folder."}}}\``,
-  },
-  misc: {
-    example: async (activeGroups) => {
-      let example = "";
-      if (activeGroups.has("workspaces") && activeGroups.has("tabs")) {
-        example += `#### Creating and Managing a Workspace:
--   **User Prompt:** "make a new workspace called 'Research', then move all tabs related to animals in that workspace."
--   **Your First Tool Call:** \`{"functionCall": {"name": "getAllTabs", "args": {}}}\`
--   **Your Second Tool Call:** \`{"functionCall": {"name": "createWorkspace", "args": {"name": "Research"}}}\`
--   **Your Third Tool Call (after getting the new workspace ID and reading all tabs):** \`{"functionCall": {"name": "moveTabsToWorkspace", "args": {"tabIds": ["x", "y", ...], "workspaceId": "e1f2a3b4-c5d6..."}}}\`
-
-#### Advanced tabs management (using tools related to folder and workspace to manage tabs)
--   **User Prompt:** "Manage my tabs"
--   **Your First Tool Call:** \`{"functionCall": {"name": "getAllTabs", "args": {}}}\`
--   **Your Second Tool Call:**(based on all tabs) \`{"functionCall": {"name": "createTabFolder", "args": {"name": "..."}}}\`
--   **Your Third Tool Call (based on all tabs):** \`{"functionCall": {"name": "addTabsToFolder", "args": {"tabIds": ["x", "y", ...] }}}\`
--   **Your Fourth Tool Call (based on all tabs):** \`{"functionCall": {"name": "moveTabsToWorkspace", "args": {"tabIds": ["x", "y", ...], "workspaceId": "e1f2a3b4-c5d6..."}}}\`
--   Go on keep making tool calls until tabs are managed (note here you should not ask any question to user for conformation).
-
-`;
-      }
-      return example;
-    },
-  },
-};
-
-const getTools = (groups, { shouldToolBeCalled, afterToolCall } = {}) => {
-  const selectedTools = (() => {
-    if (!groups || !Array.isArray(groups) || groups.length === 0) {
-      // get all tools from all groups except 'misc'
-      return Object.entries(toolGroups).reduce((acc, [name, group]) => {
-        if (name !== "misc" && group.tools) {
-          return { ...acc, ...group.tools };
-        }
-        return acc;
-      }, {});
-    }
-    return groups.reduce((acc, groupName) => {
-      if (toolGroups[groupName] && toolGroups[groupName].tools) {
-        return { ...acc, ...toolGroups[groupName].tools };
-      }
-      return acc;
-    }, {});
-  })();
-
-  if (!shouldToolBeCalled && !afterToolCall) {
-    return selectedTools;
-  }
-
-  const wrappedTools = {};
-  for (const toolName in selectedTools) {
-    const originalTool = selectedTools[toolName];
-    const newTool = { ...originalTool };
-
-    const originalExecute = originalTool.execute;
-    newTool.execute = async (args) => {
-      if (shouldToolBeCalled && !(await shouldToolBeCalled(toolName))) {
-        PREFS.debugLog(`Tool execution for '${toolName}' was denied by shouldToolBeCalled.`);
-        return { error: `Tool execution for '${toolName}' was denied by user.` };
-      }
-      const result = await originalExecute(args);
-      if (afterToolCall) afterToolCall(toolName, result);
-      return result;
-    };
-    wrappedTools[toolName] = newTool;
-  }
-
-  return wrappedTools;
-};
-
-const getToolSystemPrompt = async (groups, includeExamples = true) => {
-  try {
-    const activeGroupNames =
-      groups && Array.isArray(groups) && groups.length > 0
-        ? groups
-        : Object.keys(toolGroups).filter((g) => g !== "misc");
-    const activeGroups = new Set(activeGroupNames);
-
-    let availableTools = [];
-    let toolExamples = [];
-
-    for (const groupName of activeGroupNames) {
-      const group = toolGroups[groupName];
-      if (group) {
-        if (group.tools) {
-          for (const toolName in group.tools) {
-            const tool = group.tools[toolName];
-            const params = Object.keys(tool.inputSchema.shape).join(", ");
-            availableTools.push(`- \`${toolName}(${params})\`: ${tool.description}`);
-          }
-        }
-        if (group.moreInstructions) {
-          const instructions =
-            typeof group.moreInstructions === "function"
-              ? await group.moreInstructions()
-              : group.moreInstructions;
-          availableTools.push(instructions);
-        }
-        if (includeExamples && group.example) {
-          toolExamples.push(await group.example(activeGroups));
-        }
-      }
-    }
-
-    if (includeExamples && toolGroups.misc && toolGroups.misc.example) {
-      const miscExample = await toolGroups.misc.example(activeGroups);
-      if (miscExample) toolExamples.push(miscExample);
-    }
-
-    let systemPrompt = `
-## Available Tools:
-${availableTools.join("\n")}
-`;
-
-    if (includeExamples && toolExamples.length > 0) {
-      systemPrompt += `
-## Tool Call Examples:
-These are just examples for you on how you can use tools calls, each example gives you some concept, the concept is not specific to single tool.
-
-${toolExamples.join("\n\n")}
-`;
-    }
-
-    return systemPrompt;
-  } catch (error) {
-    PREFS.debugError("Error in getToolSystemPrompt:", error);
-    return "";
-  }
-};
-
-const icons = {
-  loading: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="var(--browse-bot-muted)" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" width="100%" height="100%"><path d="M21 12a9 9 0 1 1-6.219-8.56"/></svg>`,
-  success: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="var(--browse-bot-success)" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" width="100%" height="100%"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>`,
-  error: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="var(--browse-bot-error)" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" width="100%" height="100%"><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></svg>`,
-  declined: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="var(--browse-bot-warning)" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" width="100%" height="100%"><circle cx="12" cy="12" r="10"/><line x1="4.93" y1="4.93" x2="19.07" y2="19.07"/></svg>`,
-};
-
-const getSidebarWidth = () => {
-  if (
-    gZenCompactModeManager &&
-    (!gZenCompactModeManager?.preference || !PREFS.getPref("zen.view.compact.hide-tabbar")) &&
-    !gZenCompactModeManager.sidebarIsOnRight
-  ) {
-    return gZenCompactModeManager.getAndApplySidebarWidth();
-  } else return 0;
-};
-
-function updateSidebarWidth() {
-  if (!PREFS.pseudoBg) return;
-  const mainWindow = document.getElementById("main-window");
-  const width = getSidebarWidth();
-  if (width) mainWindow.style.setProperty("--zen-sidebar-width", width + "px");
-  setTimeout(() => browseBotFindbar._updateFindbarDimensions(), 2);
-}
-
-const sidebarWidthUpdate = function () {
-  const mainWindow = document.getElementById("main-window");
-  const attributes = ["zen-compact-mode", "zen-sidebar-expanded", "zen-right-side"];
-
-  // Set up a MutationObserver to watch attribute changes on #main-window
-  const observer = new MutationObserver((mutationsList) => {
-    if (!PREFS.pseudoBg) return;
-    for (const mutation of mutationsList) {
-      if (mutation.type === "attributes" && attributes.includes(mutation.attributeName)) {
-        updateSidebarWidth();
-      }
-    }
-  });
-
-  // Observe attribute changes
-  observer.observe(mainWindow, {
-    attributes: true,
-    attributeFilter: attributes,
-  });
-  updateSidebarWidth();
-};
-
-sidebarWidthUpdate();
 
 function parseMD(markdown, convertHTML = true) {
   let htmlContent = parseElement(`<div class="markdown-body"></div>`);
@@ -3426,7 +1533,6 @@ const browseBotFindbar = {
   _handleFindbarCloseEvent: null,
   _isExpanded: false,
   _updateContextMenuText: null,
-  _agenticModeListener: null,
   _backgroundStylesListener: null,
   _citationsListener: null,
   _contextMenuEnabledListener: null,
@@ -3448,7 +1554,6 @@ const browseBotFindbar = {
   _stopResize: null,
   _handleResize: null,
   _handleResizeEnd: null,
-  _toolConfirmationDialog: null,
   _highlightTimeout: null,
   _originalOnMatchesCountResult: null,
   _currentAIMessageDiv: null,
@@ -3550,52 +1655,6 @@ const browseBotFindbar = {
     this.addExpandButton();
     this.removeAIInterface();
     this.showAIInterface();
-  },
-
-  createToolConfirmationDialog(toolNames) {
-    return new Promise((resolve) => {
-      const dialog = parseElement(`
-        <div class="tool-confirmation-dialog">
-          <div class="tool-confirmation-content">
-            <p>Allow AI to do following tasks: ${toolNames?.join(", ")}?</p>
-            <div class="buttons">
-              <button class="not-again">Don't ask again</button>
-              <div class="right-side-buttons">
-                <button class="confirm-tool">Yes</button>
-                <button class="cancel-tool">No</button>
-              </div>
-            </div>
-          </div>
-        </div>
-      `);
-      this._toolConfirmationDialog = dialog;
-
-      const removeDilog = () => {
-        dialog.remove();
-        this._toolConfirmationDialog = null;
-      };
-
-      const confirmButton = dialog.querySelector(".confirm-tool");
-      confirmButton.addEventListener("click", () => {
-        removeDilog();
-        resolve(true);
-      });
-
-      const cancelButton = dialog.querySelector(".cancel-tool");
-      cancelButton.addEventListener("click", () => {
-        removeDilog();
-        resolve(false);
-      });
-
-      const notAgainButton = dialog.querySelector(".not-again");
-      notAgainButton.addEventListener("click", () => {
-        removeDilog();
-        PREFS.conformation = false;
-        resolve(true);
-      });
-
-      document.body.appendChild(dialog);
-    });
   },
 
   updateFindbar() {
@@ -3705,11 +1764,9 @@ const browseBotFindbar = {
 
   aiStatus: {
     citationsEnabled: PREFS.citationsEnabled,
-    agenticMode: PREFS.agenticMode,
   },
   updateFindbarStatus() {
     this.aiStatus = {
-      agenticMode: PREFS.agenticMode,
       citationsEnabled: PREFS.citationsEnabled,
     };
     if (this.findbar) this.findbar.aiStatus = this.aiStatus;
@@ -3825,58 +1882,6 @@ const browseBotFindbar = {
     return container;
   },
 
-  _removeToolCallUI() {
-    if (!this._currentAIMessageDiv) return;
-    const container = this._currentAIMessageDiv.querySelector(".tool-calls-container");
-    if (container) {
-      container.remove();
-      setTimeout(() => this._updateFindbarDimensions(), 0);
-    }
-  },
-
-  _createOrUpdateToolCallUI(toolName, status, errorMsg = null) {
-    const messageDiv = this._currentAIMessageDiv;
-    if (!messageDiv) return;
-
-    let container = messageDiv.querySelector(".tool-calls-container");
-    const messageContent = messageDiv.querySelector(".message-content");
-    if (!container) {
-      container = parseElement(`<div class="tool-calls-container"></div>`);
-      if (messageContent) {
-        messageDiv.insertBefore(container, messageContent);
-      } else {
-        messageDiv.appendChild(container);
-      }
-    }
-
-    const friendlyName = toolNameMapping[toolName] || toolName;
-    const existingLoadingItems = container.querySelectorAll(
-      '.tool-call-status[data-status="loading"]'
-    );
-    existingLoadingItems.forEach((item) => item.remove());
-
-    let toolDiv = parseElement(`
-<div class="tool-call-status" data-tool-name="${toolName} data-status="${status}">
-  <span class="tool-call-icon">${icons[status] || ""}</span>
-  <span class="tool-call-name">${friendlyName}</span>
-</div>
-`);
-
-    container.appendChild(toolDiv);
-
-    // toolDiv.dataset.status = status;
-    let title = friendlyName;
-    if (status === "error" && errorMsg) {
-      title += `\nError: ${errorMsg}`;
-    } else if (status === "declined") {
-      title += `\nDeclined by user.`;
-    }
-    toolDiv.setAttribute("tooltiptext", title);
-
-    messageDiv.scrollTop = messageDiv.scrollHeight;
-    setTimeout(() => this._updateFindbarDimensions(), 0);
-  },
-
   async sendMessage(prompt) {
     if (!prompt || this._isStreaming) return;
 
@@ -3926,12 +1931,7 @@ const browseBotFindbar = {
             );
             contentDiv.appendChild(parseMD(textToParse));
           } else {
-            if (result.text.trim() === "" && aiMessageDiv.querySelector(".tool-calls-container")) {
-              contentDiv.innerHTML = parseMD("*(Tool actions performed)*", false);
-            } else if (
-              result.text.trim() === "" &&
-              !aiMessageDiv.querySelector(".tool-calls-container")
-            ) {
+            if (result.text.trim() === "") {
               aiMessageDiv.remove();
             } else {
               contentDiv.appendChild(parseMD(result.text));
@@ -3957,9 +1957,7 @@ const browseBotFindbar = {
             messagesContainer.scrollTop = messagesContainer.scrollHeight;
           }
         }
-        if (fullText.trim() === "" && aiMessageDiv.querySelector(".tool-calls-container")) {
-          contentDiv.innerHTML = parseMD("*(Tool actions performed)*", false);
-        } else if (fullText.trim() === "" && !aiMessageDiv.querySelector(".tool-calls-container")) {
+        if (fullText.trim() === "") {
           aiMessageDiv.remove();
         }
       }
@@ -3975,7 +1973,6 @@ const browseBotFindbar = {
     } finally {
       this._toggleStreamingControls(false);
       this._abortController = null;
-      this._removeToolCallUI();
       this._currentAIMessageDiv = null;
     }
   },
@@ -4361,8 +2358,6 @@ const browseBotFindbar = {
     this.removeExpandButton();
     this.removeContextMenuItem();
     this.removeAIInterface();
-    this._toolConfirmationDialog?.remove();
-    this._toolConfirmationDialog = null;
     SettingsModal.hide();
     this._restoreFindbarMatchesDisplay();
   },
@@ -4679,9 +2674,6 @@ const browseBotFindbar = {
         e.preventDefault();
         e.stopPropagation();
         SettingsModal.hide();
-      } else if (this._toolConfirmationDialog) {
-        const cancelButton = this._toolConfirmationDialog.querySelector(".cancel-tool");
-        cancelButton?.click();
       } else if (this.expanded) {
         e.preventDefault();
         e.stopPropagation();
@@ -4711,7 +2703,6 @@ const browseBotFindbar = {
     this._handleFindbarCloseEvent = this.handleFindbarCloseEvent.bind(this);
     window.addEventListener("findbaropen", this._handleFindbarOpenEvent);
     window.addEventListener("findbarclose", this._handleFindbarCloseEvent);
-    this._agenticModeListener = addPrefListener(PREFS.AGENTIC_MODE, _clearLLMData);
     this._backgroundStylesListener = addPrefListener(
       PREFS.BACKGROUND_STYLE,
       _handleBackgroundStyleChange
@@ -4747,7 +2738,6 @@ const browseBotFindbar = {
     document.removeEventListener("keydown", this._addKeymaps);
     window.removeEventListener("findbaropen", this._handleFindbarOpenEvent);
     window.removeEventListener("findbarclose", this._handleFindbarCloseEvent);
-    removePrefListener(this._agenticModeListener);
     removePrefListener(this._backgroundStylesListener);
     removePrefListener(this._citationsListener);
     removePrefListener(this._contextMenuEnabledListener);
@@ -4759,7 +2749,6 @@ const browseBotFindbar = {
     this._handleInputKeyPress = null;
     this._updateFindbar = null;
     this._addKeymaps = null;
-    this._agenticModeListener = null;
     this._citationsListener = null;
     this._contextMenuEnabledListener = null;
     this._minimalListener = null;
@@ -5312,9 +3301,7 @@ class LLM {
 }
 
 /**
- * An extended LLM class specifically for the BrowseBot Findbar.
- * It manages application-specific states like agentic, streaming, citations,
- * and constructs the appropriate system prompts.
+ * LLM class for the Findbar AI chat — page-context Q&A with optional citations.
  */
 class BrowseBotLLM extends LLM {
   constructor() {
@@ -5322,17 +3309,11 @@ class BrowseBotLLM extends LLM {
     this.systemInstruction = "";
   }
 
-  get agenticMode() {
-    return PREFS.agenticMode;
-  }
   get streamEnabled() {
     return PREFS.streamEnabled;
   }
   get citationsEnabled() {
     return PREFS.citationsEnabled;
-  }
-  get maxToolCalls() {
-    return PREFS.maxToolCalls;
   }
 
   async updateSystemPrompt() {
@@ -5352,26 +3333,6 @@ class BrowseBotLLM extends LLM {
 ## Your Instructions:
 - Be concise, accurate, and helpful.`;
 
-    if (this.agenticMode) {
-      systemPrompt += `
-
-## AGENTIC MODE ENABLED - TOOL USAGE:
-You have access to browser functions. The user knows you have these abilities.
-- **CRITICAL**: When you decide to call a tool, give short summary of what tool are you calling and why?
-- Use tools when the user explicitly asks, or when it is the only logical way to fulfill their request (e.g., "search for...").
-- When asked about your own abilities, describe the functions you can perform based on the tools listed below.
-`;
-      systemPrompt += await getToolSystemPrompt();
-      systemPrompt += `
-## More instructions for Running tools
-- While running tool like \`openLink\` and \`newSplit\` make sure URL is valid.
-- User will provide URL and title of current of webpage. If you need more context, use the \`getPageTextContent\` or \`getHTMLContent\` tools.
-- When the user asks you to "read the current page", use the \`getPageTextContent()\` or \`getHTMLContent\` tool.
-- Don't use search tool unless user explicitely asks.
-- When user asks you to manage tabs (close/group/move tabs) do it smartly first read tabs and take action don't ask too many question for confirmation.
-- If the user asks you to open a link by its text (e.g., "click the 'About Us' link"), you must first use \`getHTMLContent()\` to find the link's full URL, then use \`openLink()\` to open it.`;
-    }
-
     if (this.citationsEnabled) {
       systemPrompt += `
 
@@ -5388,7 +3349,6 @@ You have access to browser functions. The user knows you have these abilities.
     4.  **Unique IDs**: Each citation object **must** have a unique \`"id"\` that matches its marker in the answer text.
     5.  **Short**: The source quote must be short no longer than one sentence and should not contain line brakes.
 - **Do Not Cite**: Do not cite your own abilities, general greetings, or information not from the provided text. Make sure the text is from page text content not from page title or URL.
-- **Tool Calls**: If you call a tool, you **must not** provide citations in the same turn.
 
 ### Citation Examples
 
@@ -5438,16 +3398,14 @@ Here are some examples demonstrating the correct JSON output format.
 `;
     }
 
-    if (!this.agenticMode) {
-      systemPrompt += `
+    systemPrompt += `
 - Strictly base all your answers on the webpage content provided below.
 - If the user's question cannot be answered from the content, state that the information is not available on the page.
 
 Here is the initial info about the current page:
 `;
-      const pageContext = await messageManagerAPI.getPageTextContent(!this.citationsEnabled);
-      systemPrompt += JSON.stringify(pageContext);
-    }
+    const pageContext = await messageManagerAPI.getPageTextContent(!this.citationsEnabled);
+    systemPrompt += JSON.stringify(pageContext);
     return systemPrompt;
   }
 
@@ -5499,75 +3457,23 @@ Here is the initial info about the current page:
       return object;
     }
 
-    if (!this.agenticMode) {
-      if (this.streamEnabled) {
-        const self = this;
-        const streamResult = await super.streamText({ prompt, abortSignal });
-        (async () => {
-          await streamResult.text;
-          if (browseBotFindbar?.findbar) {
-            browseBotFindbar.findbar.history = self.getHistory();
-          }
-        })();
-        return streamResult;
-      } else {
-        const result = await super.generateText({ prompt, abortSignal });
-        if (browseBotFindbar?.findbar) {
-          browseBotFindbar.findbar.history = this.getHistory();
-        }
-        return result;
-      }
-    }
-
-    const shouldToolBeCalled = async (toolName) => {
-      browseBotFindbar._createOrUpdateToolCallUI(toolName, "loading");
-      if (PREFS.conformation) {
-        const friendlyName = toolNameMapping[toolName] || toolName;
-        const confirmed = await browseBotFindbar.createToolConfirmationDialog([friendlyName]);
-        if (!confirmed) {
-          PREFS.debugLog(`Tool execution for '${toolName}' cancelled by user.`);
-          browseBotFindbar._createOrUpdateToolCallUI(toolName, "declined");
-          return false;
-        }
-      }
-      return true;
-    };
-
-    const afterToolCall = (toolName, result) => {
-      const status = result.error ? "error" : "success";
-      browseBotFindbar._createOrUpdateToolCallUI(toolName, status, result.error);
-    };
-
-    // NOTE: Not using bookmarks group because AI always made bookmark folder when asked to make tab folder
-    const findbarToolGroups = Object.keys(toolGroups).filter(
-      (group) => group !== "bookmarks" && group !== "misc"
-    );
-    const tools = getTools(findbarToolGroups, { shouldToolBeCalled, afterToolCall });
-
-    const commonConfig = {
-      prompt,
-      tools,
-      stopWhen: stepCountIs(this.maxToolCalls),
-      abortSignal,
-    };
-
     if (this.streamEnabled) {
       const self = this;
-      return super.streamText({
-        ...commonConfig,
-        onFinish: () => {
-          if (browseBotFindbar?.findbar) {
-            browseBotFindbar.findbar.history = self.getHistory();
-          }
-        },
-      });
-    } else {
-      const result = await super.generateText(commonConfig);
-      if (browseBotFindbar?.findbar) {
-        browseBotFindbar.findbar.history = this.getHistory();
-      }
-      return result;
+      const streamResult = await super.streamText({ prompt, abortSignal });
+      (async () => {
+        await streamResult.text;
+        if (browseBotFindbar?.findbar) {
+          browseBotFindbar.findbar.history = self.getHistory();
+        }
+      })();
+      return streamResult;
     }
+
+    const result = await super.generateText({ prompt, abortSignal });
+    if (browseBotFindbar?.findbar) {
+      browseBotFindbar.findbar.history = this.getHistory();
+    }
+    return result;
   }
 
   clearData() {
@@ -5578,358 +3484,6 @@ Here is the initial info about the current page:
 
 const browseBotFindbarLLM = new BrowseBotLLM();
 window.browseBotFindabrLLM = browseBotFindbarLLM;
-
-const urlBarGroups = ["search", "navigation", "tabs", "workspaces", "uiFeedback"];
-
-class UrlBarLLM extends LLM {
-  async getSystemPrompt() {
-    let systemPrompt = "";
-
-    if (PREFS.customSystemPrompt) {
-      systemPrompt = PREFS.customSystemPrompt + "\n\n";
-    }
-
-    systemPrompt += `You are an AI integrated with Zen Browser URL bar, designed to assist users in browsing the web effectively and organizing their workspace in a better way.
-
-Your primary responsibilities include:
-1. Making tool calls in each response based on user input.
-2. If the user does not provide specific commands, perform a search using the provided terms. You are permitted to correct any grammar or spelling mistakes and refine user queries for better accuracy.
-3. If a URL is provided, open it directly.
-4. Update the user about your action with a Toast Notification.
-5. Managing tabs, if a user asks you to manage the tabs (grouping, closing, splitting) you will do it with tools you have access to.
-
-When to use Toast:
-- When you perform a non-default action, like searching or opening a URL, or if you fix a spelling mistake in the search term.
-- When you can't fulfill a user's requirement (show a short and clear toast why the user's requirement can't be fulfilled).
-- When a long and complicated task is completed.
-
-Your goal is to ensure a seamless and user-friendly browsing experience.`;
-    systemPrompt += await getToolSystemPrompt(urlBarGroups);
-    return systemPrompt;
-  }
-
-  async sendMessage(prompt) {
-    PREFS.debugLog(`urlBarLLM: Sending prompt: "${prompt}"`);
-
-    const shouldToolBeCalled = async (toolName) => {
-      const friendlyName = toolNameMapping[toolName] || toolName;
-      gURLBar.inputField.setAttribute("placeholder", `${friendlyName}...`);
-      return true;
-    };
-
-    const urlBarToolSet = getTools(urlBarGroups, { shouldToolBeCalled });
-
-    await super.generateText({
-      prompt,
-      tools: urlBarToolSet,
-      stopWhen: stepCountIs(PREFS.maxToolCalls),
-    });
-  }
-}
-
-const urlBarLLM = new UrlBarLLM();
-window.browseBotURLBarLLM = urlBarLLM;
-
-const urlbarAI = {
-  _isAIMode: false,
-  _originalPlaceholder: "",
-  _originalHeight: null,
-  _initialized: false,
-  _enabled: false,
-
-  get enabled() {
-    return PREFS.getPref(PREFS.URLBAR_AI_ENABLED);
-  },
-  get hideSuggestions() {
-    return PREFS.getPref(PREFS.URLBAR_AI_HIDE_SUGGESTIONS);
-  },
-  get animationsEnabled() {
-    return PREFS.getPref(PREFS.URLBAR_AI_ANIMATIONS_ENABLED);
-  },
-
-  _hideSuggestions() {
-    gURLBar.setAttribute("hide-suggestions", "true");
-  },
-  _resetHideSuggestions() {
-    gURLBar.removeAttribute("hide-suggestions");
-  },
-
-  init() {
-    if (!this.enabled) {
-      PREFS.debugLog("urlbarAI: Disabled by preference.");
-      return;
-    }
-    PREFS.debugLog("urlbarAI: Initializing");
-    if (this._initialized) {
-      PREFS.debugLog("urlbarAI: Already initialized.");
-      return;
-    }
-    this._originalPlaceholder = gURLBar.inputField.getAttribute("placeholder");
-    this.addAskButton();
-    this.addListeners();
-    this._initialized = true;
-    PREFS.debugLog("urlbarAI: Initialization complete");
-  },
-
-  destroy() {
-    PREFS.debugLog("urlbarAI: Destroying");
-    this.removeAskButton();
-    this.removeListeners();
-    if (this._isAIMode) {
-      this.toggleAIMode(false);
-    }
-    gURLBar.removeAttribute("ai-mode-active");
-    gURLBar.removeAttribute("is-ai-thinking");
-    gURLBar.inputField.setAttribute("placeholder", this._originalPlaceholder);
-    this._initialized = false;
-    PREFS.debugLog("urlbarAI: Destruction complete");
-  },
-
-  _closeUrlBar() {
-    try {
-      this.clearAnimationPropertiesInUrlBar();
-      this._resetHideSuggestions();
-      if (window.gZenUIManager && typeof window.gZenUIManager.handleUrlbarClose === "function") {
-        window.gZenUIManager.handleUrlbarClose(false, false);
-        return;
-      }
-
-      gURLBar.selectionStart = gURLBar.selectionEnd = 0;
-      gURLBar.blur();
-      if (gURLBar.view.isOpen) {
-        gURLBar.view.close();
-      }
-    } catch (e) {
-      PREFS.debugError("urlbarAI: Error in _closeUrlBar", e);
-    }
-  },
-
-  animateAIOn() {
-    if (!this.hideSuggestions) {
-      return false;
-    }
-    if (!this.animationsEnabled) {
-      this._hideSuggestions();
-      return false;
-    }
-    try {
-      const textbox = gURLBar;
-      if (!textbox) return false;
-      if (!gURLBar.view.isOpen) {
-        this._hideSuggestions();
-        return false;
-      }
-      const height = textbox.getBoundingClientRect().height;
-      if (!height) return;
-      this._originalHeight = height;
-      textbox.style.setProperty("height", height + "px", "important");
-      textbox.style.setProperty("overflow", "hidden", "important");
-      textbox.style.setProperty("transition", "height 0.15s ease", "important");
-      const panelHeight = gURLBar.panel.getBoundingClientRect().height;
-      const inputHeight = height - panelHeight - 10;
-      setTimeout(() => textbox.style.setProperty("height", inputHeight + "px", "important"), 1);
-      setTimeout(() => this._hideSuggestions(), 151);
-    } catch (e) {
-      PREFS.debugError("Error while animating", e);
-      return false;
-    }
-    return true;
-  },
-
-  animateAIOff() {
-    if (!this.hideSuggestions) {
-      return false;
-    }
-    if (!this.animationsEnabled) {
-      this._resetHideSuggestions();
-      return false;
-    }
-    try {
-      const textbox = gURLBar;
-      if (!textbox) return false;
-      if (!gURLBar.view.isOpen) {
-        this._resetHideSuggestions();
-        return false;
-      }
-      if (!this._originalHeight) return false;
-      const height = textbox.getBoundingClientRect().height;
-      if (!height) return;
-      if (height === this._originalHeight) return;
-      textbox.style.setProperty("transition", "height 0.15s ease", "important");
-      textbox.style.setProperty("overflow", "hidden", "important");
-      setTimeout(() => {
-        textbox.style.setProperty("height", this._originalHeight + "px", "important");
-        this._originalHeight = null;
-      }, 1);
-      setTimeout(() => {
-        this.clearAnimationPropertiesInUrlBar();
-        this._resetHideSuggestions();
-      }, 151);
-    } catch (e) {
-      PREFS.debugError("Error while animating", e);
-      return false;
-    }
-    return true;
-  },
-
-  clearAnimationPropertiesInUrlBar() {
-    try {
-      const textbox = gURLBar;
-      if (!textbox) return;
-      textbox.style.removeProperty("transition");
-      textbox.style.removeProperty("overflow");
-      textbox.style.removeProperty("height");
-    } catch {
-      // ignore
-    }
-  },
-
-  toggleAIMode(forceState, forceClose = false) {
-    const newState = typeof forceState === "boolean" ? forceState : !this._isAIMode;
-    if (newState === this._isAIMode) return;
-
-    PREFS.debugLog(`urlbarAI: Toggling AI mode. Current: ${this._isAIMode}, New: ${newState}`);
-    this._isAIMode = newState;
-
-    if (this._isAIMode) {
-      gURLBar.value = "";
-      gURLBar.setAttribute("ai-mode-active", "true");
-      gURLBar.inputField.setAttribute("placeholder", "Command to AI");
-      this.animateAIOn();
-      gURLBar.startQuery();
-      gURLBar.focus();
-    } else {
-      if (forceClose) this._closeUrlBar();
-      else this.animateAIOff();
-      gURLBar.removeAttribute("ai-mode-active");
-      gURLBar.removeAttribute("is-ai-thinking");
-      gURLBar.inputField.setAttribute("placeholder", this._originalPlaceholder);
-      gURLBar.value = "";
-    }
-    PREFS.debugLog(`urlbarAI: AI mode is now ${this._isAIMode ? "ON" : "OFF"}`);
-  },
-
-  handleUrlbarKeyDown(e) {
-    if (this._isAIMode) {
-      if (
-        ((e.key === "ArrowUp" || e.key === "ArrowDown") && this.hideSuggestions) ||
-        e.key === "Tab"
-      ) {
-        e.preventDefault();
-        e.stopPropagation();
-        return;
-      }
-      if (e.key === "Enter") {
-        PREFS.debugLog("urlbarAI: Enter key pressed in AI mode");
-        e.preventDefault();
-        e.stopPropagation();
-        this.send();
-      }
-    }
-  },
-
-  addListeners() {
-    PREFS.debugLog("urlbarAI: Adding event listeners");
-    this._boundHandleUrlbarKeyDown = this.handleUrlbarKeyDown.bind(this);
-    this._boundDisableAIMode = () => {
-      gURLBar.inputField.setAttribute("placeholder", this._originalPlaceholder);
-      if (this._isAIMode) {
-        PREFS.debugLog("urlbarAI: Disabling AI mode due to blur or popup hide");
-        this.toggleAIMode(false);
-        this.clearAnimationPropertiesInUrlBar();
-        this._resetHideSuggestions();
-      }
-    };
-
-    gURLBar.inputField.addEventListener("keydown", this._boundHandleUrlbarKeyDown, true);
-    gURLBar.inputField.addEventListener("blur", this._boundDisableAIMode);
-    gURLBar.view.panel.addEventListener("popuphiding", this._boundDisableAIMode);
-  },
-
-  removeListeners() {
-    PREFS.debugLog("urlbarAI: Removing event listeners");
-    if (this._boundHandleUrlbarKeyDown) {
-      gURLBar.inputField.removeEventListener("keydown", this._boundHandleUrlbarKeyDown, true);
-      this._boundHandleUrlbarKeyDown = null;
-    }
-    if (this._boundDisableAIMode) {
-      gURLBar.inputField.removeEventListener("blur", this._boundDisableAIMode);
-      gURLBar.view.panel.removeEventListener("popuphiding", this._boundDisableAIMode);
-      this._boundDisableAIMode = null;
-    }
-  },
-
-  send() {
-    const prompt = gURLBar.value.trim();
-    if (prompt) {
-      PREFS.debugLog(`URLbar: Sending prompt: "${prompt}"`);
-      gURLBar.value = "";
-      gURLBar.setAttribute("is-ai-thinking", "true");
-      gURLBar.inputField.setAttribute("placeholder", "AI thinking...");
-      urlBarLLM.sendMessage(prompt).finally(() => {
-        gURLBar.removeAttribute("is-ai-thinking");
-        gURLBar.inputField.setAttribute("placeholder", this._originalPlaceholder);
-        this.toggleAIMode(false, true);
-
-        // clear data after 4 seconds
-        setTimeout(() => urlBarLLM.clearData(), 4000);
-      });
-    } else {
-      this.toggleAIMode(false, true);
-    }
-  },
-
-  addAskButton() {
-    PREFS.debugLog("urlbarAI: Adding 'Ask' button");
-    if (document.getElementById("urlbar-ask-ai-button")) {
-      PREFS.debugLog("urlbarAI: 'Ask' button already exists.");
-      return;
-    }
-
-    const buttonString = `
-      <toolbarbutton id="urlbar-ask-ai-button" class="urlbar-icon"
-        image="chrome://global/skin/icons/highlights.svg" tooltiptext="Ask AI"/>
-    `;
-    const button = parseElement(buttonString, "xul");
-
-    button.addEventListener("click", () => setTimeout(() => this.send(), 100));
-
-    const insertButton = (retryCount = 0) => {
-      const inputContainer = document.querySelector("#urlbar .urlbar-input-container");
-      if (inputContainer) {
-        inputContainer.appendChild(button);
-        PREFS.debugLog("urlbarAI: 'Ask' button added successfully to .urlbar-input-container");
-      } else if (retryCount < 10) {
-        PREFS.debugError(
-          `Could not find #urlbar .urlbar-input-container to add the 'Ask' button. Retrying in 500ms... (attempt ${
-            retryCount + 1
-          })`
-        );
-        setTimeout(() => insertButton(retryCount + 1), 500);
-      } else {
-        PREFS.debugError(
-          "Could not find #urlbar .urlbar-input-container after multiple attempts. Giving up."
-        );
-      }
-    };
-
-    insertButton();
-  },
-
-  removeAskButton() {
-    PREFS.debugLog("urlbarAI: Removing 'Ask' button");
-    const button = document.getElementById("urlbar-ask-ai-button");
-    if (button) {
-      button.remove();
-      PREFS.debugLog("urlbarAI: 'Ask' button removed.");
-    }
-  },
-
-  handlePrefChange(pref) {
-    if (pref.value) this.init();
-    else this.destroy();
-  },
-};
 
 function startupFinish(callback) {
   if (document.readyState === "complete") callback();
@@ -5961,14 +3515,6 @@ function setupCommandPaletteIntegration(retryCount = 0) {
         tags: ["AI", "BrowseBot", "Settings"],
       },
       {
-        key: "browsebot:urlbarAi",
-        label: "Toggle URL bar AI mode",
-        command: () => urlbarAI.toggleAIMode(),
-        condition: () => urlbarAI.enabled,
-        icon: "chrome://global/skin/icons/highlights.svg",
-        tags: ["AI", "BrowseBot", "URL", "Command"],
-      },
-      {
         key: "browsebot:expand-findbar",
         label: "Expand findbar AI",
         command: () => (browseBotFindbar.expanded = true),
@@ -5989,12 +3535,6 @@ function setupCommandPaletteIntegration(retryCount = 0) {
   }
 }
 
-function registerUrlBarShortcut(value = PREFS.shortcutUrlbar) {
-  if (!urlbarAI.enabled) return;
-  registerShortcut(value, "toggle-url-bar-ai", () => {
-    urlbarAI.toggleAIMode();
-  });
-}
 function registerFindbarShortcut(value = PREFS.shortcutFindbar) {
   if (!browseBotFindbar.enabled) return;
   registerShortcut(value, "toggle-findbar-ai-bar", () => {
@@ -6005,26 +3545,16 @@ function registerFindbarShortcut(value = PREFS.shortcutFindbar) {
 
 function setupShortcuts() {
   registerFindbarShortcut();
-  registerUrlBarShortcut();
-  addPrefListener(PREFS.SHORTCUT_URLBAR, (val) => registerUrlBarShortcut(val.value));
   addPrefListener(PREFS.SHORTCUT_FINDBAR, (val) => registerFindbarShortcut(val.value));
 }
 
 function init() {
-  // Init findbar-AI
   browseBotFindbar.init();
   addPrefListener(PREFS.ENABLED, (val) => {
     browseBotFindbar.handleEnabledChange(val);
     registerFindbarShortcut();
   });
   window.browseBotFindbar = browseBotFindbar;
-
-  // Init URL bar-AI
-  urlbarAI.init();
-  addPrefListener(PREFS.URLBAR_AI_ENABLED, (val) => {
-    urlbarAI.handlePrefChange();
-    registerUrlBarShortcut(val);
-  });
 
   setupShortcuts();
   setupCommandPaletteIntegration();
