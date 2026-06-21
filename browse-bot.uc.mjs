@@ -2,7 +2,7 @@
 // @name            Browse Bot
 // @description     Transforms the standard Zen Browser findbar into a modern, floating, AI-powered chat interface. Inspired by Arc Browser.
 // @author          Bibek Bhusal
-// @version         2.5.85
+// @version         2.5.86
 // @lastUpdated     2026-06-21
 // @ignorecache
 // @homepage        https://github.com/Vertex-Mods/Browse-Bot
@@ -2196,7 +2196,7 @@ sidebarWidthUpdate();
 function parseMD(markdown, convertHTML = !0) {
   let htmlContent = parseElement('<div class="markdown-body"></div>');
   try {
-    let parse = ChromeUtils.importESModule("chrome://userscripts/content/engine/utils/dom.mjs").default.parseMD, browserWindow = Services.wm.getMostRecentWindow("navigator:browser");
+    let parse = ChromeUtils.importESModule("chrome://userscripts/content/utils/dom.mjs").default.parseMD, browserWindow = Services.wm.getMostRecentWindow("navigator:browser");
     parse(htmlContent, markdown, "", browserWindow || window);
   } catch {
     PREFS2.debugLog("Parsing markdown failed"), htmlContent.innerHTML = markdown;
@@ -2512,7 +2512,7 @@ var browseBotFindbar = {
     let friendlyName = toolNameMapping[toolName] || toolName;
     container.querySelectorAll('.tool-call-status[data-status="loading"]').forEach((item) => item.remove());
     let toolDiv = parseElement(`
-<div class="tool-call-status" data-tool-name="${toolName} data-status="${status}">
+<div class="tool-call-status" data-tool-name="${toolName}" data-status="${status}">
   <span class="tool-call-icon">${icons[status] || ""}</span>
   <span class="tool-call-name">${friendlyName}</span>
 </div>
