@@ -80,6 +80,10 @@
         "label": "Ollama (local)"
       },
       {
+        "value": "openrouter",
+        "label": "OpenRouter"
+      },
+      {
         "value": "openai",
         "label": "OpenAI GPT"
       },
@@ -562,6 +566,103 @@
         "if": {
           "property": "extension.browse-bot.llm-provider",
           "value": "ollama"
+        }
+      }
+    ]
+  },
+  {
+    "property": "extension.browse-bot.openrouter-api-key",
+    "label": "OpenRouter API Key",
+    "type": "string",
+    "placeholder": "Enter your OpenRouter API key",
+    "defaultValue": "",
+    "description": "Your personal API key from OpenRouter. Gives access to 300+ models from multiple providers.",
+    "conditions": [
+      {
+        "if": {
+          "property": "extension.browse-bot.llm-provider",
+          "value": "openrouter"
+        }
+      }
+    ]
+  },
+  {
+    "property": "extension.browse-bot.openrouter-model",
+    "label": "OpenRouter Model",
+    "type": "dropdown",
+    "defaultValue": "google/gemini-2.5-flash",
+    "description": "Select the model to use via OpenRouter.",
+    "options": [
+      {
+        "value": "openai/gpt-4.1",
+        "label": "OpenAI GPT-4.1"
+      },
+      {
+        "value": "openai/gpt-4.1-mini",
+        "label": "OpenAI GPT-4.1 Mini"
+      },
+      {
+        "value": "openai/gpt-4o",
+        "label": "OpenAI GPT-4o"
+      },
+      {
+        "value": "openai/gpt-4o-mini",
+        "label": "OpenAI GPT-4o Mini"
+      },
+      {
+        "value": "openai/o3-mini",
+        "label": "OpenAI o3 Mini"
+      },
+      {
+        "value": "openai/o4-mini",
+        "label": "OpenAI o4 Mini"
+      },
+      {
+        "value": "anthropic/claude-sonnet-4-20250514",
+        "label": "Claude Sonnet 4"
+      },
+      {
+        "value": "anthropic/claude-opus-4-20250514",
+        "label": "Claude Opus 4"
+      },
+      {
+        "value": "google/gemini-2.5-flash",
+        "label": "Gemini 2.5 Flash"
+      },
+      {
+        "value": "google/gemini-2.5-pro",
+        "label": "Gemini 2.5 Pro"
+      },
+      {
+        "value": "meta-llama/llama-4-maverick",
+        "label": "Llama 4 Maverick"
+      },
+      {
+        "value": "meta-llama/llama-4-scout",
+        "label": "Llama 4 Scout"
+      },
+      {
+        "value": "deepseek/deepseek-chat-v3-0324",
+        "label": "DeepSeek V3"
+      },
+      {
+        "value": "deepseek/deepseek-r1",
+        "label": "DeepSeek R1"
+      },
+      {
+        "value": "qwen/qwen3-235b-a22b",
+        "label": "Qwen3 235B"
+      },
+      {
+        "value": "mistralai/mistral-large-2411",
+        "label": "Mistral Large"
+      }
+    ],
+    "conditions": [
+      {
+        "if": {
+          "property": "extension.browse-bot.llm-provider",
+          "value": "openrouter"
         }
       }
     ]

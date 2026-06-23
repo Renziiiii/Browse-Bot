@@ -140,6 +140,8 @@ class BrowseBotPREFS extends PREFS {
   static CEREBRAS_MODEL = "extension.browse-bot.cerebras-model";
   static OLLAMA_MODEL = "extension.browse-bot.ollama-model";
   static OLLAMA_BASE_URL = "extension.browse-bot.ollama-base-url";
+  static OPENROUTER_API_KEY = "extension.browse-bot.openrouter-api-key";
+  static OPENROUTER_MODEL = "extension.browse-bot.openrouter-model";
   static LLM_TEMPERATURE = "extension.browse-bot.llm.temperature";
   static LLM_TOP_P = "extension.browse-bot.llm.top-p";
   static LLM_TOP_K = "extension.browse-bot.llm.top-k";
@@ -180,6 +182,8 @@ class BrowseBotPREFS extends PREFS {
     [BrowseBotPREFS.CEREBRAS_MODEL]: "llama3.1-8b",
     [BrowseBotPREFS.OLLAMA_MODEL]: "llama2",
     [BrowseBotPREFS.OLLAMA_BASE_URL]: "http://localhost:11434/api",
+    [BrowseBotPREFS.OPENROUTER_API_KEY]: "",
+    [BrowseBotPREFS.OPENROUTER_MODEL]: "google/gemini-2.5-flash",
     [BrowseBotPREFS.DND_ENABLED]: !0,
     [BrowseBotPREFS.POSITION]: "top-right",
     [BrowseBotPREFS.REMEMBER_DIMENSIONS]: !0,
@@ -3450,6 +3454,55 @@ var providerPrototype = {
       baseURL: this.baseUrl
     })(this.model);
   }
+}), openrouter = Object.assign(Object.create(providerPrototype), {
+  name: "openrouter",
+  label: "OpenRouter",
+  faviconUrl: googleFaviconAPI("openrouter.ai"),
+  apiKeyUrl: "https://openrouter.ai/keys",
+  AVAILABLE_MODELS: [
+    "openai/gpt-4.1",
+    "openai/gpt-4.1-mini",
+    "openai/gpt-4o",
+    "openai/gpt-4o-mini",
+    "openai/o3-mini",
+    "openai/o4-mini",
+    "anthropic/claude-sonnet-4-20250514",
+    "anthropic/claude-opus-4-20250514",
+    "google/gemini-2.5-flash",
+    "google/gemini-2.5-pro",
+    "meta-llama/llama-4-maverick",
+    "meta-llama/llama-4-scout",
+    "deepseek/deepseek-chat-v3-0324",
+    "deepseek/deepseek-r1",
+    "qwen/qwen3-235b-a22b",
+    "mistralai/mistral-large-2411"
+  ],
+  AVAILABLE_MODELS_LABELS: {
+    "openai/gpt-4.1": "OpenAI GPT-4.1",
+    "openai/gpt-4.1-mini": "OpenAI GPT-4.1 Mini",
+    "openai/gpt-4o": "OpenAI GPT-4o",
+    "openai/gpt-4o-mini": "OpenAI GPT-4o Mini",
+    "openai/o3-mini": "OpenAI o3 Mini",
+    "openai/o4-mini": "OpenAI o4 Mini",
+    "anthropic/claude-sonnet-4-20250514": "Claude Sonnet 4",
+    "anthropic/claude-opus-4-20250514": "Claude Opus 4",
+    "google/gemini-2.5-flash": "Gemini 2.5 Flash",
+    "google/gemini-2.5-pro": "Gemini 2.5 Pro",
+    "meta-llama/llama-4-maverick": "Llama 4 Maverick",
+    "meta-llama/llama-4-scout": "Llama 4 Scout",
+    "deepseek/deepseek-chat-v3-0324": "DeepSeek V3",
+    "deepseek/deepseek-r1": "DeepSeek R1",
+    "qwen/qwen3-235b-a22b": "Qwen3 235B",
+    "mistralai/mistral-large-2411": "Mistral Large"
+  },
+  modelPref: prefs_default.OPENROUTER_MODEL,
+  apiPref: prefs_default.OPENROUTER_API_KEY,
+  getModel() {
+    return createOpenAI({
+      apiKey: this.apiKey,
+      baseURL: "https://openrouter.ai/api/v1"
+    })(this.model);
+  }
 });
 
 // findbar-ai/llm/index.js
@@ -3470,6 +3523,7 @@ class LLM {
       mistral,
       ollama,
       openai,
+      openrouter,
       perplexity,
       cerebras
     };
